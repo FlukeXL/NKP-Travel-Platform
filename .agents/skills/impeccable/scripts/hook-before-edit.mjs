@@ -1,15 +1,3 @@
-#!/usr/bin/env node
-/**
- * Impeccable design hook — Cursor preToolUse write gate.
- *
- * Cursor's stop hook is not consistently dispatched by the headless agent, so
- * this hook checks proposed Write/Edit content before it lands. It only denies
- * writes when the real detector finds an issue in the proposed UI content.
- *
- * Contract: never break a turn accidentally. On malformed input or internal
- * errors, allow the tool and exit 0.
- */
-
 import fs from 'node:fs';
 import path from 'node:path';
 

@@ -1,24 +1,3 @@
-#!/usr/bin/env node
-/**
- * `/impeccable hooks <on|off|status|reset>` — manage the design hook runtime
- * via the `hook` key and shared detector ignores via the `detector` key in
- * .impeccable/config.json / .impeccable/config.local.json.
- *
- * Usage:
- *   node hook-admin.mjs status                         # print current state
- *   node hook-admin.mjs on                             # set enabled: true
- *   node hook-admin.mjs off                            # set enabled: false
- *   node hook-admin.mjs ignore-rule <rule-id>          # append to ignoreRules
- *   node hook-admin.mjs ignore-rule overused-font --all-values
- *   node hook-admin.mjs ignore-file <glob>             # append to ignoreFiles
- *   node hook-admin.mjs ignore-value <rule> <value>    # append to shared ignoreValues
- *   node hook-admin.mjs ignore-value <rule> <value> --local
- *   node hook-admin.mjs reset                          # remove all config + cache
- *
- * Designed to be invoked by the LLM from the reference/hooks.md flow.
- * Output is human-readable; the harness will pass it back to the user.
- */
-
 import fs from 'node:fs';
 import path from 'node:path';
 
@@ -109,10 +88,6 @@ const HOOK_MANIFEST_TARGETS = [
     }),
   },
   {
-    // GitHub Copilot reads repo-level hooks from `.github/hooks/*.json`. The same
-    // manifest is honored by the CLI (once committed to the default branch) and
-    // the cloud/app agent. Schema differs: lowercase `postToolUse`, flat entries,
-    // `bash`/`timeoutSec`, and a `matcher` regex against the `edit`/`create` tools.
     provider: '.github',
     skillRel: '.github/skills/impeccable',
     destRel: '.github/hooks/impeccable.json',
@@ -643,12 +618,12 @@ function main() {
     let out = '';
     switch (action) {
       case 'status': out = statusReport(cwd); break;
-      case 'on':     out = setEnabled(cwd, true); break;
-      case 'off':    out = setEnabled(cwd, false); break;
+      case 'on': out = setEnabled(cwd, true); break;
+      case 'off': out = setEnabled(cwd, false); break;
       case 'ignore-rule': out = addIgnoreRule(cwd, rest); break;
       case 'ignore-file': out = addIgnoreFile(cwd, rest[0]); break;
       case 'ignore-value': out = addIgnoreValue(cwd, rest); break;
-      case 'reset':  out = reset(cwd); break;
+      case 'reset': out = reset(cwd); break;
     }
     process.stdout.write(out + '\n');
   } catch (err) {

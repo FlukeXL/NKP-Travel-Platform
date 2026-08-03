@@ -1,21 +1,3 @@
-/**
- * Context loader: prints PRODUCT.md (and DESIGN.md if present) as one
- * markdown block on stdout, or exits with empty stdout when no PRODUCT.md
- * is found anywhere. The skill keys off "empty stdout" to branch into the
- * init flow.
- *
- * Path resolution (first match wins):
- *   1. Active project root, if PRODUCT.md or DESIGN.md is there
- *   2. Active project .agents/context/ then docs/
- *   3. Monorepo root context, using the same order, as a per-file fallback
- *   4. $IMPECCABLE_CONTEXT_DIR (absolute or cwd-relative) — power-user
- *      escape hatch, only consulted when defaults are empty
- *   5. Active project root as a "nothing found" default
- *
- * `resolveContextDir()` and `loadContext()` are also exported for the
- * server-side scripts (live.mjs, live-server.mjs) that need the structured
- * shape rather than the markdown block.
- */
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -40,18 +22,11 @@ const WORKSPACE_DISCOVERY_IGNORED_DIRS = new Set([
   'coverage',
 ]);
 
-// ─── Update check ──────────────────────────────────────────────────────────
-// Piggyback a lightweight skill-version check on the once-per-session boot.
-// When a newer skill ships, append an UPDATE_AVAILABLE directive so the agent
-// can offer `npx impeccable update`. Everything here is best-effort and
-// silent on failure: a network problem, sandbox, or missing cache must never
-// block context output or print an error.
-
 const UPDATE_HOST = (process.env.IMPECCABLE_UPDATE_HOST || 'https://impeccable.style').replace(/\/$/, '');
 const UPDATE_CACHE_PATH =
   process.env.IMPECCABLE_UPDATE_CACHE || path.join(os.homedir(), '.impeccable', 'update-check.json');
-const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // throttle the network poll to once a day
-const RENOTIFY_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000; // don't re-surface the same version for a week
+const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000;
+const RENOTIFY_INTERVAL_MS = 7 * 24 * 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 1200;
 
 export function resolveContextDir(cwd = process.cwd(), options = {}) {
@@ -136,10 +111,6 @@ export function resolveTargetSelection(cwd = process.cwd(), options = {}) {
     return null;
   }
   const targetCandidates = discoverTargetCandidates(project.repoRoot);
-  // No discoverable child apps (e.g. `workspaces: ["."]`, a root-only workspace,
-  // or a marker file with no apps/packages children): there is nothing to choose,
-  // so treat the repo root as the active project rather than blocking on an empty
-  // selection prompt that the user cannot answer.
   if (targetCandidates.length === 0) return null;
   return {
     targetPath: null,
@@ -217,12 +188,6 @@ function findMonorepoRoot(startDir) {
   const homeDir = path.resolve(os.homedir());
   while (true) {
     if (dir === homeDir) return null;
-    // isMonorepoRoot is checked before hasGitBoundary on purpose: a workspace
-    // root that also carries its own .git is still recognized. The trade-off is
-    // deliberate — a directory with a monorepo *marker* but no workspace patterns
-    // and no apps/packages children is not a monorepo root, so its .git stops
-    // traversal and a further-up root is not searched. The nested .git is treated
-    // as an independent project boundary, which is the intended isolation.
     if (isMonorepoRoot(dir)) return dir;
     if (hasGitBoundary(dir)) return null;
     const parent = path.dirname(dir);
@@ -281,9 +246,6 @@ function discoverTargetCandidates(repoRoot) {
   }
   return [...roots.entries()]
     .filter(([rel]) => rel && !rel.startsWith('..'))
-    // Honor negated workspace patterns (e.g. "!packages/internal"). resolveWorkspaceProjectRoot
-    // sends an excluded package back to the repo root, so an excluded folder must not appear as a
-    // selectable target — choosing it would silently resolve to the root instead.
     .filter(([rel]) => !isExcludedByWorkspacePattern(rel.split('/').filter(Boolean), patterns))
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([rel, root]) => {
@@ -307,12 +269,6 @@ function resolveCandidateContextSummary(repoRoot, projectRoot, targetPath) {
   };
 }
 
-// Selection candidates surface one of four statuses: 'child' (a canonical
-// PRODUCT.md/DESIGN.md directly in the app root), 'inherited' (resolved from the
-// repo root in a monorepo), 'missing' (no file found), and 'fallback'. 'fallback'
-// intentionally covers two non-canonical locations: a file inside the project
-// root but in a subdirectory (FALLBACK_DIRS, e.g. `.agents/context/`), and a file
-// outside both the project and repo roots (IMPECCABLE_CONTEXT_DIR override).
 function contextSourceStatus(filePath, repoRoot, projectRoot) {
   if (!filePath) return 'missing';
   const absPath = path.resolve(filePath);

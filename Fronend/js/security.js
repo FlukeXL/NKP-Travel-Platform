@@ -1,8 +1,3 @@
-/**
- * MapNexus Frontend Security & XSS Sanitization Utilities
- * Provides robust defense against DOM-based XSS, script injection, and malicious URL schemes.
- */
-
 (function () {
   'use strict';
 
@@ -39,8 +34,7 @@
     if (!url || typeof url !== 'string') return fallback;
     const trimmed = url.trim();
     const lower = trimmed.toLowerCase();
-    
-    // Disallow dangerous schemes
+
     if (
       lower.startsWith('javascript:') ||
       lower.startsWith('vbscript:') ||
@@ -50,7 +44,6 @@
       return fallback;
     }
 
-    // Allow relative paths, http, https, mailto, tel, blob, standard data:image
     if (
       trimmed.startsWith('/') ||
       trimmed.startsWith('#') ||
@@ -69,9 +62,6 @@
     return fallback;
   }
 
-  /**
-   * Safe text truncate with escaping
-   */
   function mnxSafeText(str, maxLen = 500, fallback = '') {
     if (str == null) return fallback;
     const s = String(str).trim();
@@ -79,7 +69,6 @@
     return mnxEscapeHtml(maxLen && s.length > maxLen ? s.slice(0, maxLen) + '...' : s);
   }
 
-  // Export globally
   window.mnxEscapeHtml = mnxEscapeHtml;
   window.mnxSanitizeUrl = mnxSanitizeUrl;
   window.mnxSafeText = mnxSafeText;

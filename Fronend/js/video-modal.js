@@ -21,11 +21,6 @@ function mnxVideoModalEls() {
   };
 }
 
-/* Renders a row of 5 star icons as SVG (filled vs outline via a
-   "filled" state class) instead of the old ★/☆ character glyphs —
-   keeps the star rating visual but drawn with the same inline-SVG
-   line-icon language used everywhere else, rather than emoji-style
-   platform glyphs. */
 function mnxStarSvgRow(rating) {
   const full = Math.round(rating);
   let html = '';
@@ -72,7 +67,7 @@ async function mnxOpenVideoModal(video) {
 
   els.modal.classList.add('is-open');
   document.body.style.overflow = 'hidden';
-  els.video.play().catch(() => {});
+  els.video.play().catch(() => { });
 }
 
 function mnxCloseVideoModal() {
@@ -109,9 +104,6 @@ function mnxRenderVideoComments(comments) {
   }).join('');
 }
 
-/** Web Share API when available (mobile-friendly native share sheet),
- * falls back to copy-link so desktop users can still share the URL
- * externally to bring people back to watch on the site. */
 async function mnxShareVideo(video) {
   const shareUrl = `${window.location.origin}/Fronend/pages/videos.html?video=${encodeURIComponent(video.id)}`;
   const place = window.mnxGetPlace?.(video.placeId);
@@ -277,7 +269,7 @@ function mnxRenderVideoCards(container, videos) {
     card.addEventListener('mouseenter', () => {
       card.classList.add('is-playing');
       video.currentTime = 0;
-      video.play().catch(() => {});
+      video.play().catch(() => { });
     });
     card.addEventListener('mouseleave', () => {
       card.classList.remove('is-playing');

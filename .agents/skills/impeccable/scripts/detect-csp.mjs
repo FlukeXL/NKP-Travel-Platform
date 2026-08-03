@@ -20,7 +20,6 @@ const LAYOUT_EXTS = new Set(['.tsx', '.jsx', '.astro', '.vue', '.svelte', '.html
 const MAX_DEPTH = 6;
 const MAX_READ_BYTES = 64 * 1024;
 
-// append-arrays signals: CSP expressed as structured directive arrays
 const MONOREPO_HELPER_SIGNALS = [
   /\bbuildCSPConfig\b/,
   /\bbuildSecurityHeaders\b/,
@@ -38,7 +37,6 @@ const NUXT_SECURITY_SIGNALS = [
   /\bcontentSecurityPolicy\b/,
 ];
 
-// append-string signals: CSP written as a literal value string
 const INLINE_HEADER_SIGNALS = [
   /["']Content-Security-Policy["']/i,
   /\bscript-src\b/,
@@ -65,10 +63,6 @@ export function detectCsp(cwd = process.cwd()) {
     const base = path.basename(absPath).toLowerCase();
     const isConfig = (name) =>
       new RegExp('(^|/)' + name + '\\.config\\.').test(relPath);
-
-    // === append-arrays candidates ===
-
-    // Monorepo CSP helper: packages/*/src/.../(config|security)/*
     if (SCAN_EXTS.has(ext) &&
       /packages\/[^/]+\/src\/.*(config|next-config|security)/.test(relPath) &&
       MONOREPO_HELPER_SIGNALS.some((re) => re.test(body))) {
@@ -76,35 +70,23 @@ export function detectCsp(cwd = process.cwd()) {
       return;
     }
 
-    // SvelteKit kit.csp.directives
     if (SCAN_EXTS.has(ext) && isConfig('svelte') &&
       SVELTEKIT_CSP_SIGNALS.every((re) => re.test(body))) {
       hits.appendArrays.push(relPath);
       return;
     }
 
-    // Nuxt nuxt-security module
     if (SCAN_EXTS.has(ext) && isConfig('nuxt') &&
       NUXT_SECURITY_SIGNALS.every((re) => re.test(body))) {
       hits.appendArrays.push(relPath);
       return;
     }
-
-    // === append-string candidates ===
-
-    // Inline headers in Next/Nuxt/SvelteKit/Astro/Vite config
     if (SCAN_EXTS.has(ext) &&
       /(^|\/)(next|nuxt|vite|astro|svelte)\.config\./.test(relPath) &&
       INLINE_HEADER_SIGNALS.every((re) => re.test(body))) {
-      // Nuxt routeRules is a sub-shape of append-string; we already covered
-      // nuxt-security above via return, so any remaining Nuxt CSP match here
-      // is a route-rules / inline-headers case. Either way, same patch
-      // mechanism.
       hits.appendString.push(relPath);
       return;
     }
-
-    // === detect-only shapes ===
 
     if ((base === 'middleware.ts' || base === 'middleware.js' || base === 'middleware.mjs') &&
       MIDDLEWARE_HINT.test(body)) {
@@ -116,9 +98,6 @@ export function detectCsp(cwd = process.cwd()) {
     }
   });
 
-  // Priority: append-arrays > append-string > middleware > meta-tag.
-  // Structured patches are safer than string splices; runtime and HTML
-  // injection patches are less reliable and v1 doesn't auto-apply them.
   if (hits.appendArrays.length > 0) {
     return { shape: 'append-arrays', signals: hits.appendArrays };
   }
