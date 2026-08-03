@@ -92,15 +92,21 @@ function mnxRenderVideoComments(comments) {
     commentList.innerHTML = `<p class="video-modal__comments-empty">ยังไม่มีความคิดเห็น เป็นคนแรกที่คอมเมนต์เลย!</p>`;
     return;
   }
-  commentList.innerHTML = comments.map((c) => `
+  const esc = window.mnxEscapeHtml || ((s) => s || '');
+  commentList.innerHTML = comments.map((c) => {
+    const authorSafe = esc(c.author);
+    const textSafe = esc(c.text);
+    const avatarSafe = c.avatar ? (window.mnxSanitizeUrl ? window.mnxSanitizeUrl(c.avatar) : c.avatar) : '/assets/images/avatar-placeholder.png';
+    return `
     <div class="video-modal__comment-item">
-      <img src="${c.avatar || '/assets/images/avatar-placeholder.png'}" alt="${c.author}" />
+      <img src="${avatarSafe}" alt="${authorSafe}" />
       <div>
-        <div class="video-modal__comment-head"><strong>${c.author}</strong><span>${mnxVideoTimeAgoTh(c.createdAt)}</span></div>
-        <p>${c.text}</p>
+        <div class="video-modal__comment-head"><strong>${authorSafe}</strong><span>${mnxVideoTimeAgoTh(c.createdAt)}</span></div>
+        <p>${textSafe}</p>
       </div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 }
 
 /** Web Share API when available (mobile-friendly native share sheet),
@@ -227,25 +233,33 @@ function mnxRenderVideoCards(container, videos) {
     return;
   }
 
+  const esc = window.mnxEscapeHtml || ((s) => s || '');
   container.innerHTML = videos.map((v) => {
     const place = window.mnxGetPlace?.(v.placeId);
+    const placeNameSafe = esc(place?.name || '');
+    const authorSafe = esc(v.author);
+    const textSafe = esc(v.text);
+    const avatarSafe = v.avatar ? (window.mnxSanitizeUrl ? window.mnxSanitizeUrl(v.avatar) : v.avatar) : '/assets/images/avatar-placeholder.png';
+    const posterSafe = mnxAbsoluteUploadUrl(v.video.posterUrl);
+    const videoUrlSafe = mnxAbsoluteUploadUrl(v.video.url);
+
     return `
       <div class="video-card" data-review-id="${v.id}">
         <div class="video-card__frame">
-          <img src="${mnxAbsoluteUploadUrl(v.video.posterUrl)}" alt="รีวิว ${place?.name || ''}" data-role="poster" draggable="false" />
-          <video src="${mnxAbsoluteUploadUrl(v.video.url)}" muted loop playsinline preload="metadata" data-role="video"></video>
+          <img src="${posterSafe}" alt="รีวิว ${placeNameSafe}" data-role="poster" draggable="false" />
+          <video src="${videoUrlSafe}" muted loop playsinline preload="metadata" data-role="video"></video>
           <div class="video-card__gradient"></div>
           <span class="video-card__place-tag">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10Z"/><circle cx="12" cy="11" r="1.8"/></svg>
-            ${place?.name || ''}
+            ${placeNameSafe}
           </span>
           <div class="video-card__info">
             <div class="video-card__reviewer">
-              <img class="video-card__avatar" src="${v.avatar || '/assets/images/avatar-placeholder.png'}" alt="${v.author}" draggable="false" />
-              <span class="video-card__reviewer-name">${v.author}</span>
+              <img class="video-card__avatar" src="${avatarSafe}" alt="${authorSafe}" draggable="false" />
+              <span class="video-card__reviewer-name">${authorSafe}</span>
               <span class="video-card__stars">${mnxStarSvgRow(v.rating)}</span>
             </div>
-            <p class="video-card__caption">${v.text}</p>
+            <p class="video-card__caption">${textSafe}</p>
             <div class="video-card__stats">
               <span class="video-card__stat"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" width="12" height="12"><path d="M12 20s-7-4.5-9.3-8.8C1.4 8 2.6 4.6 6 4c2-.4 3.8.6 6 3 2.2-2.4 4-3.4 6-3 3.4.6 4.6 4 3.3 7.2C19 15.5 12 20 12 20Z"/></svg>${v.likeCount || 0}</span>
               <span class="video-card__stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M4 5h16v11H8l-4 4V5Z"/></svg>${v.commentCount || 0}</span>

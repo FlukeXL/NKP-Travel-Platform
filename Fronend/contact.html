@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>แจ้งปัญหา / ติดต่อเรา | Nakhon Phanom Lifestyle Travel Platform</title>
+  <meta name="description"
+    content="แจ้งปัญหาการใช้งาน แนะนำสถานที่ท่องเที่ยว หรือติดต่อลงโฆษณากับ Nakhon Phanom Lifestyle Travel Platform" />
+
+  <!-- Design system + shared components -->
+  <link rel="stylesheet" href="/Fronend/css/style.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/hero.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/footer.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/auth.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/place-modal.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=44" />
+
+  <style>
+    .contact-page {
+      padding: 120px 20px 60px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    @media (max-width: 900px) {
+      .contact-page {
+        padding: 80px 16px 40px;
+      }
+    }
+    .contact-hero {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .contact-hero__tag {
+      display: inline-block;
+      padding: 4px 14px;
+      background: rgba(201, 162, 39, 0.15);
+      border: 1px solid rgba(201, 162, 39, 0.35);
+      color: #c9a227;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      margin-bottom: 12px;
+    }
+    .contact-hero__title {
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+    .contact-hero__desc {
+      font-size: 1rem;
+      color: rgba(255, 255, 255, 0.7);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 32px;
+      align-items: start;
+    }
+    @media (max-width: 768px) {
+      .contact-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+    }
+    .contact-card {
+      background: rgba(20, 20, 24, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 32px;
+      backdrop-filter: blur(16px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    .contact-info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .contact-info-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .contact-info-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: rgba(201, 162, 39, 0.12);
+      border: 1px solid rgba(201, 162, 39, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #c9a227;
+      flex-shrink: 0;
+    }
+    .contact-info-title {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.5);
+      margin-bottom: 4px;
+    }
+    .contact-info-value {
+      font-size: 1rem;
+      color: #fff;
+      font-weight: 500;
+      line-height: 1.5;
+    }
+    .contact-info-value a {
+      color: #c9a227;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+    .contact-info-value a:hover {
+      text-decoration: underline;
+    }
+    .contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .contact-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .contact-form-label {
+      font-size: 0.88rem;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 500;
+    }
+    .contact-input,
+    .contact-select,
+    .contact-textarea {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .contact-input:focus,
+    .contact-select:focus,
+    .contact-textarea:focus {
+      border-color: #c9a227;
+      box-shadow: 0 0 0 3px rgba(201, 162, 39, 0.2);
+    }
+    .contact-textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+    .contact-submit-btn {
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #c9a227 0%, #e0be47 100%);
+      color: #0b0b0c;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    }
+    .contact-submit-btn:hover {
+      filter: brightness(1.08);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(201, 162, 39, 0.35);
+    }
+    .contact-submit-btn:active {
+      transform: translateY(0);
+    }
+    .contact-status {
+      display: none;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+    .contact-status--success {
+      background: rgba(46, 204, 113, 0.15);
+      border: 1px solid rgba(46, 204, 113, 0.4);
+      color: #2ecc71;
+    }
+  </style>
+  <script src="js/security.js?v=44"></script>
+</head>
+
+<body class="page-contact" data-page="contact">
+
+  <!-- ================= FLOATING HEADER (Navbar + Infobar) — desktop only ================= -->
+  <div class="floating-header" id="site-floating-header" data-desktop-only>
+    <div data-include="/Fronend/components/navbar.html"></div>
+    <div data-include="/Fronend/components/infobar.html"></div>
+  </div>
+
+  <!-- ================= MOBILE SHELL (fully independent from desktop) ================= -->
+  <div data-mobile-only>
+    <div data-include="/Fronend/components/mobile-shell.html"></div>
+  </div>
+
+  <!-- ================= AUTH MODAL (login / register popup) — shared site-wide ================= -->
+  <div data-include="/Fronend/components/auth-modal.html"></div>
+
+  <!-- ================= PLACE DETAIL MODAL (shared site-wide) ================= -->
+  <div data-include="/Fronend/components/place-modal.html"></div>
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="contact-page">
+    <div class="contact-hero">
+      <span class="contact-hero__tag" data-i18n="contact.tag">Contact & Feedback</span>
+      <h1 class="contact-hero__title" data-i18n="contact.title">แจ้งปัญหา / ติดต่อเรา</h1>
+      <p class="contact-hero__desc" data-i18n="contact.desc">
+        หากพบปัญหาการใช้งานเว็บไซต์ มีข้อเสนอแนะ แนะนำสถานที่ท่องเที่ยวใหม่ หรือต้องการติดต่อประสานงาน/ลงโฆษณา สามารถติดต่อเราได้ผ่านแบบฟอร์มด้านล่าง
+      </p>
+    </div>
+
+    <div class="contact-grid">
+      <!-- Contact Info -->
+      <div class="contact-card">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #fff; margin-bottom: 24px;" data-i18n="contact.info_title">ช่องทางการติดต่อ</h3>
+        <div class="contact-info-list">
+          <div class="contact-info-item">
+            <div class="contact-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <div>
+              <div class="contact-info-title" data-i18n="contact.email_label">อีเมลติดต่อ</div>
+              <div class="contact-info-value">
+                <a href="mailto:663070310136@npu.ac.th">663070310136@npu.ac.th</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="contact-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10Z"/><circle cx="12" cy="11" r="2"/></svg>
+            </div>
+            <div>
+              <div class="contact-info-title" data-i18n="contact.location_label">ที่ตั้งโครงการ</div>
+              <div class="contact-info-value" data-i18n="contact.location_val">
+                มหาวิทยาลัยนครพนม<br />
+                Nakhon Phanom, Thailand
+              </div>
+            </div>
+          </div>
+
+          <div class="contact-info-item">
+            <div class="contact-info-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <div>
+              <div class="contact-info-title" data-i18n="contact.hours_label">เวลาทำการ</div>
+              <div class="contact-info-value" data-i18n="contact.hours_val">
+                จันทร์ - ศุกร์ : 08:30 - 16:30 น.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Form -->
+      <div class="contact-card">
+        <h3 style="font-size: 1.25rem; font-weight: 600; color: #fff; margin-bottom: 20px;" data-i18n="contact.form_title">ส่งข้อความถึงเรา</h3>
+        <form class="contact-form" id="contact-form">
+          <div class="contact-form-group">
+            <label class="contact-form-label" for="contact-name" data-i18n="contact.form_name">ชื่อ - นามสกุล *</label>
+            <input type="text" id="contact-name" class="contact-input" required placeholder="กรุณากรอกชื่อของคุณ" />
+          </div>
+
+          <div class="contact-form-group">
+            <label class="contact-form-label" for="contact-email" data-i18n="contact.form_email">อีเมลติดต่อกลับ *</label>
+            <input type="email" id="contact-email" class="contact-input" required placeholder="example@email.com" />
+          </div>
+
+          <div class="contact-form-group">
+            <label class="contact-form-label" for="contact-topic" data-i18n="contact.form_topic">หัวข้อที่ต้องการติดต่อ *</label>
+            <select id="contact-topic" class="contact-select" required>
+              <option value="report">แจ้งปัญหาการใช้งานเว็บไซต์</option>
+              <option value="ads">ติดต่อลงโฆษณา / ประชาสัมพันธ์</option>
+              <option value="suggest">แนะนำสถานที่ท่องเที่ยว / ข้อมูลใหม่</option>
+              <option value="general">สอบถามข้อมูลทั่วไป</option>
+            </select>
+          </div>
+
+          <div class="contact-form-group">
+            <label class="contact-form-label" for="contact-message" data-i18n="contact.form_msg">รายละเอียดข้อความ *</label>
+            <textarea id="contact-message" class="contact-textarea" required placeholder="พิมพ์รายละเอียดข้อความของคุณที่นี่..."></textarea>
+          </div>
+
+          <button type="submit" class="contact-submit-btn" id="contact-submit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="18" height="18"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <span data-i18n="contact.form_submit">ส่งข้อความ</span>
+          </button>
+
+          <div class="contact-status contact-status--success" id="contact-status" data-i18n="contact.success_msg">
+            ✓ ส่งข้อความเรียบร้อยแล้ว ทีมงานจะดำเนินการตรวจสอบและติดต่อกลับโดยเร็วที่สุด
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <!-- ================= FOOTER ================= -->
+  <div data-include="/Fronend/components/footer.html"></div>
+
+  <!-- AI Tour Guide Component -->
+  <div data-include="/Fronend/components/ai-tour-guide.html"></div>
+
+  <!-- ================= SCRIPTS ================= -->
+  <script src="/Fronend/js/i18n.js?v=44"></script>
+  <script src="/Fronend/js/main.js?v=44"></script>
+  <script src="/Fronend/js/auth.js?v=44"></script>
+  <script src="/Fronend/js/navbar.js?v=44"></script>
+  <script src="/Fronend/js/infobar.js?v=44"></script>
+  <script src="/Fronend/js/mobile-shell.js?v=44"></script>
+  <script src="/Fronend/js/places-data.js?v=44"></script>
+  <script src="/Fronend/js/place-modal.js?v=44"></script>
+  <script src="/Fronend/js/ai-tour-guide.js?v=44"></script>
+
+  <script>
+    document.getElementById('contact-form')?.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const status = document.getElementById('contact-status');
+      const btn = document.getElementById('contact-submit');
+      if (btn) btn.disabled = true;
+      if (status) {
+        status.style.display = 'block';
+        status.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+      setTimeout(() => {
+        this.reset();
+        if (btn) btn.disabled = false;
+      }, 3000);
+    });
+  </script>
+</body>
+
+</html>

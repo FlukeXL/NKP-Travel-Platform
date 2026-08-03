@@ -36,7 +36,9 @@ html.mnx-is-mobile body {
    guarantees there's never a stray light-colored strip at the very
    end of any page again. */
 html.mnx-is-mobile footer.footer {
-  padding-bottom: calc(var(--mnx-m-tabbar-h) + var(--mnx-m-safe-b) + 26px);
+  position: relative;
+  z-index: 10;
+  padding-bottom: calc(var(--mnx-m-tabbar-h) + var(--mnx-m-safe-b) + 90px);
 }
 
 html.mnx-is-mobile a,
@@ -199,6 +201,41 @@ html.mnx-is-mobile button {
 
 .mnx-m-infobar__dot.mnx-m-dot--moderate { background: #e08a3c; }
 .mnx-m-infobar__dot.mnx-m-dot--bad { background: #c9392f; }
+
+/* ---- Mobile Header Lang Switcher ---- */
+.mnx-m-infobar__lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 4px 9px;
+  margin-left: auto;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(201, 162, 39, 0.28);
+  font-family: var(--font-display, sans-serif);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.6);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: all 0.2s ease;
+  user-select: none;
+  flex-shrink: 0;
+}
+.mnx-m-infobar__lang:active {
+  transform: scale(0.94);
+  background: rgba(201, 162, 39, 0.18);
+}
+.mnx-m-infobar__lang .is-active {
+  color: #e8cb77;
+  font-weight: 800;
+  text-shadow: 0 0 8px rgba(232, 203, 119, 0.4);
+}
+.mnx-m-infobar__lang .mnx-m-lang-sep {
+  opacity: 0.35;
+  font-size: 0.65rem;
+}
+
 
 @media (max-width: 360px) {
   .mnx-m-infobar__pill {
@@ -1139,7 +1176,7 @@ html.mnx-is-mobile .widget-card__coords {
    grid sections below it. ---- */
 html.mnx-is-mobile #section-recommend {
   padding: 28px 0 30px;
-  background: linear-gradient(180deg, rgba(11, 11, 12, 0.04) 0%, transparent 100%);
+  background: transparent;
 }
 
 html.mnx-is-mobile #section-recommend .section-head {
@@ -1163,7 +1200,18 @@ html.mnx-is-mobile #section-recommend .widget-grid::-webkit-scrollbar {
 html.mnx-is-mobile #section-recommend .widget-card {
   flex: 0 0 168px;
   scroll-snap-align: start;
+  background: var(--color-white);
   border: 1px solid rgba(201, 162, 39, 0.22);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+  -webkit-tap-highlight-color: transparent;
+}
+
+html.mnx-is-mobile #section-recommend .widget-card:hover,
+html.mnx-is-mobile #section-recommend .widget-card:active,
+html.mnx-is-mobile #section-recommend .widget-card:focus {
+  transform: none;
+  background: var(--color-white);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
 html.mnx-is-mobile #section-recommend .widget-card__img-wrap {
@@ -1190,14 +1238,7 @@ html.mnx-is-mobile .category-section {
 }
 
 html.mnx-is-mobile .category-section__head {
-  gap: 10px;
-  margin-bottom: 18px;
-}
-
-html.mnx-is-mobile .category-section__icon {
-  width: 36px;
-  height: 36px;
-  font-size: 1.02rem;
+  margin-bottom: 16px;
 }
 
 html.mnx-is-mobile .category-section__count {
@@ -1560,16 +1601,16 @@ html.mnx-is-mobile .gauge {
    instead of a long scroll of plain links.
 ---------------------------------------------------------- */
 html.mnx-is-mobile footer.footer {
-  padding-top: 32px;
+  position: relative;
+  z-index: 10;
+  padding-top: 36px;
   padding-left: 20px;
   padding-right: 20px;
-  /* padding-bottom is set once, near the top of this file (section 2),
-     to clear the fixed bottom tab bar — not repeated here so it can't
-     accidentally get overwritten back to a small value again. */
+  padding-bottom: calc(var(--mnx-m-tabbar-h) + var(--mnx-m-safe-b) + 90px);
 }
 
 html.mnx-is-mobile .footer__inner {
-  padding-bottom: 28px;
+  padding-bottom: 24px;
 }
 
 html.mnx-is-mobile .footer__brand {
@@ -1589,8 +1630,36 @@ html.mnx-is-mobile .footer__tagline {
   margin-bottom: 14px;
 }
 
+html.mnx-is-mobile .footer__social-section {
+  margin-top: 16px;
+  text-align: center;
+}
+
+html.mnx-is-mobile .footer__social-heading {
+  font-size: 0.72rem;
+  margin-bottom: 10px;
+}
+
 html.mnx-is-mobile .footer__socials {
   justify-content: center;
+  gap: 10px;
+}
+
+html.mnx-is-mobile .footer__social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px 8px 8px;
+  font-size: 0.78rem;
+  min-height: 40px;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(201, 162, 39, 0.25);
+}
+
+html.mnx-is-mobile .footer__social-img {
+  width: 24px;
+  height: 24px;
 }
 
 /* NOTE: intentionally NOT using :nth-of-type(odd/even) here — that
@@ -1614,43 +1683,69 @@ html.mnx-is-mobile .footer__col {
 }
 
 html.mnx-is-mobile .footer__col h5 {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   margin-bottom: 12px;
 }
 
 html.mnx-is-mobile .footer__col {
-  gap: 9px;
+  gap: 6px;
 }
 
 html.mnx-is-mobile .footer__col a {
-  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.84rem;
+  padding: 6px 0;
+  min-height: 36px;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(201, 162, 39, 0.25);
 }
 
 html.mnx-is-mobile .footer__contact-info {
-  font-size: 0.74rem;
+  font-size: 0.76rem;
   line-height: 1.5;
+  padding-top: 4px;
 }
 
 html.mnx-is-mobile .footer__bottom {
   flex-direction: column;
   text-align: center;
-  gap: 8px;
-  padding: 18px 0 0;
+  gap: 12px;
+  padding: 20px 0 0;
 }
 
 html.mnx-is-mobile .footer__legal {
-  gap: 16px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+html.mnx-is-mobile .footer__legal a {
+  display: inline-block;
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  touch-action: manipulation;
+  cursor: pointer;
+  -webkit-tap-highlight-color: rgba(201, 162, 39, 0.25);
 }
 
 /* ----------------------------------------------------------
    19. UTILITY / A11Y
 ---------------------------------------------------------- */
 html.mnx-is-mobile .widget-card:hover,
+html.mnx-is-mobile .widget-card:active,
 html.mnx-is-mobile .place-card:hover,
+html.mnx-is-mobile .place-card:active,
 html.mnx-is-mobile .lifestyle-card:hover,
+html.mnx-is-mobile .lifestyle-card:active,
 html.mnx-is-mobile .lifestyle-popular-card:hover,
-html.mnx-is-mobile .video-card:hover {
+html.mnx-is-mobile .lifestyle-popular-card:active,
+html.mnx-is-mobile .video-card:hover,
+html.mnx-is-mobile .video-card:active {
   transform: none;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
 }
 
 /* Admin panel is desktop-focused; on mobile, show a brief notice
@@ -1701,3 +1796,41 @@ html.mnx-is-mobile .admin-mobile-notice {
   line-height: 1.6;
   margin-bottom: 10px;
 }
+
+/* ============================================================
+   MOBILE ZOOM LOCK & iOS AUTO-ZOOM PREVENTION
+   Ensures iOS Safari & mobile browsers never auto-zoom on input
+   focus, button click, or accidental pinch/double-tap.
+   ============================================================ */
+@media screen and (max-width: 900px) {
+  html, body {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  input,
+  select,
+  textarea,
+  .auth-field input,
+  .mnx-m-dropdown-search input,
+  .checkin-menu__search input,
+  .navbar__mobile-search input,
+  .composer input,
+  .composer textarea,
+  .post-card__comment-form input,
+  .note-editor input,
+  .note-editor textarea,
+  .ai-guide-chat__input,
+  .video-modal__comment-form input,
+  .profile-name-edit input {
+    font-size: 16px !important;
+    touch-action: manipulation;
+  }
+
+  button, a, .btn, [role="button"], [data-place-open], [data-video-open], [data-auth-open], .place-card, .widget-card, .lifestyle-card, .lifestyle-popular-card, .video-card {
+    touch-action: manipulation;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+

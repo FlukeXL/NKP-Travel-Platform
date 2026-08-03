@@ -1,8 +1,17 @@
 .footer {
+  position: relative;
+  z-index: 10;
   background: var(--color-black);
   border-top: 1px solid rgba(201, 162, 39, 0.25);
   color: rgba(255, 255, 255, 0.65);
   padding-top: 70px;
+}
+
+.footer a,
+.footer button {
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(201, 162, 39, 0.25);
 }
 
 .footer__inner {
@@ -39,25 +48,92 @@
   margin-bottom: 20px;
 }
 
+.footer__social-section {
+  margin-top: 20px;
+}
+
+.footer__social-heading {
+  font-family: var(--font-body);
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-gold-light);
+  margin-bottom: 12px;
+}
+
 .footer__socials {
   display: flex;
-  gap: 10px;
-}
-
-.footer__socials a {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all var(--dur-fast) var(--ease-luxury);
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.footer__socials a:hover {
-  border-color: var(--color-gold);
-  background: rgba(201, 162, 39, 0.12);
+.footer__social-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px 6px 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff !important;
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 500;
+  transition: all var(--dur-fast) var(--ease-luxury);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.footer__social-btn > * {
+  pointer-events: none;
+}
+
+.footer__social-img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  border-radius: 50%;
+  flex-shrink: 0;
+  transition: transform var(--dur-fast) var(--ease-luxury);
+}
+
+.footer__social-label {
+  font-family: var(--font-body);
+  letter-spacing: 0.02em;
+}
+
+.footer__social-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.footer__social-btn:hover .footer__social-img {
+  transform: scale(1.12);
+}
+
+.footer__social-btn--tiktok:hover {
+  border-color: #00f2fe;
+  box-shadow: 0 4px 14px rgba(0, 242, 254, 0.28);
+}
+
+.footer__social-btn--facebook:hover {
+  border-color: #1877f2;
+  box-shadow: 0 4px 14px rgba(24, 119, 242, 0.28);
+}
+
+.footer__social-btn--instagram:hover {
+  border-color: #e1306c;
+  box-shadow: 0 4px 14px rgba(225, 48, 108, 0.28);
+}
+
+/* Hide social section on About Us page */
+body.page-about .footer__social-section,
+.page-about .footer__social-section,
+body[data-page="about"] .footer__social-section {
+  display: none !important;
 }
 
 .footer__col h5 {
@@ -80,6 +156,10 @@
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);
   transition: color var(--dur-fast);
+  cursor: pointer;
+  touch-action: manipulation;
+  pointer-events: auto !important;
+  text-decoration: none;
 }
 
 .footer__col a:hover {

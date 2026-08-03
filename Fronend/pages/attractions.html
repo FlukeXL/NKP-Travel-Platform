@@ -2,24 +2,25 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>สถานที่ท่องเที่ยว | Nakhon Phanom Lifestyle Travel Platform</title>
   <meta name="description" content="รวมสถานที่ท่องเที่ยวจังหวัดนครพนม วิดีโอรีวิว Wardoo แผนที่นำทาง คาเฟ่ ร้านอาหาร วัด และสถานที่ออกกำลังกาย" />
 
   <!-- Leaflet 1.9.4 (pinned) — interactive map, OpenStreetMap tiles, no API key needed -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=34" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css?v=44" />
 
   <!-- Design system + shared components -->
-  <link rel="stylesheet" href="/Fronend/css/style.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/footer.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/attractions.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/auth.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/place-modal.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/style.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/footer.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/attractions.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/auth.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/place-modal.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=44" />
+  <script src="../js/security.js?v=44"></script>
 </head>
 <body>
 
@@ -95,7 +96,6 @@
   <section class="category-section" id="cat-cafe">
     <div class="container">
       <div class="category-section__head fade-in">
-        <div class="category-section__icon"></div>
         <div>
           <h3 class="section-title" style="margin:0; font-size:1.5rem;">คาเฟ่</h3>
           <span class="category-section__count">คัดสรรคาเฟ่เด็ดทั่วนครพนม — เลื่อนดูร้านอื่นได้เรื่อยๆ</span>
@@ -113,7 +113,6 @@
   <section class="category-section" id="cat-restaurant">
     <div class="container">
       <div class="category-section__head fade-in">
-        <div class="category-section__icon"></div>
         <div>
           <h3 class="section-title" style="margin:0; font-size:1.5rem;">ร้านอาหาร</h3>
           <span class="category-section__count">อาหารเวียดนามและอาหารพื้นถิ่นขึ้นชื่อของนครพนม</span>
@@ -131,7 +130,6 @@
   <section class="category-section" id="cat-temple">
     <div class="container">
       <div class="category-section__head fade-in">
-        <div class="category-section__icon"></div>
         <div>
           <h3 class="section-title" style="margin:0; font-size:1.5rem;">วัดและสถานที่ศักดิ์สิทธิ์</h3>
           <span class="category-section__count">ปูชนียสถานสำคัญและสถานที่ศักดิ์สิทธิ์คู่บ้านคู่เมือง</span>
@@ -149,7 +147,6 @@
   <section class="category-section" id="cat-fitness">
     <div class="container">
       <div class="category-section__head fade-in">
-        <div class="category-section__icon"></div>
         <div>
           <h3 class="section-title" style="margin:0; font-size:1.5rem;">สถานที่ออกกำลังกาย</h3>
           <span class="category-section__count">เส้นทางวิ่ง ปั่นจักรยาน และลานกิจกรรมกลางแจ้ง</span>
@@ -168,33 +165,33 @@
 
   <!-- ================= Scripts ================= -->
   <!-- Leaflet 1.9.4 (pinned) — interactive map, OpenStreetMap tiles, no API key needed -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=34"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=44"></script>
 
-  <script src="/Fronend/js/i18n.js?v=34"></script>
-  <script src="/Fronend/js/places-data.js?v=34"></script>
-  <script src="/Fronend/js/reviews-data.js?v=34"></script>
-  <script src="/Fronend/js/favorites-data.js?v=34"></script>
+  <script src="/Fronend/js/i18n.js?v=44"></script>
+  <script src="/Fronend/js/places-data.js?v=44"></script>
+  <script src="/Fronend/js/reviews-data.js?v=44"></script>
+  <script src="/Fronend/js/favorites-data.js?v=44"></script>
   <!-- Firebase Web SDK 10.13.2 (pinned, compat build) — Google Sign-In -->
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=34"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=34"></script>
-  <script src="/Fronend/js/firebase.js?v=34"></script>
-  <script src="/Fronend/js/api-client.js?v=34"></script>
-  <script src="/Fronend/js/environment-data.js?v=34"></script>
-  <script src="/Fronend/js/auth-state.js?v=34"></script>
-  <script src="/Fronend/js/main.js?v=34"></script>
-  <script src="/Fronend/js/navbar.js?v=34"></script>
-  <script src="/Fronend/js/auth.js?v=34"></script>
-  <script src="/Fronend/js/place-modal.js?v=34"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=44"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=44"></script>
+  <script src="/Fronend/js/firebase.js?v=44"></script>
+  <script src="/Fronend/js/api-client.js?v=44"></script>
+  <script src="/Fronend/js/environment-data.js?v=44"></script>
+  <script src="/Fronend/js/auth-state.js?v=44"></script>
+  <script src="/Fronend/js/main.js?v=44"></script>
+  <script src="/Fronend/js/navbar.js?v=44"></script>
+  <script src="/Fronend/js/auth.js?v=44"></script>
+  <script src="/Fronend/js/place-modal.js?v=44"></script>
   <!-- Chart.js 4.5.1 + SheetJS 0.20.3 (pinned) — Infobar's mini history chart + Excel download -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js?v=34"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js?v=34"></script>
-  <script src="/Fronend/js/excel-export.js?v=34"></script>
-  <script src="/Fronend/js/infobar.js?v=34"></script>
-  <script src="/Fronend/js/attractions-map.js?v=34"></script>
-  <script src="/Fronend/js/attractions.js?v=34"></script>
-  <script src="/Fronend/js/mobile-shell.js?v=34"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js?v=44"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js?v=44"></script>
+  <script src="/Fronend/js/excel-export.js?v=44"></script>
+  <script src="/Fronend/js/infobar.js?v=44"></script>
+  <script src="/Fronend/js/attractions-map.js?v=44"></script>
+  <script src="/Fronend/js/attractions.js?v=44"></script>
+  <script src="/Fronend/js/mobile-shell.js?v=44"></script>
   <!-- ================= AI TOUR GUIDE ================= -->
   <div data-include="/Fronend/components/ai-tour-guide.html"></div>
-  <script src="/Fronend/js/ai-tour-guide.js?v=34"></script>
+  <script src="/Fronend/js/ai-tour-guide.js?v=44"></script>
 </body>
 </html>

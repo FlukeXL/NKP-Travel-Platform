@@ -10,6 +10,13 @@ document.addEventListener('click', (e) => {
     // Prevent opening chat if it was a drag action
     if (hasFabMoved) return;
 
+    if (!window.MNX_AUTH?.isLoggedIn()) {
+      if (typeof window.mnxOpenAuthModal === 'function') {
+        window.mnxOpenAuthModal('login');
+      }
+      return;
+    }
+
     const chatWindow = document.getElementById('ai-guide-chat');
     const inputEl = document.getElementById('ai-guide-chat-input');
     if (chatWindow) {
@@ -246,3 +253,17 @@ async function sendMessage() {
     inputEl.focus();
   }
 }
+
+// Global API helper
+window.MapNexusAI = window.PlanvisAI = {
+  toggle: () => {
+    const chatWindow = document.getElementById('ai-guide-chat');
+    const inputEl = document.getElementById('ai-guide-chat-input');
+    if (chatWindow) {
+      chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+      if (chatWindow.style.display === 'flex' && inputEl) {
+        inputEl.focus();
+      }
+    }
+  }
+};

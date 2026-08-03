@@ -185,7 +185,7 @@ function initAuthModal() {
   const modal = document.getElementById('auth-modal');
   if (!modal) return;
 
-  document.body.addEventListener('click', (e) => {
+  document.addEventListener('click', (e) => {
     const trigger = e.target.closest('[data-auth-open]');
     if (!trigger) return;
     e.preventDefault();

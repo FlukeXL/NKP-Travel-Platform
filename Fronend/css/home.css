@@ -277,8 +277,8 @@
 }
 
 .widget-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-deep);
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(201, 162, 39, 0.15);
 }
 
 .widget-card__img-wrap {

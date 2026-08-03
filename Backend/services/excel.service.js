@@ -2,7 +2,7 @@ const ExcelJS = require('exceljs');
 
 async function buildHistoryWorkbook(sheets) {
   const workbook = new ExcelJS.Workbook();
-  workbook.creator = 'MapNexus — Nakhon Phanom Lifestyle Travel Platform';
+  workbook.creator = 'Nakhon Phanom Lifestyle Travel Platform';
   workbook.created = new Date();
 
   sheets.forEach(({ title, unit, rows }) => {

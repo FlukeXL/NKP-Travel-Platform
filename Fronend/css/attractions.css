@@ -284,26 +284,15 @@
 }
 
 .category-section__head {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  margin-bottom: 34px;
+  margin-bottom: 28px;
 }
 
 .category-section__icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--grad-gold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
-  flex-shrink: 0;
-  box-shadow: var(--shadow-gold);
+  display: none !important;
 }
 
 .category-section__count {
+  display: block;
   font-size: 0.82rem;
   color: var(--color-text-muted);
   margin-top: 2px;

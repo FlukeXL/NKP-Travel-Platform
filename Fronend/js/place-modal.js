@@ -211,7 +211,7 @@ function renderPlaceReviewsSection(place) {
   ` : `
     <div class="place-modal__lock">
       <div class="place-modal__lock-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 1 1 8 0v4"/></svg></div>
-      <p>เข้าสู่ระบบเพื่อเขียนรีวิว ให้คะแนน และแนบรูปภาพ/วิดีโอของคุณเองสำหรับ "${place.name}"</p>
+      <p>เข้าสู่ระบบเพื่อเขียนรีวิว ให้คะแนน และแนบรูปภาพ/วิดีโอของคุณเองสำหรับ "${window.mnxEscapeHtml ? window.mnxEscapeHtml(place.name) : place.name}"</p>
       <button class="btn btn-gold btn-sm" data-auth-open="login">เข้าสู่ระบบ / สมัครสมาชิก</button>
     </div>
   `;
@@ -223,6 +223,11 @@ function renderPlaceReviewsSection(place) {
 }
 
 function mnxRenderReviewItem(r) {
+  const esc = window.mnxEscapeHtml || ((s) => s || '');
+  const authorSafe = esc(r.author);
+  const textSafe = esc(r.text);
+  const avatarSafe = r.avatar ? esc(r.avatar) : '/assets/images/avatar-placeholder.png';
+
   const photosHtml = (r.photos || []).length
     ? `<div class="place-review-item__media">${r.photos.map((src) => `<img src="${mnxAbsoluteUploadUrl(src)}" alt="รูปรีวิว" loading="lazy" />`).join('')}</div>`
     : '';
@@ -236,14 +241,14 @@ function mnxRenderReviewItem(r) {
 
   return `
     <div class="place-review-item" data-review-id="${r.id}">
-      <img class="place-review-item__avatar" src="${r.avatar || '/assets/images/avatar-placeholder.png'}" alt="${r.author}" />
+      <img class="place-review-item__avatar" src="${avatarSafe}" alt="${authorSafe}" />
       <div class="place-review-item__body">
         <div class="place-review-item__head">
-          <span class="place-review-item__name">${r.author}</span>
+          <span class="place-review-item__name">${authorSafe}</span>
           <span class="place-review-item__stars">${mnxStarString(r.rating)}</span>
           <span class="place-review-item__time">${mnxTimeAgoTh(r.createdAt)}</span>
         </div>
-        <p class="place-review-item__text">${r.text}</p>
+        <p class="place-review-item__text">${textSafe}</p>
         ${photosHtml}
         ${videoHtml}
         <div class="place-review-item__actions">
@@ -256,9 +261,12 @@ function mnxRenderReviewItem(r) {
 
 function mnxAbsoluteUploadUrl(relativeUrl) {
   if (!relativeUrl) return '';
-  if (/^https?:\/\//.test(relativeUrl)) return relativeUrl;
+  if (/^https?:\/\//.test(relativeUrl)) {
+    return window.mnxSanitizeUrl ? window.mnxSanitizeUrl(relativeUrl) : relativeUrl;
+  }
   const apiOrigin = window.MNX_API.baseUrl.replace(/\/api\/?$/, '');
-  return `${apiOrigin}${relativeUrl}`;
+  const finalUrl = `${apiOrigin}${relativeUrl.startsWith('/') ? '' : '/'}${relativeUrl}`;
+  return window.mnxSanitizeUrl ? window.mnxSanitizeUrl(finalUrl) : finalUrl;
 }
 
 function wireReviewItemActions(place, reviewsWrap) {
@@ -422,13 +430,6 @@ function initPlaceModal() {
   const els = mnxPlaceEls();
   if (!els.modal) return;
 
-  document.body.addEventListener('click', (e) => {
-    const trigger = e.target.closest('[data-place-open]');
-    if (!trigger) return;
-    e.preventDefault();
-    mnxOpenPlaceModal(trigger.dataset.placeOpen);
-  });
-
   document.getElementById('place-modal-close')?.addEventListener('click', mnxClosePlaceModal);
   els.modal.addEventListener('click', (e) => {
     if (e.target === els.modal) mnxClosePlaceModal();
@@ -442,7 +443,7 @@ function initPlaceModal() {
 
   document.getElementById('place-gallery-prev')?.addEventListener('click', () => mnxPlaceGalleryManualGoTo(mnxPlaceGalleryIndex - 1));
   document.getElementById('place-gallery-next')?.addEventListener('click', () => mnxPlaceGalleryManualGoTo(mnxPlaceGalleryIndex + 1));
-  els.dots.addEventListener('click', (e) => {
+  els.dots?.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-index]');
     if (btn) mnxPlaceGalleryManualGoTo(Number(btn.dataset.index));
   });
@@ -455,23 +456,25 @@ function initPlaceModal() {
     toggle.innerHTML = isExpanded ? `ย่อลง ${mnxChevronIcon('up')}` : `อ่านต่อ ${mnxChevronIcon('down')}`;
   });
 
-  const viewport = els.track.closest('.place-modal__gallery-viewport');
-  let mnxRealPointerMoveSeen = false;
-  viewport.addEventListener('mousemove', () => { mnxRealPointerMoveSeen = true; });
-  viewport.addEventListener('mouseenter', () => {
-    if (mnxRealPointerMoveSeen) clearInterval(mnxPlaceGalleryTimer);
-  });
-  viewport.addEventListener('mouseleave', () => {
-    mnxRealPointerMoveSeen = false;
-    if (els.modal.classList.contains('is-open')) mnxStartPlaceGalleryAutoplay();
-  });
+  const viewport = els.track?.closest('.place-modal__gallery-viewport');
+  if (viewport) {
+    let mnxRealPointerMoveSeen = false;
+    viewport.addEventListener('mousemove', () => { mnxRealPointerMoveSeen = true; });
+    viewport.addEventListener('mouseenter', () => {
+      if (mnxRealPointerMoveSeen) clearInterval(mnxPlaceGalleryTimer);
+    });
+    viewport.addEventListener('mouseleave', () => {
+      mnxRealPointerMoveSeen = false;
+      if (els.modal.classList.contains('is-open')) mnxStartPlaceGalleryAutoplay();
+    });
 
-  let touchStartX = 0;
-  viewport.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
-  viewport.addEventListener('touchend', (e) => {
-    const delta = e.changedTouches[0].clientX - touchStartX;
-    if (Math.abs(delta) > 40) mnxPlaceGalleryManualGoTo(mnxPlaceGalleryIndex + (delta < 0 ? 1 : -1));
-  }, { passive: true });
+    let touchStartX = 0;
+    viewport.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; }, { passive: true });
+    viewport.addEventListener('touchend', (e) => {
+      const delta = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(delta) > 40) mnxPlaceGalleryManualGoTo(mnxPlaceGalleryIndex + (delta < 0 ? 1 : -1));
+    }, { passive: true });
+  }
 
   document.addEventListener('auth:changed', () => {
     if (els.modal.classList.contains('is-open') && mnxCurrentPlaceId) {
@@ -481,11 +484,26 @@ function initPlaceModal() {
   });
 }
 
+// Global click listener for opening place details
+document.addEventListener('click', (e) => {
+  const trigger = e.target.closest('[data-place-open]');
+  if (!trigger) return;
+  const placeId = trigger.dataset.placeOpen;
+  if (!placeId) return;
+  e.preventDefault();
+  mnxOpenPlaceModal(placeId);
+});
+
 function mnxAutoOpenPlaceFromQuery() {
   const placeId = new URLSearchParams(window.location.search).get('place');
   if (!placeId) return;
   setTimeout(() => mnxOpenPlaceModal(placeId), 300);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+  initPlaceModal();
+  mnxAutoOpenPlaceFromQuery();
+});
 
 document.addEventListener('includes:loaded', () => {
   initPlaceModal();

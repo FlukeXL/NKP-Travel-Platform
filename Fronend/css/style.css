@@ -53,6 +53,8 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -62,6 +64,11 @@ body {
   line-height: 1.6;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
+}
+
+button, a, input, select, textarea, [role="button"], [data-place-open], [data-video-open], [data-auth-open], .place-card, .widget-card, .lifestyle-card, .lifestyle-popular-card, .video-card {
+  touch-action: manipulation;
+  cursor: pointer;
 }
 
 img {

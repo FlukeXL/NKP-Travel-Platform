@@ -3,26 +3,27 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>เกี่ยวกับเรา | MapNexus - Nakhon Phanom Lifestyle Travel Platform</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>เกี่ยวกับเรา | Nakhon Phanom Lifestyle Travel Platform</title>
   <meta name="description"
-    content="ข้อมูลเกี่ยวกับโครงการ MapNexus ทีมนักศึกษาผู้จัดทำ 4 คน (ผู้พัฒนาเว็บ 2 คน, นักหาข้อมูล 2 คน) และอาจารย์ที่ปรึกษาโครงการ 2 ท่าน พร้อมเรื่องราวที่มาและภาพบรรยากาศทีม" />
+    content="ข้อมูลเกี่ยวกับโครงการ Nakhon Phanom Lifestyle Travel Platform ทีมนักศึกษาผู้จัดทำ 4 คน (ผู้พัฒนาเว็บ 2 คน, นักหาข้อมูล 2 คน) และอาจารย์ที่ปรึกษาโครงการ 2 ท่าน พร้อมเรื่องราวที่มาและภาพบรรยากาศทีม" />
 
   <!-- Design system + shared components -->
-  <link rel="stylesheet" href="/Fronend/css/style.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/hero.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/footer.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/auth.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/place-modal.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=34" />
-  <link rel="stylesheet" href="/Fronend/css/about.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/style.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/hero.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/footer.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/auth.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/place-modal.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=44" />
+  <link rel="stylesheet" href="/Fronend/css/about.css?v=44" />
+  <script src="js/security.js?v=44"></script>
 </head>
 
-<body>
+<body class="page-about" data-page="about">
 
   <!-- ================= FLOATING HEADER (Navbar + Infobar) — desktop only ================= -->
   <div class="floating-header" id="site-floating-header" data-desktop-only>
@@ -43,73 +44,237 @@
 
   <!-- ================= HERO SECTION ================= -->
   <header class="about-hero" id="about-hero">
-    <div class="about-hero__container" data-aos="fade-up">
-      <span class="about-hero__badge">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-          stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="16" x2="12" y2="12"></line>
-          <line x1="12" y1="8" x2="12.01" y2="8"></line>
-        </svg>
-        <span data-i18n="about.badge">About MapNexus Platform</span>
-      </span>
-      <h1 class="about-hero__title"><span data-i18n="about.hero_title">เกี่ยวกับเรา</span> <em>Nakhon Phanom Lifestyle Travel Platform</em></h1>
+    <div class="about-hero__inner" data-aos="fade-up">
+      <nav class="about-hero__breadcrumb" aria-label="breadcrumb">
+        <a href="/Fronend/index.html">หน้าหลัก</a>
+        <span class="about-hero__breadcrumb-sep">/</span>
+        <span class="text-gold" data-i18n="nav.about">เกี่ยวกับเรา</span>
+      </nav>
+
+      <div>
+        <span class="about-hero__badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="12" y1="16" x2="12" y2="12"></line>
+            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+          </svg>
+          <span data-i18n="about.badge">About Nakhon Phanom Lifestyle Travel Platform</span>
+        </span>
+      </div>
+
+      <h1 class="about-hero__title">
+        <span data-i18n="about.hero_title">เกี่ยวกับเรา</span> <em>Nakhon Phanom</em>
+      </h1>
+
       <p class="about-hero__desc" data-i18n="about.hero_desc">
         แพลตฟอร์มท่องเที่ยวไลฟ์สไตล์อัจฉริยะจังหวัดนครพนม ผสานมนต์เสน่ห์แห่งวัฒนธรรมลุ่มน้ำโขง
         เข้ากับนวัตกรรมเทคโนโลยีเพื่อยกระดับการเดินทางสู่ยุคดิจิทัล
       </p>
+
+      <!-- Quick stats / pills strip -->
+      <div class="about-hero__stats">
+        <span class="about-hero-stat-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          <span><strong>100+</strong> จุดเช็คอิน &amp; คาเฟ่</span>
+        </span>
+        <span class="about-hero-stat-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"></path>
+          </svg>
+          <span><strong>Real-time</strong> สภาพแวดล้อม IoT</span>
+        </span>
+        <span class="about-hero-stat-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+          </svg>
+          <span><strong>AI Planvis</strong> ผู้ช่วยวางแผน</span>
+        </span>
+        <span class="about-hero-stat-pill">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span><strong>เพื่อชุมชน</strong> ท้องถิ่นนครพนม</span>
+        </span>
+      </div>
     </div>
   </header>
 
   <main>
-    <!-- ================= 1. STUDENT TEAM SECTION (ทีมนักศึกษา 4 คน: ผู้พัฒนาเว็บ 2 คน + นักหาข้อมูล 2 คน) ================= -->
-    <section class="about-section about-section--dark" id="team-section">
-      <div class="container">
+    <!-- ================= 1. OUR STORY & BRAND IDENTITY ================= -->
+    <section class="about-section about-section--dark" id="story-section">
+      <div class="about-container">
+        <div class="about-story-grid">
 
-        <div class="section-head--center" data-aos="fade-up">
-          <span class="eyebrow" data-i18n="about.team_eyebrow">The Project Team</span>
-          <h2 class="section-title" data-i18n="about.team_title">ทีมนักศึกษาผู้จัดทำโครงการ</h2>
-          <p class="section-sub" data-i18n="about.team_sub">4 พลังนักศึกษาผู้สร้างสรรค์และขับเคลื่อนแพลตฟอร์ม MapNexus สู่ความเป็นจริง</p>
+          <!-- Left: Story Narrative & Metrics -->
+          <article class="about-story-card" data-aos="fade-up">
+            <div>
+              <div class="about-section-head" style="text-align: left; margin-bottom: 20px;">
+                <span class="eyebrow" data-i18n="about.story_eyebrow">The Origin &amp; Vision</span>
+                <h2 class="section-title" data-i18n="about.story_title">เรื่องราวและที่มาของโครงการ</h2>
+              </div>
+
+              <blockquote class="about-story-lead" data-i18n="about.story_lead">
+                "เปลี่ยนมุมมองการท่องเที่ยวนครพนม สู่ประสบการณ์อัจฉริยะที่เชื่อมโยงคุณเข้ากับทุกจังหวะชีวิตริมฝั่งโขง"
+              </blockquote>
+
+              <p class="about-story-text">
+                จังหวัดนครพนมเปี่ยมล้นไปด้วยมนต์เสน่ห์ ทั้งประวัติศาสตร์อันยาวนาน ความศักดิ์สิทธิ์ขององค์พระธาตุพนม
+                ประเพณีไหลเรือไฟ และวิถีชีวิตสโลว์ไลฟ์ริมแม่น้ำโขง แต่ข้อมูลการท่องเที่ยวยังกระจัดกระจาย
+                และขาดข้อมูลสภาพแวดล้อมที่จำเป็นต่อการตัดสินใจเดินทาง
+              </p>
+
+              <p class="about-story-text">
+                เราจึงพัฒนา <strong>Nakhon Phanom Lifestyle Travel Platform</strong> ขึ้นเพื่อเป็นศูนย์รวมไลฟ์สไตล์การท่องเที่ยวแบบ All-in-One
+                ผสานข้อมูลสิ่งแวดล้อมเรียลไทม์ (PM2.5, สภาพอากาศ, ระดับน้ำโขง) เข้ากับ
+                <strong>AI Tour Guide (Planvis)</strong> และวิดีโอรีวิวจริง เพื่อประสบการณ์ที่สะดวกและปลอดภัยที่สุด
+              </p>
+            </div>
+
+            <!-- Highlights metric chips -->
+            <div class="about-story-stats">
+              <div class="about-story-stat-item">
+                <span class="about-story-stat-num">100+</span>
+                <span class="about-story-stat-label">พิกัดสถานที่ท่องเที่ยว</span>
+              </div>
+              <div class="about-story-stat-item">
+                <span class="about-story-stat-num">24/7</span>
+                <span class="about-story-stat-label">ข้อมูลสิ่งแวดล้อมสด</span>
+              </div>
+              <div class="about-story-stat-item">
+                <span class="about-story-stat-num">AI</span>
+                <span class="about-story-stat-label">ผู้ช่วยวางแผนอัจฉริยะ</span>
+              </div>
+            </div>
+          </article>
+
+          <!-- Right: Brand Identity Card -->
+          <aside class="about-brand-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="about-brand-logo-wrap">
+              <img src="/Fronend/assets/images/logo.png" alt="Nakhon Phanom Lifestyle Travel Platform Logo" class="about-brand-logo-img" />
+            </div>
+            <h3 class="about-brand-title no-translate">NAKHON<span class="text-gold">PHANOM</span></h3>
+            <p class="about-brand-sub no-translate">Lifestyle Travel Platform</p>
+            <p class="about-brand-desc">
+              <strong>ความหมายของตราสัญลักษณ์:</strong> สื่อถึงการผสานวัฒนธรรมอันรุ่งโรจน์ของจังหวัดนครพนม เส้นทางริมฝั่งโขง และเทคโนโลยีดิจิทัลสมัยใหม่เข้าด้วยกันอย่างลงตัว
+            </p>
+          </aside>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 2. CORE INNOVATIONS / PLATFORM PILLARS ================= -->
+    <section class="about-section about-section--alt" id="pillars-section">
+      <div class="about-container">
+        <div class="about-section-head" data-aos="fade-up">
+          <span class="eyebrow">Platform Innovations</span>
+          <h2 class="section-title">4 เสาหลักนวัตกรรมของแพลตฟอร์ม</h2>
+          <p class="section-sub">เทคโนโลยีและแนวคิดที่ถูกออกแบบมาเพื่อยกระดับการเดินทางท่องเที่ยวในจังหวัดนครพนม</p>
         </div>
 
-        <div class="team-grid">
+        <div class="about-pillars-grid">
+          <!-- Pillar 1 -->
+          <div class="about-pillar-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="about-pillar-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+              </svg>
+            </div>
+            <h3 class="about-pillar-title">วิถีวัฒนธรรม &amp; สายมู</h3>
+            <p class="about-pillar-desc">รวบรวมเส้นทางไหว้พระธาตุประจำวันเกิด วัดสำคัญริมฝั่งโขง และเรื่องราวความเชื่อท้องถิ่นอย่างลึกซึ้ง</p>
+          </div>
+
+          <!-- Pillar 2 -->
+          <div class="about-pillar-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="about-pillar-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+              </svg>
+            </div>
+            <h3 class="about-pillar-title">ข้อมูลสิ่งแวดล้อมเรียลไทม์</h3>
+            <p class="about-pillar-desc">รายงานค่าฝุ่น PM2.5 สภาพอากาศ อุณหภูมิ ระดับน้ำโขง และสภาพจราจรสดแบบนาทีต่อนาที</p>
+          </div>
+
+          <!-- Pillar 3 -->
+          <div class="about-pillar-card" data-aos="fade-up" data-aos-delay="300">
+            <div class="about-pillar-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
+            <h3 class="about-pillar-title">AI Tour Guide อัจฉริยะ</h3>
+            <p class="about-pillar-desc">ผู้ช่วยส่วนตัว AI (Planvis) คอยแนะนำทริป ตอบคำถาม และจัดตารางการเดินทางที่เหมาะสมกับคุณ</p>
+          </div>
+
+          <!-- Pillar 4 -->
+          <div class="about-pillar-card" data-aos="fade-up" data-aos-delay="400">
+            <div class="about-pillar-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </div>
+            <h3 class="about-pillar-title">ขับเคลื่อนเศรษฐกิจชุมชน</h3>
+            <p class="about-pillar-desc">สนับสนุนร้านอาหาร คาเฟ่ วิสาหกิจชุมชน และผู้ประกอบการท้องถิ่นให้เข้าถึงนักท่องเที่ยวโดยตรง</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= 3. STUDENT TEAM SECTION (ทีมนักศึกษา 4 คน) ================= -->
+    <section class="about-section about-section--dark" id="team-section">
+      <div class="about-container">
+
+        <div class="about-section-head" data-aos="fade-up">
+          <span class="eyebrow" data-i18n="about.team_eyebrow">The Project Team</span>
+          <h2 class="section-title" data-i18n="about.team_title">ทีมนักศึกษาผู้จัดทำโครงการ</h2>
+          <p class="section-sub" data-i18n="about.team_sub">4 พลังนักศึกษาผู้สร้างสรรค์และขับเคลื่อนแพลตฟอร์ม Nakhon Phanom Lifestyle Travel Platform สู่ความเป็นจริง</p>
+        </div>
+
+        <div class="about-team-grid">
 
           <!-- Student 1: ผู้พัฒนาเว็บ 1 -->
-          <article class="dev-card" data-aos="fade-up" data-aos-delay="100">
-            <div class="dev-avatar-wrap">
-              <img src="/Fronend/assets/images/team/dev1.svg" alt="ผู้พัฒนาเว็บคนที่ 1" class="dev-avatar" />
+          <article class="about-dev-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="about-dev-avatar-wrap">
+              <img src="/Fronend/assets/images/team/dev1.svg" alt="ผู้พัฒนาเว็บคนที่ 1" class="about-dev-avatar" />
             </div>
-            <h3 class="dev-name" data-i18n="about.dev1_name">นักศึกษาคนที่ 1</h3>
-            <p class="dev-nickname">Full-Stack &amp; System</p>
-            <span class="dev-role-badge" data-i18n="about.dev1_role">ผู้พัฒนาเว็บ (Web Developer)</span>
-            <p class="dev-desc" data-i18n="about.dev1_desc">
-              พัฒนาระบบสถาปัตยกรรมเว็บไซต์ ระบบ Backend สภาพแวดล้อมเรียลไทม์ และระบบบริหารจัดการฐานข้อมูล
+            <h3 class="about-dev-name" data-i18n="about.dev1_name">นักศึกษาคนที่ 1</h3>
+            <p class="about-dev-nickname">Full-Stack &amp; System</p>
+            <span class="about-dev-role-badge" data-i18n="about.dev1_role">ผู้พัฒนาเว็บ (Web Developer)</span>
+            <p class="about-dev-desc" data-i18n="about.dev1_desc">
+              พัฒนาระบบสถาปัตยกรรมเว็บไซต์ Backend สภาพแวดล้อมเรียลไทม์ และระบบฐานข้อมูล
             </p>
-            <div class="dev-skills">
-              <span class="dev-skill-tag">Web Development</span>
-              <span class="dev-skill-tag">Backend &amp; API</span>
-              <span class="dev-skill-tag">System Design</span>
+            <div class="about-dev-skills">
+              <span class="about-dev-skill-tag">Full-Stack</span>
+              <span class="about-dev-skill-tag">Backend API</span>
+              <span class="about-dev-skill-tag">Database</span>
             </div>
-            <div class="dev-socials">
-              <a href="#" class="dev-social-link" aria-label="GitHub">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path
-                    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                  </path>
+            <div class="about-dev-socials">
+              <a href="#" class="about-dev-social-link" aria-label="GitHub">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
                 </svg>
               </a>
-              <a href="#" class="dev-social-link" aria-label="LinkedIn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
+              <a href="#" class="about-dev-social-link" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                   <rect x="2" y="9" width="4" height="12"></rect>
                   <circle cx="4" cy="4" r="2"></circle>
                 </svg>
               </a>
-              <a href="#" class="dev-social-link" aria-label="Email">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
+              <a href="#" class="about-dev-social-link" aria-label="Email">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
@@ -118,41 +283,36 @@
           </article>
 
           <!-- Student 2: ผู้พัฒนาเว็บ 2 -->
-          <article class="dev-card" data-aos="fade-up" data-aos-delay="200">
-            <div class="dev-avatar-wrap">
-              <img src="/Fronend/assets/images/team/dev2.svg" alt="ผู้พัฒนาเว็บคนที่ 2" class="dev-avatar" />
+          <article class="about-dev-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="about-dev-avatar-wrap">
+              <img src="/Fronend/assets/images/team/dev2.svg" alt="ผู้พัฒนาเว็บคนที่ 2" class="about-dev-avatar" />
             </div>
-            <h3 class="dev-name" data-i18n="about.dev2_name">นักศึกษาคนที่ 2</h3>
-            <p class="dev-nickname">Frontend &amp; UI/UX</p>
-            <span class="dev-role-badge" data-i18n="about.dev2_role">ผู้พัฒนาเว็บ (Web Developer)</span>
-            <p class="dev-desc" data-i18n="about.dev2_desc">
-              ออกแบบและพัฒนาส่วนติดต่อผู้ใช้ (Frontend UI/UX) แอนิเมชัน AOS ระบบแผนที่ Leaflet และ AI Tour Guide
+            <h3 class="about-dev-name" data-i18n="about.dev2_name">นักศึกษาคนที่ 2</h3>
+            <p class="about-dev-nickname">Frontend &amp; UI/UX</p>
+            <span class="about-dev-role-badge" data-i18n="about.dev2_role">ผู้พัฒนาเว็บ (Web Developer)</span>
+            <p class="about-dev-desc" data-i18n="about.dev2_desc">
+              ออกแบบและพัฒนาส่วนติดต่อผู้ใช้ (UI/UX) แอนิเมชัน แผนที่ Leaflet และ AI Guide
             </p>
-            <div class="dev-skills">
-              <span class="dev-skill-tag">UI/UX Design</span>
-              <span class="dev-skill-tag">Frontend Script</span>
-              <span class="dev-skill-tag">Responsive Web</span>
+            <div class="about-dev-skills">
+              <span class="about-dev-skill-tag">UI/UX Design</span>
+              <span class="about-dev-skill-tag">Frontend UI</span>
+              <span class="about-dev-skill-tag">Responsive</span>
             </div>
-            <div class="dev-socials">
-              <a href="#" class="dev-social-link" aria-label="GitHub">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path
-                    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                  </path>
+            <div class="about-dev-socials">
+              <a href="#" class="about-dev-social-link" aria-label="GitHub">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
                 </svg>
               </a>
-              <a href="#" class="dev-social-link" aria-label="LinkedIn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
+              <a href="#" class="about-dev-social-link" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                   <rect x="2" y="9" width="4" height="12"></rect>
                   <circle cx="4" cy="4" r="2"></circle>
                 </svg>
               </a>
-              <a href="#" class="dev-social-link" aria-label="Email">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
+              <a href="#" class="about-dev-social-link" aria-label="Email">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
@@ -161,41 +321,36 @@
           </article>
 
           <!-- Student 3: นักหาข้อมูล 1 -->
-          <article class="dev-card" data-aos="fade-up" data-aos-delay="300">
-            <div class="dev-avatar-wrap">
-              <img src="/Fronend/assets/images/team/dev3.svg" alt="นักหาข้อมูลคนที่ 1" class="dev-avatar" />
+          <article class="about-dev-card" data-aos="fade-up" data-aos-delay="300">
+            <div class="about-dev-avatar-wrap">
+              <img src="/Fronend/assets/images/team/dev3.svg" alt="นักหาข้อมูลคนที่ 1" class="about-dev-avatar" />
             </div>
-            <h3 class="dev-name" data-i18n="about.dev3_name">นักศึกษาคนที่ 3</h3>
-            <p class="dev-nickname">Field &amp; Cultural Data</p>
-            <span class="dev-role-badge" data-i18n="about.dev3_role">นักหาข้อมูล (Data Researcher)</span>
-            <p class="dev-desc" data-i18n="about.dev3_desc">
-              ลงพื้นที่สำรวจ รวบรวมข้อมูลสถานที่ท่องเที่ยว วัฒนธรรม ประเพณี และประวัติความเป็นมาของจังหวัดนครพนม
+            <h3 class="about-dev-name" data-i18n="about.dev3_name">นักศึกษาคนที่ 3</h3>
+            <p class="about-dev-nickname">Field &amp; Cultural Data</p>
+            <span class="about-dev-role-badge" data-i18n="about.dev3_role">นักหาข้อมูล (Data Researcher)</span>
+            <p class="about-dev-desc" data-i18n="about.dev3_desc">
+              ลงพื้นที่สำรวจ รวบรวมข้อมูลสถานที่ท่องเที่ยว วัฒนธรรม ประเพณี และประวัติศาสตร์นครพนม
             </p>
-            <div class="dev-skills">
-              <span class="dev-skill-tag">Field Survey</span>
-              <span class="dev-skill-tag">Cultural Research</span>
-              <span class="dev-skill-tag">Data Collection</span>
+            <div class="about-dev-skills">
+              <span class="about-dev-skill-tag">Field Survey</span>
+              <span class="about-dev-skill-tag">Culture &amp; Faith</span>
+              <span class="about-dev-skill-tag">Research</span>
             </div>
-            <div class="dev-socials">
-              <a href="#" class="dev-social-link" aria-label="GitHub">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path
-                    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                  </path>
+            <div class="about-dev-socials">
+              <a href="#" class="about-dev-social-link" aria-label="GitHub">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
                 </svg>
               </a>
-              <a href="#" class="dev-social-link" aria-label="LinkedIn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
+              <a href="#" class="about-dev-social-link" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                   <rect x="2" y="9" width="4" height="12"></rect>
                   <circle cx="4" cy="4" r="2"></circle>
                 </svg>
               </a>
-              <a href="#" class="dev-social-link" aria-label="Email">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
+              <a href="#" class="about-dev-social-link" aria-label="Email">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
@@ -204,41 +359,36 @@
           </article>
 
           <!-- Student 4: นักหาข้อมูล 2 -->
-          <article class="dev-card" data-aos="fade-up" data-aos-delay="400">
-            <div class="dev-avatar-wrap">
-              <img src="/Fronend/assets/images/team/dev4.svg" alt="นักหาข้อมูลคนที่ 2" class="dev-avatar" />
+          <article class="about-dev-card" data-aos="fade-up" data-aos-delay="400">
+            <div class="about-dev-avatar-wrap">
+              <img src="/Fronend/assets/images/team/dev4.svg" alt="นักหาข้อมูลคนที่ 2" class="about-dev-avatar" />
             </div>
-            <h3 class="dev-name" data-i18n="about.dev4_name">นักศึกษาคนที่ 4</h3>
-            <p class="dev-nickname">Lifestyle &amp; Multimedia</p>
-            <span class="dev-role-badge" data-i18n="about.dev4_role">นักหาข้อมูล (Data Researcher)</span>
-            <p class="dev-desc" data-i18n="about.dev4_desc">
-              รวบรวมข้อมูลไลฟ์สไตล์ คาเฟ่ ร้านอาหาร จุดเช็คอิน พิกัด GPS แผนที่ และวิดีโอคอนเทนต์รีวิวสถานที่จริง
+            <h3 class="about-dev-name" data-i18n="about.dev4_name">นักศึกษาคนที่ 4</h3>
+            <p class="about-dev-nickname">Lifestyle &amp; Multimedia</p>
+            <span class="about-dev-role-badge" data-i18n="about.dev4_role">นักหาข้อมูล (Data Researcher)</span>
+            <p class="about-dev-desc" data-i18n="about.dev4_desc">
+              รวบรวมข้อมูลคาเฟ่ ร้านอาหาร จุดเช็คอิน พิกัด GPS และวิดีโอคอนเทนต์รีวิวสถานที่จริง
             </p>
-            <div class="dev-skills">
-              <span class="dev-skill-tag">Lifestyle &amp; Food</span>
-              <span class="dev-skill-tag">GPS &amp; Places</span>
-              <span class="dev-skill-tag">Media Content</span>
+            <div class="about-dev-skills">
+              <span class="about-dev-skill-tag">Lifestyle &amp; Food</span>
+              <span class="about-dev-skill-tag">GPS Points</span>
+              <span class="about-dev-skill-tag">Media Content</span>
             </div>
-            <div class="dev-socials">
-              <a href="#" class="dev-social-link" aria-label="GitHub">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
-                  <path
-                    d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22">
-                  </path>
+            <div class="about-dev-socials">
+              <a href="#" class="about-dev-social-link" aria-label="GitHub">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
                 </svg>
               </a>
-              <a href="#" class="dev-social-link" aria-label="LinkedIn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
+              <a href="#" class="about-dev-social-link" aria-label="LinkedIn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
                   <rect x="2" y="9" width="4" height="12"></rect>
                   <circle cx="4" cy="4" r="2"></circle>
                 </svg>
               </a>
-              <a href="#" class="dev-social-link" aria-label="Email">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                  stroke-linejoin="round">
+              <a href="#" class="about-dev-social-link" aria-label="Email">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                   <polyline points="22,6 12,13 2,6"></polyline>
                 </svg>
@@ -251,48 +401,52 @@
       </div>
     </section>
 
-    <!-- ================= 2. ADVISORS SECTION (อาจารย์ที่ปรึกษาโครงการ 2 คน) ================= -->
-    <section class="about-section about-section--light-accent" id="advisors-section">
-      <div class="container">
+    <!-- ================= 4. ADVISORS SECTION (อาจารย์ที่ปรึกษาโครงการ 2 ท่าน) ================= -->
+    <section class="about-section about-section--alt" id="advisors-section">
+      <div class="about-container">
 
-        <div class="section-head--center" data-aos="fade-up">
+        <div class="about-section-head" data-aos="fade-up">
           <span class="eyebrow" data-i18n="about.advisors_eyebrow">Honorable Mentors</span>
           <h2 class="section-title" data-i18n="about.advisors_title">อาจารย์ที่ปรึกษาโครงการ</h2>
           <p class="section-sub" data-i18n="about.advisors_sub">ขอขอบพระคุณอาจารย์ผู้ทรงคุณวุฒิที่ได้ให้คำแนะนำ ชี้แนะแนวทาง
             และให้คำปรึกษาตลอดการพัฒนาโครงการ</p>
         </div>
 
-        <div class="advisors-grid">
+        <div class="about-advisors-grid">
 
           <!-- Advisor 1: อาจารย์ที่ปรึกษาหลัก -->
-          <article class="advisor-card" data-aos="fade-up" data-aos-delay="100">
-            <span class="advisor-badge" data-i18n="about.advisor1_badge">อาจารย์ที่ปรึกษาหลัก</span>
-            <div class="advisor-avatar-wrap">
-              <img src="/Fronend/assets/images/team/advisor1.svg" alt="อาจารย์ที่ปรึกษาหลัก" class="advisor-avatar" />
+          <article class="about-advisor-card" data-aos="fade-up" data-aos-delay="100">
+            <div class="about-advisor-avatar-wrap">
+              <img src="/Fronend/assets/images/team/advisor1.svg" alt="อาจารย์ที่ปรึกษาหลัก" class="about-advisor-avatar" />
             </div>
-            <h3 class="advisor-name" data-i18n="about.advisor1_name">อาจารย์ที่ปรึกษา 1</h3>
-            <p class="advisor-role" data-i18n="about.advisor1_role">อาจารย์ที่ปรึกษาหลักโครงการ</p>
-            <p class="advisor-dept" data-i18n="about.advisor1_dept">สาขาวิชาวิทยาการคอมพิวเตอร์ / เทคโนโลยีสารสนเทศ มหาวิทยาลัยนครพนม</p>
-            <div class="advisor-focus">
-              <span class="advisor-tag">ระบบสารสนเทศภูมิศาสตร์ (GIS)</span>
-              <span class="advisor-tag">การจัดการโครงการซอฟต์แวร์</span>
-              <span class="advisor-tag">นวัตกรรมดิจิทัลเพื่อชุมชน</span>
+            <div class="about-advisor-info">
+              <span class="about-advisor-badge" data-i18n="about.advisor1_badge">อาจารย์ที่ปรึกษาหลัก</span>
+              <h3 class="about-advisor-name" data-i18n="about.advisor1_name">อาจารย์ที่ปรึกษา 1</h3>
+              <p class="about-advisor-role" data-i18n="about.advisor1_role">อาจารย์ที่ปรึกษาหลักโครงการ</p>
+              <p class="about-advisor-dept" data-i18n="about.advisor1_dept">สาขาวิชาวิทยาการคอมพิวเตอร์ / เทคโนโลยีสารสนเทศ มหาวิทยาลัยนครพนม</p>
+              <div class="about-advisor-tags">
+                <span class="about-advisor-tag">ระบบ GIS &amp; แผนที่</span>
+                <span class="about-advisor-tag">การจัดการโครงการซอฟต์แวร์</span>
+                <span class="about-advisor-tag">นวัตกรรมเพื่อชุมชน</span>
+              </div>
             </div>
           </article>
 
           <!-- Advisor 2: อาจารย์ที่ปรึกษาร่วม -->
-          <article class="advisor-card" data-aos="fade-up" data-aos-delay="200">
-            <span class="advisor-badge" data-i18n="about.advisor2_badge">อาจารย์ที่ปรึกษาร่วม</span>
-            <div class="advisor-avatar-wrap">
-              <img src="/Fronend/assets/images/team/advisor2.svg" alt="อาจารย์ที่ปรึกษาร่วม" class="advisor-avatar" />
+          <article class="about-advisor-card" data-aos="fade-up" data-aos-delay="200">
+            <div class="about-advisor-avatar-wrap">
+              <img src="/Fronend/assets/images/team/advisor2.svg" alt="อาจารย์ที่ปรึกษาร่วม" class="about-advisor-avatar" />
             </div>
-            <h3 class="advisor-name" data-i18n="about.advisor2_name">อาจารย์ที่ปรึกษา 2</h3>
-            <p class="advisor-role" data-i18n="about.advisor2_role">อาจารย์ที่ปรึกษาร่วมโครงการ</p>
-            <p class="advisor-dept" data-i18n="about.advisor2_dept">สาขาวิชาวิทยาการคอมพิวเตอร์ / เทคโนโลยีสารสนเทศ มหาวิทยาลัยนครพนม</p>
-            <div class="advisor-focus">
-              <span class="advisor-tag">ปัญญาประดิษฐ์และ AI Guide</span>
-              <span class="advisor-tag">วิศวกรรมข้อมูลและคลาวด์</span>
-              <span class="advisor-tag">การออกแบบประสบการณ์ผู้ใช้ (UX)</span>
+            <div class="about-advisor-info">
+              <span class="about-advisor-badge" data-i18n="about.advisor2_badge">อาจารย์ที่ปรึกษาร่วม</span>
+              <h3 class="about-advisor-name" data-i18n="about.advisor2_name">อาจารย์ที่ปรึกษา 2</h3>
+              <p class="about-advisor-role" data-i18n="about.advisor2_role">อาจารย์ที่ปรึกษาร่วมโครงการ</p>
+              <p class="about-advisor-dept" data-i18n="about.advisor2_dept">สาขาวิชาวิทยาการคอมพิวเตอร์ / เทคโนโลยีสารสนเทศ มหาวิทยาลัยนครพนม</p>
+              <div class="about-advisor-tags">
+                <span class="about-advisor-tag">AI Guide &amp; ปัญญาประดิษฐ์</span>
+                <span class="about-advisor-tag">วิศวกรรมคลาวด์ &amp; ข้อมูล</span>
+                <span class="about-advisor-tag">UX/UI Design</span>
+              </div>
             </div>
           </article>
 
@@ -301,91 +455,28 @@
       </div>
     </section>
 
-    <!-- ================= 3. OUR STORY & LOGO SECTION ================= -->
-    <section class="about-section about-section--dark" id="story-section">
-      <div class="container">
-        <div class="story-grid">
+    <!-- ================= 5. TEAM GALLERY (รูปภาพทีม 5 รูป) ================= -->
+    <section class="about-section about-section--dark" id="gallery-section">
+      <div class="about-container">
 
-          <!-- Story Content -->
-          <div class="story-content" data-aos="fade-up">
-            <span class="eyebrow" data-i18n="about.story_eyebrow">The Origin &amp; Vision</span>
-            <h2 class="section-title" data-i18n="about.story_title">เรื่องราวและที่มาของโครงการ</h2>
-
-            <p class="story-lead" data-i18n="about.story_lead">
-              "เปลี่ยนมุมมองการท่องเที่ยวนครพนม สู่ประสบการณ์อัจฉริยะที่เชื่อมโยงคุณเข้ากับทุกจังหวะชีวิตริมฝั่งโขง"
-            </p>
-
-            <p class="story-p">
-              จังหวัดนครพนมเป็นดินแดนที่เปี่ยมล้นไปด้วยมนต์เสน่ห์ ทั้งประวัติศาสตร์อันยาวนาน
-              ความศักดิ์สิทธิ์ขององค์พระธาตุพนม ประเพณีไหลเรือไฟอันเลื่องชื่อ และวิถีชีวิตสโลว์ไลฟ์ริมแม่น้ำโขง
-              แต่ข้อมูลการท่องเที่ยวในอดีตยังกระจัดกระจายและขาดข้อมูลสภาพแวดล้อมที่จำเป็นต่อการวางแผนเดินทาง
-            </p>
-
-            <p class="story-p">
-              เราจึงรวมพลังพัฒนา <strong>MapNexus</strong> ขึ้นมาเพื่อเป็นศูนย์กลางการท่องเที่ยวแบบ All-in-One
-              ไม่เพียงแต่แนะนำสถานที่ท่องเที่ยวยอดนิยม คาเฟ่ ร้านอาหารพื้นถิ่น และวัดสำคัญ
-              แต่ยังนำข้อมูลสิ่งแวดล้อมเรียลไทม์ (ค่าฝุ่น PM2.5, สภาพอากาศ, ระดับน้ำโขง, การจราจร) ผสานเข้ากับ
-              <strong>AI Tour Guide (Planvis)</strong> และวิดีโอรีวิวจริง
-              เพื่อให้นักท่องเที่ยวทุกคนได้รับประสบการณ์ที่สะดวก ปลอดภัย และประทับใจที่สุด
-              พร้อมช่วยส่งเสริมเศรษฐกิจของชุมชนท้องถิ่นอย่างยั่งยืน
-            </p>
-
-            <div class="story-highlights">
-              <div class="highlight-box">
-                <span class="highlight-num">100+</span>
-                <span class="highlight-label">พิกัดสถานที่ท่องเที่ยว</span>
-              </div>
-              <div class="highlight-box">
-                <span class="highlight-num">24/7</span>
-                <span class="highlight-label">ข้อมูลสิ่งแวดล้อมเรียลไทม์</span>
-              </div>
-              <div class="highlight-box">
-                <span class="highlight-num">AI</span>
-                <span class="highlight-label">ผู้ช่วยวางแผนอัจฉริยะ</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Logo & Brand Identity Card -->
-          <div class="logo-card" data-aos="fade-up" data-aos-delay="150">
-            <div class="logo-card__img-wrap">
-              <img src="/Fronend/assets/images/logo.png" alt="MapNexus Logo" class="logo-card__img" />
-            </div>
-            <h3 class="logo-card__title">MAP<span class="text-gold">NEXUS</span></h3>
-            <p class="logo-card__subtitle" data-i18n="about.logo_sub">Nakhon Phanom Smart Tourism</p>
-            <p class="logo-card__desc">
-              <strong>ความหมายของโลโก้:</strong> สัญลักษณ์ "Nexus" สื่อถึงจุดเชื่อมต่อศูนย์รวมของเส้นทาง แผนที่
-              และสายน้ำโขง ประดับด้วยเฉดสีทองแห่งแสงจันทร์และพระธาตุพนม
-              สะท้อนถึงความมั่งคั่งทางวัฒนธรรมและความทันสมัยของเทคโนโลยีดิจิทัล
-            </p>
-          </div>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- ================= 4. TEAM GALLERY (รูปภาพทีม 5 รูป) ================= -->
-    <section class="about-section about-section--light-accent" id="gallery-section">
-      <div class="container">
-
-        <div class="section-head--center" data-aos="fade-up">
+        <div class="about-section-head" data-aos="fade-up">
           <span class="eyebrow" data-i18n="about.gallery_eyebrow">Moments &amp; Behind The Scenes</span>
           <h2 class="section-title" data-i18n="about.gallery_title">ภาพกิจกรรมและการทำงานของทีม</h2>
           <p class="section-sub" data-i18n="about.gallery_sub">รวบรวมบรรยากาศการลงพื้นที่ การวางแผน และการพัฒนาระบบร่วมกันตลอดโครงการ</p>
         </div>
 
-        <div class="gallery-mosaic" data-aos="fade-up">
+        <div class="about-gallery-grid" data-aos="fade-up">
 
           <!-- Photo 1: Featured -->
-          <div class="gallery-item gallery-item--featured" data-img="/Fronend/assets/images/team/team-1.svg"
-            data-caption="การประชุมระดมความคิดและวางแผนสถาปัตยกรรมระบบ MapNexus">
-            <img src="/Fronend/assets/images/team/team-1.svg" alt="Project Planning" class="gallery-item__img" />
-            <div class="gallery-item__overlay">
-              <span class="gallery-item__tag" data-i18n="about.gallery_tag1">วางแผนและสถาปัตยกรรม</span>
-              <p class="gallery-item__caption">การประชุมระดมความคิดและวางแผนสถาปัตยกรรมระบบ MapNexus</p>
+          <div class="about-gallery-item about-gallery-item--featured" data-img="/Fronend/assets/images/team/team-1.svg"
+            data-caption="การประชุมระดมความคิดและวางแผนสถาปัตยกรรมระบบ Nakhon Phanom Lifestyle Travel Platform">
+            <img src="/Fronend/assets/images/team/team-1.svg" alt="Project Planning" class="about-gallery-img" />
+            <div class="about-gallery-overlay">
+              <span class="about-gallery-tag" data-i18n="about.gallery_tag1">วางแผนและสถาปัตยกรรม</span>
+              <p class="about-gallery-caption">การประชุมระดมความคิดและวางแผนสถาปัตยกรรมระบบ</p>
             </div>
-            <div class="gallery-item__zoom">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <div class="about-gallery-zoom">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 <line x1="11" y1="8" x2="11" y2="14"></line>
@@ -395,15 +486,15 @@
           </div>
 
           <!-- Photo 2 -->
-          <div class="gallery-item" data-img="/Fronend/assets/images/team/team-2.svg"
+          <div class="about-gallery-item" data-img="/Fronend/assets/images/team/team-2.svg"
             data-caption="การลงพื้นที่สำรวจพิกัดสถานที่ท่องเที่ยวและเก็บข้อมูลจังหวัดนครพนม">
-            <img src="/Fronend/assets/images/team/team-2.svg" alt="Field Survey" class="gallery-item__img" />
-            <div class="gallery-item__overlay">
-              <span class="gallery-item__tag" data-i18n="about.gallery_tag2">สำรวจพิกัดจริง</span>
-              <p class="gallery-item__caption">การลงพื้นที่สำรวจพิกัดสถานที่ท่องเที่ยวนครพนม</p>
+            <img src="/Fronend/assets/images/team/team-2.svg" alt="Field Survey" class="about-gallery-img" />
+            <div class="about-gallery-overlay">
+              <span class="about-gallery-tag" data-i18n="about.gallery_tag2">สำรวจพิกัดจริง</span>
+              <p class="about-gallery-caption">การลงพื้นที่สำรวจพิกัดสถานที่ท่องเที่ยวนครพนม</p>
             </div>
-            <div class="gallery-item__zoom">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <div class="about-gallery-zoom">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 <line x1="11" y1="8" x2="11" y2="14"></line>
@@ -413,15 +504,15 @@
           </div>
 
           <!-- Photo 3 -->
-          <div class="gallery-item" data-img="/Fronend/assets/images/team/team-3.svg"
+          <div class="about-gallery-item" data-img="/Fronend/assets/images/team/team-3.svg"
             data-caption="การขอรับคำปรึกษาและข้อเสนอแนะจากอาจารย์ที่ปรึกษาโครงการ">
-            <img src="/Fronend/assets/images/team/team-3.svg" alt="Advisor Meeting" class="gallery-item__img" />
-            <div class="gallery-item__overlay">
-              <span class="gallery-item__tag" data-i18n="about.gallery_tag3">ปรึกษาอาจารย์</span>
-              <p class="gallery-item__caption">การประชุมรับคำปรึกษาจากอาจารย์ที่ปรึกษา</p>
+            <img src="/Fronend/assets/images/team/team-3.svg" alt="Advisor Meeting" class="about-gallery-img" />
+            <div class="about-gallery-overlay">
+              <span class="about-gallery-tag" data-i18n="about.gallery_tag3">ปรึกษาอาจารย์</span>
+              <p class="about-gallery-caption">การประชุมรับคำปรึกษาจากอาจารย์ที่ปรึกษา</p>
             </div>
-            <div class="gallery-item__zoom">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <div class="about-gallery-zoom">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 <line x1="11" y1="8" x2="11" y2="14"></line>
@@ -431,15 +522,15 @@
           </div>
 
           <!-- Photo 4 -->
-          <div class="gallery-item" data-img="/Fronend/assets/images/team/team-4.svg"
+          <div class="about-gallery-item" data-img="/Fronend/assets/images/team/team-4.svg"
             data-caption="การทดสอบฟังก์ชัน AI Tour Guide, ข้อมูลเรียลไทม์ และระบบแผนที่">
-            <img src="/Fronend/assets/images/team/team-4.svg" alt="AI &amp; System Testing" class="gallery-item__img" />
-            <div class="gallery-item__overlay">
-              <span class="gallery-item__tag" data-i18n="about.gallery_tag4">ทดสอบระบบและ AI</span>
-              <p class="gallery-item__caption">การทดสอบฟังก์ชัน AI Guide และแผนที่อัจฉริยะ</p>
+            <img src="/Fronend/assets/images/team/team-4.svg" alt="AI &amp; System Testing" class="about-gallery-img" />
+            <div class="about-gallery-overlay">
+              <span class="about-gallery-tag" data-i18n="about.gallery_tag4">ทดสอบระบบและ AI</span>
+              <p class="about-gallery-caption">การทดสอบฟังก์ชัน AI Guide และแผนที่อัจฉริยะ</p>
             </div>
-            <div class="gallery-item__zoom">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <div class="about-gallery-zoom">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 <line x1="11" y1="8" x2="11" y2="14"></line>
@@ -449,15 +540,15 @@
           </div>
 
           <!-- Photo 5 -->
-          <div class="gallery-item" data-img="/Fronend/assets/images/team/team-5.svg"
-            data-caption="ภาพความสำเร็จและการนำเสนอผลงานโครงการ MapNexus">
-            <img src="/Fronend/assets/images/team/team-5.svg" alt="Project Showcase" class="gallery-item__img" />
-            <div class="gallery-item__overlay">
-              <span class="gallery-item__tag" data-i18n="about.gallery_tag5">ความสำเร็จของทีม</span>
-              <p class="gallery-item__caption">ภาพความสำเร็จและการนำเสนอผลงานโครงการ</p>
+          <div class="about-gallery-item" data-img="/Fronend/assets/images/team/team-5.svg"
+            data-caption="ภาพความสำเร็จและการนำเสนอผลงานโครงการ Nakhon Phanom Lifestyle Travel Platform">
+            <img src="/Fronend/assets/images/team/team-5.svg" alt="Project Showcase" class="about-gallery-img" />
+            <div class="about-gallery-overlay">
+              <span class="about-gallery-tag" data-i18n="about.gallery_tag5">ความสำเร็จของทีม</span>
+              <p class="about-gallery-caption">ภาพความสำเร็จและการนำเสนอผลงานโครงการ</p>
             </div>
-            <div class="gallery-item__zoom">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+            <div class="about-gallery-zoom">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
                 <circle cx="11" cy="11" r="8"></circle>
                 <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                 <line x1="11" y1="8" x2="11" y2="14"></line>
@@ -470,6 +561,34 @@
 
       </div>
     </section>
+
+    <!-- ================= 6. BOTTOM ACTION CTA STRIP ================= -->
+    <section class="about-section about-section--alt" id="cta-section">
+      <div class="about-container">
+        <div class="about-cta-card" data-aos="fade-up">
+          <h2 class="about-cta-title">พร้อมสัมผัสประสบการณ์ท่องเที่ยวนครพนมรูปแบบใหม่หรือยัง?</h2>
+          <p class="about-cta-sub">
+            ออกเดินทางสำรวจสถานที่ยอดนิยม เช็คอินคาเฟ่วิวสวย วางแผนทริป หรือพูดคุยปรึกษากับ AI Tour Guide ได้ตลอด 24 ชั่วโมง
+          </p>
+          <div class="about-cta-btns">
+            <a href="/Fronend/pages/attractions-all.html" class="about-btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon>
+              </svg>
+              <span>สำรวจสถานที่ท่องเที่ยว</span>
+            </a>
+            <a href="javascript:void(0)" onclick="(window.MapNexusAI || window.PlanvisAI) && (window.MapNexusAI || window.PlanvisAI).toggle ? (window.MapNexusAI || window.PlanvisAI).toggle() : null" class="about-btn-secondary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+              </svg>
+              <span>คุยกับ AI Tour Guide</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
   </main>
 
   <!-- ================= GALLERY LIGHTBOX MODAL ================= -->
@@ -488,25 +607,25 @@
   <div data-include="/Fronend/components/ai-tour-guide.html"></div>
 
   <!-- ================= SCRIPTS ================= -->
-  <script src="/Fronend/js/i18n.js?v=34"></script>
-  <script src="/Fronend/js/places-data.js?v=34"></script>
-  <script src="/Fronend/js/reviews-data.js?v=34"></script>
+  <script src="/Fronend/js/i18n.js?v=44"></script>
+  <script src="/Fronend/js/places-data.js?v=44"></script>
+  <script src="/Fronend/js/reviews-data.js?v=44"></script>
   <!-- Firebase Web SDK 10.13.2 (pinned, compat build) — Google Sign-In -->
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=34"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=34"></script>
-  <script src="/Fronend/js/firebase.js?v=34"></script>
-  <script src="/Fronend/js/api-client.js?v=34"></script>
-  <script src="/Fronend/js/environment-data.js?v=34"></script>
-  <script src="/Fronend/js/auth-state.js?v=34"></script>
-  <script src="/Fronend/js/recommend.js?v=34"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=44"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=44"></script>
+  <script src="/Fronend/js/firebase.js?v=44"></script>
+  <script src="/Fronend/js/api-client.js?v=44"></script>
+  <script src="/Fronend/js/environment-data.js?v=44"></script>
+  <script src="/Fronend/js/auth-state.js?v=44"></script>
+  <script src="/Fronend/js/recommend.js?v=44"></script>
   <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-  <script src="/Fronend/js/main.js?v=34"></script>
-  <script src="/Fronend/js/navbar.js?v=34"></script>
-  <script src="/Fronend/js/auth.js?v=34"></script>
-  <script src="/Fronend/js/place-modal.js?v=34"></script>
-  <script src="/Fronend/js/infobar.js?v=34"></script>
-  <script src="/Fronend/js/mobile-shell.js?v=34"></script>
-  <script src="/Fronend/js/ai-tour-guide.js?v=34"></script>
+  <script src="/Fronend/js/main.js?v=44"></script>
+  <script src="/Fronend/js/navbar.js?v=44"></script>
+  <script src="/Fronend/js/auth.js?v=44"></script>
+  <script src="/Fronend/js/place-modal.js?v=44"></script>
+  <script src="/Fronend/js/infobar.js?v=44"></script>
+  <script src="/Fronend/js/mobile-shell.js?v=44"></script>
+  <script src="/Fronend/js/ai-tour-guide.js?v=44"></script>
 
   <!-- Lightweight Gallery Lightbox Interaction -->
   <script>
@@ -518,7 +637,7 @@
 
       if (!modal || !modalImg || !modalCaption) return;
 
-      document.querySelectorAll('.gallery-item').forEach((item) => {
+      document.querySelectorAll('.about-gallery-item').forEach((item) => {
         item.addEventListener('click', () => {
           const imgSrc = item.getAttribute('data-img');
           const caption = item.getAttribute('data-caption');

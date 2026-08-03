@@ -202,11 +202,75 @@ function loadI18nScript() {
       return;
     }
     const script = document.createElement('script');
-    script.src = '/Fronend/js/i18n.js?v=34';
+    script.src = '/Fronend/js/i18n.js?v=38';
     script.async = false;
     script.onload = () => resolve(window.MNX_I18N);
     script.onerror = () => resolve(null);
     document.head.appendChild(script);
+  });
+}
+
+function initSiteLinkInteractions() {
+  const currentPath = window.location.pathname;
+  const isFronendRoot = currentPath.includes('/Fronend/');
+
+  document.querySelectorAll('a[href]').forEach((link) => {
+    const rawHref = link.getAttribute('href');
+    if (!rawHref) return;
+
+    // Ignore javascript:, mailto:, tel:, external links
+    if (rawHref.startsWith('javascript:') || rawHref.startsWith('mailto:') || rawHref.startsWith('tel:') || rawHref.startsWith('http://') || rawHref.startsWith('https://')) {
+      return;
+    }
+
+    // Auto-normalize path if needed
+    let targetHref = rawHref;
+    if (isFronendRoot && !targetHref.startsWith('/Fronend/')) {
+      targetHref = '/Fronend' + (targetHref.startsWith('/') ? targetHref : '/' + targetHref);
+      link.setAttribute('href', targetHref);
+    } else if (!isFronendRoot && targetHref.startsWith('/Fronend/')) {
+      targetHref = targetHref.replace(/^\/Fronend/, '');
+      link.setAttribute('href', targetHref);
+    }
+
+    // Handle hash jumps (e.g. #panel-weather, #panel-pm25, etc)
+    if (targetHref.includes('#')) {
+      const parts = targetHref.split('#');
+      const pagePart = parts[0];
+      const hashPart = parts[1];
+
+      link.addEventListener('click', (e) => {
+        const curPage = currentPath.split('/').pop() || 'index.html';
+        const targetPage = pagePart.split('/').pop();
+
+        if (!pagePart || curPage === targetPage) {
+          e.preventDefault();
+          const targetEl = document.getElementById(hashPart);
+          if (targetEl) {
+            targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            history.pushState(null, '', '#' + hashPart);
+          } else {
+            window.location.href = targetHref;
+          }
+        }
+      });
+    }
+  });
+
+  // Handle Privacy & Terms alert modals when tapped
+  document.querySelectorAll('.footer [data-i18n="footer.privacy"], .footer [data-i18n="footer.terms"]').forEach((link) => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const isPrivacy = link.getAttribute('data-i18n') === 'footer.privacy';
+      const isEn = window.MNX_I18N && window.MNX_I18N.getLang() === 'EN';
+      const title = isPrivacy
+        ? (isEn ? 'Privacy Policy' : 'นโยบายความเป็นส่วนตัว')
+        : (isEn ? 'Terms of Service' : 'ข้อกำหนดการใช้งาน');
+      const msg = isPrivacy
+        ? (isEn ? 'Nakhon Phanom Lifestyle Travel Platform prioritizes user data privacy in accordance with PDPA regulations.' : 'แพลตฟอร์ม Nakhon Phanom Lifestyle Travel Platform ให้ความสำคัญสูงสุดต่อการรักษาความปลอดภัยของข้อมูลส่วนบุคคลตามมาตรฐาน PDPA')
+        : (isEn ? 'By accessing this platform, you agree to comply with our community terms and guidelines.' : 'การใช้งานแพลตฟอร์มนี้ถือว่าท่านยอมรับข้อกำหนดและเงื่อนไขการให้บริการของชุมชนเพื่อการท่องเที่ยวอย่างสร้างสรรค์');
+      alert(`${title}\n\n${msg}`);
+    });
   });
 }
 
@@ -231,11 +295,19 @@ document.addEventListener('app:content-updated', () => {
 document.addEventListener('includes:loaded', () => {
   const yearEl = document.getElementById('footer-year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+  if (window.location.pathname.includes('about.html') || document.body.classList.contains('page-about')) {
+    const socialSec = document.querySelector('.footer__social-section');
+    if (socialSec) socialSec.style.display = 'none';
+  }
+  initSiteLinkInteractions();
   initAOS();
   if (window.MNX_I18N) {
     window.MNX_I18N.translateDom(window.MNX_I18N.getLang());
   }
 });
+
+
+
 
 
 

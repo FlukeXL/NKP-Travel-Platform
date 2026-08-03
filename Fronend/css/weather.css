@@ -54,22 +54,14 @@
 .metric-panel__head {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 16px;
-  margin-bottom: 34px;
+  margin-bottom: 28px;
   flex-wrap: wrap;
 }
 
 .metric-panel__icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--grad-gold);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-  box-shadow: var(--shadow-gold);
-  flex-shrink: 0;
+  display: none !important;
 }
 
 .metric-panel__title-wrap {
@@ -298,12 +290,6 @@
   height: 9px;
   border-radius: 50%;
   flex-shrink: 0;
-}
-
-/* ---- Mekong dedicated icon accent ---- */
-#panel-mekong .metric-panel__icon {
-  background: linear-gradient(135deg, #6fb7c7, #2f8f9f);
-  box-shadow: 0 8px 24px rgba(47, 143, 159, 0.35);
 }
 
 /* ---- Responsive ---- */

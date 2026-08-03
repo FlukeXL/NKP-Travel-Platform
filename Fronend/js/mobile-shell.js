@@ -136,7 +136,16 @@
       openDropdown(trigger, dropdown, 268, onOpen);
     });
 
-    dropdown.querySelectorAll('a').forEach((a) => a.addEventListener('click', closeAllDropdowns));
+    dropdown.querySelectorAll('a').forEach((a) => {
+      a.addEventListener('click', () => {
+        const href = a.getAttribute('href');
+        if (href && !href.startsWith('javascript:') && !href.startsWith('#')) {
+          setTimeout(closeAllDropdowns, 150);
+        } else {
+          closeAllDropdowns();
+        }
+      });
+    });
   }
 
   document.addEventListener('click', (e) => {

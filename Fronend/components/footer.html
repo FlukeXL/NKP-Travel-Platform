@@ -2,16 +2,32 @@
   <div class="container footer__inner">
 
     <div class="footer__brand">
-      <a href="/Fronend/index.html" class="footer__logo">
+      <a href="/Fronend/index.html" class="footer__logo no-translate">
         <img src="/Fronend/assets/images/logo.png" alt="Nakhon Phanom Lifestyle Travel" />
-        <span>NAKHON<span class="text-gold">PHANOM</span></span>
+        <span class="no-translate">NAKHON<span class="text-gold">PHANOM</span></span>
       </a>
-      <p class="footer__tagline">Nakhon Phanom Lifestyle Travel Platform<br /><span data-i18n="footer.tagline">เที่ยวนครพนม ในสไตล์ที่เป็นคุณ</span></p>
-      <div class="footer__socials">
-        <a href="#" aria-label="Facebook"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 8h-2a2 2 0 0 0-2 2v2H9v3h2v6h3v-6h2.2l.8-3H14v-1.5c0-.5.3-.5.6-.5H16V8Z"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></a>
-        <a href="#" aria-label="Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="3.7"/><circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none"/></svg></a>
-        <a href="#" aria-label="TikTok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 4v10.5a3.5 3.5 0 1 1-3.5-3.5"/><path d="M14 4c0 2.5 1.8 4.5 4 4.8"/></svg></a>
-        <a href="#" aria-label="Line"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 6.5 0 1 1 3 5l-3.5 1.5L4 15.3A6.5 5.5 0 0 1 4 12Z"/></svg></a>
+      <p class="footer__tagline"><span class="no-translate">Nakhon Phanom Lifestyle Travel Platform</span><br /><span data-i18n="footer.tagline">เที่ยวนครพนม ในสไตล์ที่เป็นคุณ</span></p>
+      <div class="footer__social-section">
+        <h6 class="footer__social-heading" data-i18n="footer.follow_us">ช่องทางการติดตาม</h6>
+        <div class="footer__socials">
+          <!-- 🎵 1. TikTok: นำลิงก์ช่อง TikTok มาใส่ใน href="..." แทนเครื่องหมาย # -->
+          <a href="https://www.tiktok.com" target="_blank" rel="noopener noreferrer" class="footer__social-btn footer__social-btn--tiktok" title="ติดตามเราบน TikTok" aria-label="TikTok">
+            <img src="/Fronend/assets/icons/tiktok.png" alt="TikTok" class="footer__social-img" />
+            <span class="footer__social-label">TikTok</span>
+          </a>
+
+          <!-- 👤 2. Facebook: นำลิงก์เพจ Facebook มาใส่ใน href="..." แทนเครื่องหมาย # -->
+          <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer" class="footer__social-btn footer__social-btn--facebook" title="ติดตามเราบน Facebook" aria-label="Facebook">
+            <img src="/Fronend/assets/icons/facebook.png" alt="Facebook" class="footer__social-img" />
+            <span class="footer__social-label">Facebook</span>
+          </a>
+
+          <!-- 📸 3. Instagram: นำลิงก์ Instagram มาใส่ใน href="..." แทนเครื่องหมาย # -->
+          <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer" class="footer__social-btn footer__social-btn--instagram" title="ติดตามเราบน Instagram" aria-label="Instagram">
+            <img src="/Fronend/assets/icons/instagram.png" alt="Instagram" class="footer__social-img" />
+            <span class="footer__social-label">Instagram</span>
+          </a>
+        </div>
       </div>
     </div>
 
@@ -33,8 +49,8 @@
 
     <div class="footer__col">
       <h5 data-i18n="footer.account">บัญชีผู้ใช้</h5>
-      <a href="#" data-auth-open="login" data-i18n="nav.login">เข้าสู่ระบบ</a>
-      <a href="#" data-auth-open="register" data-i18n="nav.register">สมัครสมาชิก</a>
+      <a href="javascript:void(0)" role="button" data-auth-open="login" data-i18n="nav.login">เข้าสู่ระบบ</a>
+      <a href="javascript:void(0)" role="button" data-auth-open="register" data-i18n="nav.register">สมัครสมาชิก</a>
       <a href="/Fronend/pages/review.html" data-i18n="nav.checkin">เช็คอินและรีวิว</a>
       <a href="/Fronend/pages/profile.html" data-i18n="footer.profile">โปรไฟล์ของฉัน</a>
     </div>
@@ -50,8 +66,8 @@
   <div class="footer__bottom container">
     <p>© <span id="footer-year"></span> Nakhon Phanom Lifestyle Travel Platform. All rights reserved.</p>
     <div class="footer__legal">
-      <a href="#" data-i18n="footer.privacy">นโยบายความเป็นส่วนตัว</a>
-      <a href="#" data-i18n="footer.terms">ข้อกำหนดการใช้งาน</a>
+      <a href="javascript:void(0)" data-i18n="footer.privacy">นโยบายความเป็นส่วนตัว</a>
+      <a href="javascript:void(0)" data-i18n="footer.terms">ข้อกำหนดการใช้งาน</a>
     </div>
   </div>
 </footer>
