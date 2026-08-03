@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>โปรไฟล์ของฉัน | Nakhon Phanom Lifestyle Travel Platform</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="/Fronend/css/style.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/footer.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/auth.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/place-modal.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/profile.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=34" />
+</head>
+<body class="page-profile">
+
+  <!-- ================= FLOATING HEADER ================= -->
+  <div class="floating-header" id="site-floating-header" data-desktop-only>
+    <div data-include="/Fronend/components/navbar.html"></div>
+    <div data-include="/Fronend/components/infobar.html"></div>
+  </div>
+
+  <!-- ================= MOBILE SHELL (fully independent from desktop) ================= -->
+  <div data-mobile-only>
+    <div data-include="/Fronend/components/mobile-shell.html"></div>
+  </div>
+
+  <!-- ================= AUTH MODAL ================= -->
+  <div data-include="/Fronend/components/auth-modal.html"></div>
+  <div data-include="/Fronend/components/place-modal.html"></div>
+
+  <!-- ================= ACCESS GATE (shown when not logged in) ================= -->
+  <div class="profile-gate" id="profile-gate">
+    <div class="profile-gate__icon"></div>
+    <h2>กรุณาเข้าสู่ระบบ</h2>
+    <p>คุณต้องเข้าสู่ระบบก่อนจึงจะดูโปรไฟล์ได้</p>
+    <button class="btn btn-gold" data-auth-open="login">เข้าสู่ระบบ / สมัครสมาชิก</button>
+  </div>
+
+  <!-- ================= PROFILE SHELL ================= -->
+  <div class="profile-shell" id="profile-shell" style="display:none;">
+
+    <!-- COVER + AVATAR -->
+    <div class="profile-cover" id="profile-cover">
+      <div class="profile-cover__gradient"></div>
+      <div class="profile-cover__avatar-wrap">
+        <img class="profile-cover__avatar" id="profile-avatar-img" src="" alt="รูปโปรไฟล์" />
+        <button class="profile-cover__avatar-edit" id="profile-avatar-edit-btn" aria-label="เปลี่ยนรูปโปรไฟล์" title="เปลี่ยนรูปโปรไฟล์">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+        <input type="file" id="profile-avatar-input" accept="image/*" class="visually-hidden" />
+      </div>
+    </div>
+
+    <div class="container profile-container">
+
+      <!-- ---- NAME + META ---- -->
+      <div class="profile-header">
+        <div class="profile-header__info">
+          <div class="profile-header__name-row">
+            <h1 class="profile-header__name" id="profile-name">–</h1>
+            <button class="profile-header__edit-name-btn btn btn-outline btn-sm" id="profile-edit-name-btn">แก้ไขชื่อ</button>
+          </div>
+          <div class="profile-header__meta" id="profile-meta"></div>
+          <div class="profile-header__persona" id="profile-persona" style="display:none;"></div>
+        </div>
+        <div class="profile-header__actions">
+          <a href="/Fronend/pages/review.html" class="btn btn-outline btn-sm">บันทึกส่วนตัว</a>
+          <button class="btn btn-outline btn-sm profile-signout-btn" id="profile-signout-btn">ออกจากระบบ</button>
+        </div>
+      </div>
+
+      <!-- NAME EDIT INLINE FORM (hidden by default) -->
+      <div class="profile-name-edit" id="profile-name-edit" style="display:none;">
+        <input type="text" id="profile-name-input" maxlength="60" placeholder="ชื่อที่แสดง" />
+        <button class="btn btn-gold btn-sm" id="profile-name-save-btn">บันทึก</button>
+        <button class="btn btn-outline btn-sm" id="profile-name-cancel-btn">ยกเลิก</button>
+        <span class="profile-name-edit__status" id="profile-name-status"></span>
+      </div>
+
+      <!-- ---- STATS STRIP ---- -->
+      <div class="profile-stats fade-in" id="profile-stats">
+        <div class="profile-stat">
+          <span class="profile-stat__value" id="stat-reviews">–</span>
+          <span class="profile-stat__label">รีวิว</span>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat__value" id="stat-favorites">–</span>
+          <span class="profile-stat__label">รายการที่ชอบ</span>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat__value" id="stat-checkins">–</span>
+          <span class="profile-stat__label">เช็คอิน</span>
+        </div>
+        <div class="profile-stat">
+          <span class="profile-stat__value" id="stat-joined">–</span>
+          <span class="profile-stat__label">เป็นสมาชิกมา</span>
+        </div>
+      </div>
+
+      <!-- ---- TRAVEL PREFERENCES ---- -->
+      <section class="profile-section fade-in">
+        <div class="profile-section__head">
+          <h2 class="profile-section__title">สไตล์การท่องเที่ยว</h2>
+          <button class="btn btn-outline btn-sm" id="profile-prefs-edit-btn">แก้ไข</button>
+        </div>
+
+        <div class="profile-prefs" id="profile-prefs-view">
+          <div class="profile-prefs__row">
+            <span class="profile-prefs__label">ความสนใจ</span>
+            <div class="profile-prefs__chips" id="pref-interests-view"></div>
+          </div>
+          <div class="profile-prefs__row">
+            <span class="profile-prefs__label">สภาพแวดล้อม</span>
+            <span class="profile-prefs__value" id="pref-env-view">–</span>
+          </div>
+          <div class="profile-prefs__row">
+            <span class="profile-prefs__label">สไตล์การเที่ยว</span>
+            <span class="profile-prefs__value" id="pref-pace-view">–</span>
+          </div>
+        </div>
+
+        <!-- EDIT MODE (hidden) -->
+        <div class="profile-prefs-edit" id="profile-prefs-edit" style="display:none;">
+          <div class="profile-prefs__row">
+            <span class="profile-prefs__label">ความสนใจ</span>
+            <div class="auth-chip-group profile-interest-chips" id="pref-interests-edit">
+              <button type="button" data-interest="cafe">คาเฟ่</button>
+              <button type="button" data-interest="restaurant">ร้านอาหาร</button>
+              <button type="button" data-interest="temple">วัด/ศักดิ์สิทธิ์</button>
+              <button type="button" data-interest="nature">ธรรมชาติ</button>
+              <button type="button" data-interest="fitness">ออกกำลังกาย</button>
+              <button type="button" data-interest="culture">วัฒนธรรม</button>
+              <button type="button" data-interest="landmark">แลนด์มาร์ก</button>
+            </div>
+          </div>
+          <div class="profile-prefs__row">
+            <span class="profile-prefs__label">สภาพแวดล้อม</span>
+            <div class="auth-toggle-group" id="pref-env-edit">
+              <button type="button" data-env="indoor">ในร่ม</button>
+              <button type="button" data-env="outdoor">กลางแจ้ง</button>
+              <button type="button" data-env="both">ทั้งสองแบบ</button>
+            </div>
+          </div>
+          <div class="profile-prefs__row">
+            <span class="profile-prefs__label">สไตล์การเที่ยว</span>
+            <div class="auth-toggle-group" id="pref-pace-edit">
+              <button type="button" data-pace="comfort">สบาย ผ่อนคลาย</button>
+              <button type="button" data-pace="adventure">ผจญภัย ท้าทาย</button>
+              <button type="button" data-pace="both">ทั้งสองแบบ</button>
+            </div>
+          </div>
+          <div class="profile-prefs-edit__actions">
+            <button class="btn btn-gold btn-sm" id="profile-prefs-save-btn">บันทึก</button>
+            <button class="btn btn-outline btn-sm" id="profile-prefs-cancel-btn">ยกเลิก</button>
+            <span class="profile-prefs-edit__status" id="profile-prefs-status"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---- RECENT REVIEWS ---- -->
+      <section class="profile-section fade-in" id="profile-reviews-section">
+        <div class="profile-section__head">
+          <h2 class="profile-section__title">รีวิวล่าสุดของฉัน</h2>
+        </div>
+        <div class="profile-reviews-list" id="profile-reviews-list">
+          <p class="profile-empty">กำลังโหลด...</p>
+        </div>
+      </section>
+
+      <!-- ---- RECENT CHECK-INS ---- -->
+      <section class="profile-section fade-in" id="profile-checkins-section">
+        <div class="profile-section__head">
+          <h2 class="profile-section__title">เช็คอินของฉัน</h2>
+          <a href="/Fronend/pages/review.html" class="btn btn-outline btn-sm">ดูทั้งหมด →</a>
+        </div>
+        <div class="profile-checkins-grid" id="profile-checkins-grid">
+          <p class="profile-empty">กำลังโหลด...</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- ================= FOOTER ================= -->
+  <div data-include="/Fronend/components/footer.html"></div>
+
+  <!-- ================= Scripts ================= -->
+  <script src="/Fronend/js/i18n.js?v=34"></script>
+  <script src="/Fronend/js/places-data.js?v=34"></script>
+  <script src="/Fronend/js/reviews-data.js?v=34"></script>
+  <script src="/Fronend/js/favorites-data.js?v=34"></script>
+  <script src="/Fronend/js/checkin-data.js?v=34"></script>
+  <!-- Firebase Web SDK 10.13.2 (pinned, compat build) -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=34"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=34"></script>
+  <script src="/Fronend/js/firebase.js?v=34"></script>
+  <script src="/Fronend/js/api-client.js?v=34"></script>
+  <script src="/Fronend/js/environment-data.js?v=34"></script>
+  <script src="/Fronend/js/auth-state.js?v=34"></script>
+  <script src="/Fronend/js/main.js?v=34"></script>
+  <script src="/Fronend/js/navbar.js?v=34"></script>
+  <script src="/Fronend/js/auth.js?v=34"></script>
+  <script src="/Fronend/js/place-modal.js?v=34"></script>
+  <!-- Chart.js 4.5.1 + SheetJS 0.20.3 (pinned) — Infobar chart + Excel download -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js?v=34"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js?v=34"></script>
+  <script src="/Fronend/js/excel-export.js?v=34"></script>
+  <script src="/Fronend/js/infobar.js?v=34"></script>
+  <script src="/Fronend/js/profile.js?v=34"></script>
+  <script src="/Fronend/js/mobile-shell.js?v=34"></script>
+  <!-- ================= AI TOUR GUIDE ================= -->
+  <div data-include="/Fronend/components/ai-tour-guide.html"></div>
+  <script src="/Fronend/js/ai-tour-guide.js?v=34"></script>
+</body>
+</html>

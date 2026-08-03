@@ -1,0 +1,330 @@
+/* ---- District filter bar ---- */
+.district-bar {
+  padding: 26px 0 10px;
+  background: var(--color-ivory);
+}
+
+.district-bar__label {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+  display: block;
+}
+
+.district-bar__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.district-chip {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-white);
+  font-size: 0.8rem;
+  color: var(--color-text-dark);
+  transition: all var(--dur-fast) var(--ease-luxury);
+}
+
+.district-chip:hover {
+  border-color: var(--color-gold);
+}
+
+.district-chip.is-active {
+  background: var(--grad-gold);
+  color: var(--color-black);
+  border-color: transparent;
+  font-weight: 600;
+}
+
+/* ---- Metric panel (repeats 4x: PM2.5 / Weather / Temp / Mekong) ---- */
+.metric-panel {
+  padding: 60px 0;
+}
+
+.metric-panel:nth-child(even) {
+  background: var(--color-white);
+}
+
+.metric-panel:nth-child(odd) {
+  background: var(--color-ivory);
+}
+
+.metric-panel__head {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 34px;
+  flex-wrap: wrap;
+}
+
+.metric-panel__icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--grad-gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: var(--shadow-gold);
+  flex-shrink: 0;
+}
+
+.metric-panel__title-wrap {
+  flex: 1;
+  min-width: 200px;
+}
+
+.metric-panel__sub {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.metric-panel__actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.metric-panel__body {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+/* ---- Circular gauge (donut via conic-gradient, no extra libs) ---- */
+.gauge-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  box-shadow: var(--shadow-soft);
+  text-align: center;
+}
+
+.gauge {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  margin: 0 auto 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* --gauge-percent and --gauge-color are set inline per instance */
+  background: conic-gradient(
+    var(--gauge-color, var(--color-gold)) calc(var(--gauge-percent, 0) * 1%),
+    #eee2c4 0
+  );
+  transition: background 0.6s var(--ease-luxury);
+}
+
+.gauge::before {
+  content: '';
+  position: absolute;
+  inset: 14px;
+  border-radius: 50%;
+  background: var(--color-white);
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.gauge__value {
+  position: relative;
+  z-index: 2;
+  font-family: var(--font-numeral);
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--color-black);
+  line-height: 1.1;
+}
+
+.gauge__value small {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.gauge-card__status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-numeral);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-white);
+  background: var(--gauge-color, var(--color-gold));
+}
+
+.gauge-card__district {
+  margin-top: 14px;
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.gauge-card__district strong {
+  color: var(--color-black);
+}
+
+/* ---- Chart + table area ---- */
+.chart-card {
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 26px 26px 22px;
+  box-shadow: var(--shadow-soft);
+}
+
+/* ---- Extra data-point grid (wind, pressure, pollutants, etc) —
+   fills out each panel with a fuller data set beyond the headline
+   gauge, per the brief's request for more complete information. ---- */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 14px;
+  margin-bottom: 24px;
+  padding-bottom: 22px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stat-grid__item {
+  text-align: center;
+}
+
+.stat-grid__icon {
+  font-size: 1.1rem;
+  margin-bottom: 4px;
+}
+
+.stat-grid__value {
+  font-family: var(--font-numeral);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-black);
+  line-height: 1.2;
+}
+
+.stat-grid__value small {
+  font-family: var(--font-body);
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.stat-grid__label {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  display: block;
+}
+
+.chart-card__canvas-wrap {
+  position: relative;
+  height: 260px;
+  margin-bottom: 22px;
+}
+
+.chart-card__tablewrap {
+  overflow-x: auto;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.84rem;
+}
+
+.data-table th,
+.data-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  font-family: var(--font-numeral);
+}
+
+.data-table th {
+  color: var(--color-gold-dark);
+  font-weight: 600;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.data-table tbody tr:hover {
+  background: var(--color-ivory);
+}
+
+.data-table__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.data-table__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ---- Band legend strip (10/25/50/75/90/100%) ---- */
+.band-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--color-border);
+}
+
+.band-legend__item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+}
+
+.band-legend__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* ---- Mekong dedicated icon accent ---- */
+#panel-mekong .metric-panel__icon {
+  background: linear-gradient(135deg, #6fb7c7, #2f8f9f);
+  box-shadow: 0 8px 24px rgba(47, 143, 159, 0.35);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .metric-panel__body {
+    grid-template-columns: 1fr;
+  }
+  .gauge-card {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .metric-panel__head {
+    align-items: flex-start;
+  }
+  .metric-panel__actions {
+    width: 100%;
+  }
+  .metric-panel__actions .btn {
+    flex: 1;
+  }
+}

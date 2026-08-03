@@ -1,0 +1,417 @@
+.auth-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(11, 11, 12, 0.72);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur-med) var(--ease-luxury), visibility var(--dur-med);
+}
+
+.auth-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.auth-modal__card {
+  position: relative;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  max-width: 440px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: var(--shadow-deep);
+  border: 1px solid var(--color-gold-soft);
+  transform: scale(0.92) translateY(10px);
+  transition: transform var(--dur-med) var(--ease-luxury);
+}
+
+.auth-modal.is-open .auth-modal__card {
+  transform: scale(1) translateY(0);
+}
+
+.auth-modal__card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 24px;
+  right: 24px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold-light), transparent);
+}
+
+.auth-modal__close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-ivory);
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  z-index: 2;
+  transition: all var(--dur-fast);
+}
+
+.auth-modal__close:hover {
+  background: var(--color-gold-soft);
+  color: var(--color-black);
+}
+
+.auth-modal__body {
+  padding: 40px 32px 32px;
+}
+
+.auth-modal__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+
+.auth-modal__brand img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.auth-modal__brand span {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--color-black);
+  letter-spacing: 0.02em;
+}
+
+.auth-modal__title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  text-align: center;
+  margin-bottom: 6px;
+}
+
+.auth-modal__subtitle {
+  text-align: center;
+  font-size: 0.86rem;
+  color: var(--color-text-muted);
+  margin-bottom: 26px;
+}
+
+/* ---- Tabs (เข้าสู่ระบบ / สมัครสมาชิก) ---- */
+.auth-modal__tabs {
+  display: flex;
+  background: var(--color-ivory);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  margin-bottom: 26px;
+}
+
+.auth-modal__tab {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: var(--radius-pill);
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: all var(--dur-fast) var(--ease-luxury);
+}
+
+.auth-modal__tab.is-active {
+  background: var(--grad-gold);
+  color: var(--color-black);
+  box-shadow: var(--shadow-gold);
+}
+
+/* ---- Form fields ---- */
+.auth-modal__panel {
+  display: none;
+}
+
+.auth-modal__panel.is-active {
+  display: block;
+}
+
+.auth-field {
+  margin-bottom: 16px;
+}
+
+.auth-field label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-black);
+  margin-bottom: 7px;
+}
+
+.auth-field input {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--color-text-dark);
+  background: var(--color-ivory);
+  transition: border-color var(--dur-fast), background var(--dur-fast);
+}
+
+.auth-field input:focus {
+  outline: none;
+  border-color: var(--color-gold);
+  background: var(--color-white);
+}
+
+.auth-field__error {
+  display: none;
+  font-size: 0.76rem;
+  color: #c9392f;
+  margin-top: 6px;
+}
+
+/* Generic API error banner (login/register failures from the Backend
+   — wrong password, duplicate email, network issues, etc). */
+.auth-modal__api-error {
+  display: none;
+  font-size: 0.82rem;
+  color: #c9392f;
+  background: rgba(201, 57, 47, 0.08);
+  border: 1px solid rgba(201, 57, 47, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 18px;
+}
+
+.auth-modal__api-error.is-active {
+  display: block;
+}
+
+/* Button loading state — dim + disable pointer feedback while an
+   async register/login request is in flight (applied to every
+   button in the form so the user can't double-submit or switch
+   tabs mid-request). */
+.auth-modal button.is-loading {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.auth-field.has-error input {
+  border-color: #c9392f;
+}
+
+.auth-field.has-error .auth-field__error {
+  display: block;
+}
+
+/* Date input — same visual language as other auth fields */
+.auth-field input[type="date"] {
+  color: var(--color-text-dark);
+}
+
+/* ---- Lifestyle preference chips (interests, multi-select) ---- */
+.auth-field--chips {
+  margin-bottom: 18px;
+}
+
+.auth-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.auth-chip-group button {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-border);
+  background: var(--color-ivory);
+  font-size: 0.8rem;
+  color: var(--color-text-dark);
+  transition: all var(--dur-fast) var(--ease-luxury);
+}
+
+.auth-chip-group button:hover {
+  border-color: var(--color-gold);
+}
+
+.auth-chip-group button.is-active {
+  background: var(--grad-gold);
+  border-color: transparent;
+  color: var(--color-black);
+  font-weight: 600;
+  box-shadow: var(--shadow-gold);
+}
+
+/* ---- Lifestyle preference toggles (single-select: env / pace) ---- */
+.auth-toggle-group {
+  display: flex;
+  background: var(--color-ivory);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  gap: 4px;
+}
+
+.auth-toggle-group button {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: all var(--dur-fast) var(--ease-luxury);
+  white-space: nowrap;
+}
+
+.auth-toggle-group button.is-active {
+  background: var(--grad-gold);
+  color: var(--color-black);
+  box-shadow: var(--shadow-gold);
+}
+
+.auth-modal__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.8rem;
+  margin-bottom: 20px;
+}
+
+.auth-modal__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.auth-modal__checkbox input {
+  accent-color: var(--color-gold);
+  width: 15px;
+  height: 15px;
+}
+
+.auth-modal__forgot {
+  color: var(--color-gold-dark);
+  font-weight: 500;
+}
+
+.auth-modal__forgot:hover {
+  text-decoration: underline;
+}
+
+.auth-modal__submit {
+  width: 100%;
+  margin-bottom: 18px;
+}
+
+/* ---- Divider ---- */
+.auth-modal__divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0;
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+}
+
+.auth-modal__divider::before,
+.auth-modal__divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-border);
+}
+
+/* ---- Google button ---- */
+.auth-google-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-white);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  transition: all var(--dur-fast) var(--ease-luxury);
+}
+
+.auth-google-btn:hover {
+  border-color: var(--color-gold);
+  background: var(--color-ivory);
+}
+
+.auth-google-btn svg {
+  flex-shrink: 0;
+}
+
+.auth-modal__switch {
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--color-text-muted);
+  margin-top: 22px;
+}
+
+.auth-modal__switch button {
+  color: var(--color-gold-dark);
+  font-weight: 600;
+}
+
+.auth-modal__switch button:hover {
+  text-decoration: underline;
+}
+
+.auth-modal__terms {
+  font-size: 0.74rem;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.6;
+}
+
+.auth-modal__terms a {
+  color: var(--color-gold-dark);
+}
+
+/* ---- Success state (shown briefly after mock sign-in) ---- */
+.auth-modal__success {
+  display: none;
+  text-align: center;
+  padding: 20px 0 6px;
+}
+
+.auth-modal__success.is-active {
+  display: block;
+}
+
+.auth-modal__success-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: var(--grad-gold);
+  color: var(--color-black);
+  font-size: 1.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+  box-shadow: var(--shadow-gold);
+}
+
+@media (max-width: 480px) {
+  .auth-modal__body {
+    padding: 32px 22px 26px;
+  }
+}

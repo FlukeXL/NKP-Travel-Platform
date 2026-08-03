@@ -1,0 +1,102 @@
+# Nginx Configuration — MapNexus
+# ไฟล์นี้: /etc/nginx/sites-available/mapnexus
+# เปิดใช้: sudo ln -s /etc/nginx/sites-available/mapnexus /etc/nginx/sites-enabled/
+# ทดสอบ:  sudo nginx -t
+# Reload:  sudo systemctl reload nginx
+#
+# สิ่งที่ต้องแก้ก่อนใช้งาน:
+#   1. แทน YOUR_DOMAIN.COM ด้วยโดเมนของคุณ
+#   2. แทน /var/www/mapnexus ด้วย path จริงที่อัพโหลดโปรเจกต์ไว้
+#   3. ติดตั้ง SSL ด้วย: sudo certbot --nginx -d YOUR_DOMAIN.COM -d www.YOUR_DOMAIN.COM
+
+# ---- Redirect HTTP → HTTPS ----
+server {
+    listen 80;
+    listen [::]:80;
+    server_name YOUR_DOMAIN.COM www.YOUR_DOMAIN.COM;
+
+    # Certbot จะเพิ่มบรรทัด ACME challenge ตรงนี้อัตโนมัติ
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ---- HTTPS Main Server ----
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name YOUR_DOMAIN.COM www.YOUR_DOMAIN.COM;
+
+    # SSL — Certbot จะเติมบรรทัดนี้เอง
+    # ssl_certificate     /etc/letsencrypt/live/YOUR_DOMAIN.COM/fullchain.pem;
+    # ssl_certificate_key /etc/letsencrypt/live/YOUR_DOMAIN.COM/privkey.pem;
+    # include /etc/letsencrypt/options-ssl-nginx.conf;
+    # ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    # ---- Security Headers ----
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # ---- Gzip Compression ----
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_types text/plain text/css text/javascript application/javascript application/json image/svg+xml;
+
+    # ---- Frontend Static Files ----
+    root /var/www/mapnexus;
+    index Fronend/index.html;
+
+    # Cache static assets (CSS/JS/Images)
+    location ~* \.(css|js|jpg|jpeg|png|gif|ico|svg|webp|woff|woff2|ttf|mp4)$ {
+        expires 30d;
+        add_header Cache-Control "public, max-age=2592000, immutable";
+        try_files $uri =404;
+    }
+
+    # Uploaded images (user uploads)
+    location /uploads/ {
+        alias /var/www/mapnexus/Backend/uploads/;
+        expires 7d;
+        add_header Cache-Control "public, max-age=604800";
+    }
+
+    # ---- Backend API Proxy → PM2 (port 4000) ----
+    location /api/ {
+        proxy_pass http://127.0.0.1:4000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+
+        # Timeout settings
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+
+        # Body size limit (for image uploads)
+        client_max_body_size 10M;
+    }
+
+    # ---- Frontend HTML Pages ----
+    location / {
+        try_files $uri $uri/ /Fronend/index.html;
+    }
+
+    # ---- Block sensitive files ----
+    location ~ /\.(env|git|gitignore) {
+        deny all;
+        return 404;
+    }
+}

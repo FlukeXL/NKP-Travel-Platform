@@ -1,0 +1,49 @@
+@media (max-width: 1080px) {
+  :root {
+    --section-padding: 70px 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .floating-header {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    gap: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --section-padding: 56px 18px;
+  }
+
+  .section-head {
+    align-items: flex-start;
+  }
+
+  .hero__cta {
+    flex-direction: column;
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .hero__cta .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 16px;
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+  }
+
+  .btn {
+    padding: 12px 22px;
+    font-size: 0.85rem;
+  }
+}

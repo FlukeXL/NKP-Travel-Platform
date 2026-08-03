@@ -1,0 +1,38 @@
+# ---- OS & Editor ----
+.DS_Store
+.DS_Store?
+Thumbs.db
+.vscode/settings.json
+.idea/
+
+# ---- Runtime & Temp ----
+.run/
+*.log
+*.pid
+
+# ---- Node.js ----
+node_modules/
+npm-debug.log*
+
+# ---- Environment & Secrets ----
+.env
+*.env.local
+*.pem
+*.key
+*firebase-adminsdk*.json
+
+# ---- Uploads (user-generated content ไม่อยู่ใน git) ----
+Backend/uploads/*
+!Backend/uploads/.gitkeep
+
+# ---- Dev Data (local dev store) ----
+Backend/.devdata/
+
+# ---- Python cache ----
+__pycache__/
+*.pyc
+
+# ---- macOS metadata ----
+._*
+.Spotlight-V100
+.Trashes

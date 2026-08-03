@@ -1,0 +1,475 @@
+.lifestyle-stats {
+  display: flex;
+  justify-content: center;
+  gap: 0;
+  max-width: var(--container-max);
+  margin: -34px auto 0;
+  position: relative;
+  z-index: 6;
+  padding: 0 24px;
+}
+
+.lifestyle-stats__inner {
+  display: flex;
+  width: 100%;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+}
+
+.lifestyle-stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 22px 16px;
+  text-align: center;
+  border-right: 1px solid var(--color-border);
+}
+
+.lifestyle-stat:last-child {
+  border-right: none;
+}
+
+.lifestyle-stat__value {
+  font-family: var(--font-numeral);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--color-black);
+  line-height: 1;
+}
+
+.lifestyle-stat__value .stars {
+  color: var(--color-gold);
+  font-size: 1rem;
+  margin-right: 3px;
+}
+
+.lifestyle-stat__label {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 720px) {
+  .lifestyle-stats { margin-top: -24px; }
+  .lifestyle-stat { padding: 16px 8px; }
+  .lifestyle-stat__value { font-size: 1.2rem; }
+  .lifestyle-stat__label { font-size: 0.64rem; }
+}
+
+/* ---- "X คนชอบไลฟ์สไตล์นี้" interest banner ---- */
+.lifestyle-interest-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin: 40px auto 0;
+  max-width: var(--container-max);
+  padding: 26px 32px;
+  border-radius: var(--radius-lg);
+  background: var(--grad-dark-fade);
+  color: var(--color-white);
+  box-shadow: var(--shadow-deep);
+}
+
+.lifestyle-interest-banner__text {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.lifestyle-interest-banner__count {
+  font-family: var(--font-numeral);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-gold-light);
+  line-height: 1;
+}
+
+.lifestyle-interest-banner__label {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.lifestyle-interest-banner__sub {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-top: 4px;
+  width: 100%;
+}
+
+.lifestyle-interest-banner__toggle {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.lifestyle-interest-banner__toggle.is-joined {
+  background: transparent;
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold-light);
+}
+
+.lifestyle-popular {
+  padding: 90px 0 20px;
+  background: var(--color-white);
+}
+
+.lifestyle-popular-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.lifestyle-popular-card {
+  position: relative;
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  transition: transform var(--dur-med) var(--ease-luxury), box-shadow var(--dur-med) var(--ease-luxury);
+}
+
+.lifestyle-popular-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-deep);
+}
+
+/* First-place card gets a taller image + gold-tinted border to stand out */
+.lifestyle-popular-card--rank-1 {
+  border-color: var(--color-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+.lifestyle-popular-card__img-wrap {
+  position: relative;
+  height: 190px;
+  overflow: hidden;
+}
+
+.lifestyle-popular-card--rank-1 .lifestyle-popular-card__img-wrap {
+  height: 230px;
+}
+
+.lifestyle-popular-card__img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease-luxury);
+}
+
+.lifestyle-popular-card:hover .lifestyle-popular-card__img-wrap img {
+  transform: scale(1.08);
+}
+
+.lifestyle-popular-card__img-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 50%, rgba(0,0,0,0.6) 100%);
+}
+
+.lifestyle-popular-card__rank {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(11, 11, 12, 0.65);
+  backdrop-filter: blur(4px);
+  color: var(--color-white);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 6px 12px 6px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.lifestyle-popular-card--rank-1 .lifestyle-popular-card__rank {
+  background: var(--grad-gold);
+  color: var(--color-black);
+}
+
+.lifestyle-popular-card__visits {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  z-index: 2;
+  color: var(--color-white);
+  font-size: 0.72rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+.lifestyle-popular-card__body {
+  padding: 16px 18px 20px;
+}
+
+.lifestyle-popular-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-numeral);
+  font-size: 0.78rem;
+  color: var(--color-gold-dark);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.lifestyle-popular-card__rating .stars {
+  color: var(--color-gold);
+}
+
+.lifestyle-popular-card__review-count {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.lifestyle-popular-card__title {
+  font-size: 1.02rem;
+  margin-bottom: 6px;
+  line-height: 1.3;
+}
+
+.lifestyle-popular-card__desc {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .lifestyle-popular-grid {
+    grid-template-columns: 1fr;
+  }
+  .lifestyle-popular-card--rank-1 .lifestyle-popular-card__img-wrap {
+    height: 190px;
+  }
+}
+
+/* ---- Video rail section (reuses .video-card look from attractions.css) ---- */
+.lifestyle-video {
+  padding: 90px 0 80px;
+  background: var(--color-ivory);
+}
+
+.lifestyle-video-empty,
+.lifestyle-grid-empty {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  padding: 40px 0;
+}
+
+.lifestyle-grid-section {
+  padding: 0 0 100px;
+  background: var(--color-white);
+}
+
+.lifestyle-grid-wrap {
+  display: flex;
+  gap: 28px;
+  align-items: flex-start;
+}
+
+.lifestyle-grid-track {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 20px;
+  align-items: start;
+}
+
+.lifestyle-card {
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: transform var(--dur-med) var(--ease-luxury), box-shadow var(--dur-med) var(--ease-luxury);
+  position: relative;
+}
+
+.lifestyle-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-soft);
+}
+
+.lifestyle-card__img-wrap {
+  position: relative;
+  height: 150px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.lifestyle-card__img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease-luxury);
+}
+
+.lifestyle-card:hover .lifestyle-card__img-wrap img {
+  transform: scale(1.08);
+}
+
+.lifestyle-card__favorite {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(11, 11, 12, 0.55);
+  color: var(--color-white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  z-index: 2;
+  transition: all var(--dur-fast) var(--ease-luxury);
+}
+
+.lifestyle-card__favorite:hover,
+.lifestyle-card__favorite.is-active {
+  background: var(--grad-gold);
+  color: var(--color-black);
+}
+
+.lifestyle-card__gallery-hint {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 2;
+  background: rgba(11, 11, 12, 0.68);
+  color: var(--color-gold-light);
+  font-size: 0.62rem;
+  font-weight: 600;
+  padding: 4px 9px;
+  border-radius: var(--radius-pill);
+}
+
+.lifestyle-card__body {
+  padding: 12px 14px 16px;
+  cursor: pointer;
+}
+
+.lifestyle-card__rating {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-numeral);
+  font-size: 0.72rem;
+  color: var(--color-gold-dark);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.lifestyle-card__rating .stars {
+  color: var(--color-gold);
+}
+
+.lifestyle-card__title {
+  font-size: 0.9rem;
+  margin-bottom: 5px;
+  line-height: 1.35;
+}
+
+.lifestyle-card__desc {
+  font-size: 0.76rem;
+  color: var(--color-text-muted);
+  line-height: 1.55;
+  margin-bottom: 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lifestyle-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  border-top: 1px solid var(--color-border);
+  padding-top: 8px;
+}
+
+.lifestyle-card__meta strong {
+  color: var(--color-black);
+}
+
+/* ---- Right-side ad rail ---- */
+.lifestyle-ad {
+  flex-shrink: 0;
+  width: 220px;
+  position: sticky;
+  top: 140px;
+}
+
+.lifestyle-ad__inner {
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-ivory);
+  padding: 10px;
+  min-height: 380px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lifestyle-ad__inner img {
+  width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.lifestyle-ad__label {
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  text-align: center;
+  margin-top: 6px;
+}
+
+@media (max-width: 960px) {
+  .lifestyle-grid-wrap {
+    flex-direction: column;
+  }
+  .lifestyle-ad {
+    width: 100%;
+    position: static;
+  }
+  .lifestyle-ad__inner {
+    min-height: 120px;
+  }
+}
+
+@media (max-width: 720px) {
+  .lifestyle-interest-banner {
+    padding: 20px 22px;
+  }
+  .lifestyle-interest-banner__count {
+    font-size: 1.7rem;
+  }
+  .lifestyle-grid-track {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+}

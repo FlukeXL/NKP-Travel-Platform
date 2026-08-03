@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel | Nakhon Phanom Lifestyle Travel Platform</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="stylesheet" href="/Fronend/css/style.css" />
+  <link rel="stylesheet" href="/Fronend/css/auth.css" />
+  <link rel="stylesheet" href="/Fronend/css/admin.css" />
+  <link rel="stylesheet" href="/Fronend/css/mobile.css" />
+</head>
+<body>
+
+  <!-- ================= AUTH MODAL (login popup, reused for the access gate) ================= -->
+  <div data-include="/Fronend/components/auth-modal.html"></div>
+
+  <!-- ================= ACCESS GATE (shown while checking session / if not an admin) ================= -->
+  <div class="admin-gate" id="admin-gate">
+    <div class="admin-gate__icon"></div>
+    <h2>กำลังตรวจสอบสิทธิ์...</h2>
+    <p>กรุณารอสักครู่</p>
+  </div>
+
+  <!-- ================= MOBILE NOTICE — Admin Panel is desktop-only ================= -->
+  <div class="admin-mobile-notice" style="display:none;">
+    <div class="admin-mobile-notice__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="12" rx="1.5"/><path d="M8 20h8M12 16v4"/></svg></div>
+    <h2>กรุณาใช้งานผ่านคอมพิวเตอร์</h2>
+    <p>Admin Panel ออกแบบมาสำหรับหน้าจอคอมพิวเตอร์เพื่อการจัดการข้อมูลที่สะดวกที่สุด กรุณาเข้าใช้งานผ่านเดสก์ท็อปหรือแท็บเล็ตขนาดใหญ่</p>
+    <a href="/Fronend/index.html" class="btn btn-gold">กลับหน้าหลัก</a>
+  </div>
+
+  <!-- ================= ADMIN SHELL ================= -->
+  <div class="admin-shell" id="admin-shell" style="display:none;">
+
+    <!-- ---- Sidebar ---- -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar__brand">
+        <img src="/Fronend/assets/images/logo.png" alt="Nakhon Phanom" />
+        <div>
+          <span>NAKHONPHANOM</span>
+          <span class="admin-sidebar__badge">ADMIN PANEL</span>
+        </div>
+      </div>
+
+      <nav class="admin-nav">
+        <button class="admin-nav__item is-active" data-view="dashboard">
+          <span class="admin-nav__icon">📊</span> แดชบอร์ด
+        </button>
+        <button class="admin-nav__item" data-view="places">
+          <span class="admin-nav__icon">📍</span> จัดการสถานที่
+        </button>
+        <button class="admin-nav__item" data-view="reviews">
+          <span class="admin-nav__icon">⭐</span> จัดการรีวิว
+        </button>
+        <button class="admin-nav__item" data-view="media">
+          <span class="admin-nav__icon">🎥</span> จัดการวิดีโอ
+        </button>
+        <button class="admin-nav__item" data-view="checkins">
+          <span class="admin-nav__icon">📸</span> จัดการเช็คอิน
+        </button>
+        <button class="admin-nav__item" data-view="events">
+          <span class="admin-nav__icon">🎪</span> จัดการกิจกรรม
+        </button>
+        <button class="admin-nav__item" data-view="users">
+          <span class="admin-nav__icon">👥</span> จัดการผู้ใช้งาน
+        </button>
+        <button class="admin-nav__item" data-view="ads">
+          <span class="admin-nav__icon">📢</span> จัดการโฆษณา
+        </button>
+        <button class="admin-nav__item" data-view="audit">
+          <span class="admin-nav__icon">🛡️</span> Audit Log
+        </button>
+      </nav>
+
+      <div class="admin-sidebar__footer">
+        <a href="/Fronend/index.html" class="admin-sidebar__back">← กลับสู่หน้าเว็บ</a>
+      </div>
+    </aside>
+
+    <!-- ---- Main content ---- -->
+    <main class="admin-main">
+      <div class="admin-topbar">
+        <div>
+          <div class="admin-topbar__title" id="admin-topbar-title">แดชบอร์ด</div>
+          <div class="admin-topbar__sub" id="admin-topbar-sub">ภาพรวมข้อมูลทั้งหมดในระบบ</div>
+        </div>
+        <div class="admin-topbar__user">
+          <img id="admin-topbar-avatar" src="" alt="" />
+          <span id="admin-topbar-name"></span>
+        </div>
+      </div>
+
+      <div class="admin-content">
+
+        <!-- ================= DASHBOARD VIEW ================= -->
+        <section class="admin-view is-active" id="admin-view-dashboard">
+          <div class="admin-stat-grid">
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">📍</div>
+              <div class="admin-stat-card__value" id="admin-stat-places">–</div>
+              <div class="admin-stat-card__label">สถานที่ทั้งหมด</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">⭐</div>
+              <div class="admin-stat-card__value" id="admin-stat-rating">–</div>
+              <div class="admin-stat-card__label">คะแนนเฉลี่ยรวม</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">💬</div>
+              <div class="admin-stat-card__value" id="admin-stat-reviews">–</div>
+              <div class="admin-stat-card__label">รีวิวทั้งหมด</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">❤️</div>
+              <div class="admin-stat-card__value" id="admin-stat-favorites">–</div>
+              <div class="admin-stat-card__label">รายการที่ถูกใจ</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">👥</div>
+              <div class="admin-stat-card__value" id="admin-stat-users">–</div>
+              <div class="admin-stat-card__label">ผู้ใช้งานทั้งหมด</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">🛡️</div>
+              <div class="admin-stat-card__value" id="admin-stat-admins">–</div>
+              <div class="admin-stat-card__label">ผู้ดูแลระบบ</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">🎥</div>
+              <div class="admin-stat-card__value" id="admin-stat-videos">–</div>
+              <div class="admin-stat-card__label">วิดีโอรีวิว</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">🖼️</div>
+              <div class="admin-stat-card__value" id="admin-stat-photos">–</div>
+              <div class="admin-stat-card__label">รูปภาพรีวิว</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">👍</div>
+              <div class="admin-stat-card__value" id="admin-stat-likes">–</div>
+              <div class="admin-stat-card__label">ไลค์ทั้งหมด</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">💬</div>
+              <div class="admin-stat-card__value" id="admin-stat-comments">–</div>
+              <div class="admin-stat-card__label">คอมเมนต์ทั้งหมด</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-card__icon">📸</div>
+              <div class="admin-stat-card__value" id="admin-stat-checkins">–</div>
+              <div class="admin-stat-card__label">โพสต์เช็คอิน</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:24px;">
+            <div>
+              <div class="admin-panel-card">
+                <div class="admin-panel-card__title">สถานที่แยกตามหมวดหมู่</div>
+                <div class="admin-category-bars" id="admin-category-bars"></div>
+              </div>
+              <div class="admin-panel-card">
+                <div class="admin-panel-card__title">วิดีโอแยกตามหมวดหมู่</div>
+                <div class="admin-category-bars" id="admin-video-category-bars"></div>
+              </div>
+            </div>
+            <div>
+              <div class="admin-panel-card">
+                <div class="admin-panel-card__title">ผู้ใช้งานล่าสุด</div>
+                <div class="admin-mini-list" id="admin-recent-users"></div>
+              </div>
+              <div class="admin-panel-card">
+                <div class="admin-panel-card__title">รีวิวล่าสุด</div>
+                <div class="admin-mini-list" id="admin-recent-reviews"></div>
+              </div>
+              <div class="admin-panel-card">
+                <div class="admin-panel-card__title">วิดีโอล่าสุด</div>
+                <div class="admin-mini-list" id="admin-recent-videos"></div>
+              </div>
+              <div class="admin-panel-card">
+                <div class="admin-panel-card__title">เช็คอินล่าสุด</div>
+                <div class="admin-mini-list" id="admin-recent-checkins"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= PLACES VIEW ================= -->
+        <section class="admin-view" id="admin-view-places">
+          <div class="admin-toolbar">
+            <input type="text" class="admin-toolbar__search" id="admin-places-search" placeholder="ค้นหาชื่อสถานที่หรือพื้นที่..." />
+            <div class="admin-toolbar__filters" id="admin-places-filters">
+              <button class="admin-toolbar__filter is-active" data-category="all">ทั้งหมด</button>
+              <button class="admin-toolbar__filter" data-category="cafe">คาเฟ่</button>
+              <button class="admin-toolbar__filter" data-category="restaurant">สายกิน</button>
+              <button class="admin-toolbar__filter" data-category="temple">วัด</button>
+              <button class="admin-toolbar__filter" data-category="mutelu">มูเตลู</button>
+              <button class="admin-toolbar__filter" data-category="shopping">ช้อปปิ้ง</button>
+              <button class="admin-toolbar__filter" data-category="culture">วัฒนธรรม</button>
+              <button class="admin-toolbar__filter" data-category="nature">ธรรมชาติ</button>
+              <button class="admin-toolbar__filter" data-category="fitness">ออกกำลังกาย</button>
+              <button class="admin-toolbar__filter" data-category="landmark">แลนด์มาร์ก</button>
+            </div>
+            <button class="btn btn-gold" id="admin-add-place-btn">+ เพิ่มสถานที่ใหม่</button>
+          </div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:14px;" id="admin-places-count"></p>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>สถานที่</th>
+                  <th>หมวดหมู่</th>
+                  <th>คะแนน</th>
+                  <th>ราคา</th>
+                  <th>สถานะ</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-places-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= REVIEWS VIEW ================= -->
+        <section class="admin-view" id="admin-view-reviews">
+          <div class="admin-toolbar">
+            <input type="text" class="admin-toolbar__search" id="admin-reviews-search" placeholder="ค้นหาชื่อผู้รีวิว, สถานที่, หรือข้อความ..." />
+          </div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:14px;" id="admin-reviews-count"></p>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ผู้รีวิว</th>
+                  <th>สถานที่ (id)</th>
+                  <th>คะแนน</th>
+                  <th>ข้อความ</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-reviews-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= MEDIA (VIDEO) VIEW ================= -->
+        <section class="admin-view" id="admin-view-media">
+          <div class="admin-toolbar">
+            <input type="text" class="admin-toolbar__search" id="admin-media-search" placeholder="ค้นหาชื่อผู้โพสต์ หรือสถานที่ (id)..." />
+            <div class="admin-toolbar__filters" id="admin-media-filters">
+              <button class="admin-toolbar__filter is-active" data-category="all">ทั้งหมด</button>
+              <button class="admin-toolbar__filter" data-category="cafe">คาเฟ่</button>
+              <button class="admin-toolbar__filter" data-category="restaurant">สายกิน</button>
+              <button class="admin-toolbar__filter" data-category="temple">วัด</button>
+              <button class="admin-toolbar__filter" data-category="mutelu">มูเตลู</button>
+              <button class="admin-toolbar__filter" data-category="shopping">ช้อปปิ้ง</button>
+              <button class="admin-toolbar__filter" data-category="culture">วัฒนธรรม</button>
+              <button class="admin-toolbar__filter" data-category="nature">ธรรมชาติ</button>
+              <button class="admin-toolbar__filter" data-category="fitness">ออกกำลังกาย</button>
+              <button class="admin-toolbar__filter" data-category="landmark">แลนด์มาร์ก</button>
+            </div>
+          </div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:14px;" id="admin-media-count"></p>
+
+          <div class="admin-media-grid" id="admin-media-grid"></div>
+        </section>
+
+        <!-- ================= CHECK-IN MODERATION VIEW ================= -->
+        <section class="admin-view" id="admin-view-checkins">
+          <div class="admin-toolbar">
+            <input type="text" class="admin-toolbar__search" id="admin-checkins-search" placeholder="ค้นหาชื่อผู้โพสต์ หรือสถานที่..." />
+            <div class="admin-toolbar__filters" id="admin-checkins-filters">
+              <button class="admin-toolbar__filter is-active" data-visibility="all">ทั้งหมด</button>
+              <button class="admin-toolbar__filter" data-visibility="public">สาธารณะ</button>
+              <button class="admin-toolbar__filter" data-visibility="private">ส่วนตัว</button>
+            </div>
+          </div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:14px;" id="admin-checkins-count"></p>
+
+          <div class="admin-media-grid" id="admin-checkins-grid"></div>
+        </section>
+
+        <!-- ================= EVENTS VIEW ================= -->
+        <section class="admin-view" id="admin-view-events">
+          <div class="admin-toolbar">
+            <input type="text" class="admin-toolbar__search" id="admin-events-search" placeholder="ค้นหาชื่อกิจกรรม หรือสถานที่..." />
+            <div class="admin-toolbar__filters" id="admin-events-filters">
+              <button class="admin-toolbar__filter is-active" data-status="all">ทั้งหมด</button>
+              <button class="admin-toolbar__filter" data-status="active">กำลังแสดง</button>
+              <button class="admin-toolbar__filter" data-status="inactive">ซ่อนอยู่</button>
+            </div>
+            <button class="btn btn-gold" id="admin-add-event-btn">+ เพิ่มกิจกรรมใหม่</button>
+          </div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:14px;" id="admin-events-count"></p>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>กิจกรรม</th>
+                  <th>วันที่</th>
+                  <th>สถานที่</th>
+                  <th>สถานะ</th>
+                  <th>Popup</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-events-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= USERS VIEW ================= -->
+        <section class="admin-view" id="admin-view-users">
+          <div class="admin-toolbar">
+            <input type="text" class="admin-toolbar__search" id="admin-users-search" placeholder="ค้นหาชื่อหรืออีเมล..." />
+          </div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:14px;" id="admin-users-count"></p>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ชื่อ</th>
+                  <th>อีเมล</th>
+                  <th>สมัครเมื่อ</th>
+                  <th>สิทธิ์</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= AUDIT LOG VIEW ================= -->
+        <section class="admin-view" id="admin-view-audit">
+          <div class="admin-audit-note">
+            ระบบจะลบ Log ที่เก่ากว่า <strong>2 เดือน</strong> ให้อัตโนมัติทุกวัน เพื่อไม่ให้ข้อมูลสะสมมากเกินไป หรือกดลบด้วยมือได้จากปุ่มด้านล่าง
+          </div>
+
+          <div class="admin-toolbar">
+            <input type="text" class="admin-toolbar__search" id="admin-audit-search" placeholder="ค้นหาชื่อแอดมิน หรือรายละเอียด..." />
+            <div class="admin-toolbar__filters" id="admin-audit-filters">
+              <button class="admin-toolbar__filter is-active" data-target="all">ทั้งหมด</button>
+              <button class="admin-toolbar__filter" data-target="place">สถานที่</button>
+              <button class="admin-toolbar__filter" data-target="review">รีวิว</button>
+              <button class="admin-toolbar__filter" data-target="video">วิดีโอ</button>
+              <button class="admin-toolbar__filter" data-target="checkin">เช็คอิน</button>
+              <button class="admin-toolbar__filter" data-target="comment">คอมเมนต์</button>
+              <button class="admin-toolbar__filter" data-target="user">ผู้ใช้งาน</button>
+            </div>
+            <div class="admin-toolbar__audit-actions">
+              <button class="btn btn-outline btn-sm" id="admin-audit-purge-btn">ลบ Log เก่ากว่า 2 เดือน</button>
+              <button class="btn btn-outline btn-sm admin-btn-danger-outline" id="admin-audit-clear-all-btn">ลบทั้งหมด</button>
+            </div>
+          </div>
+          <p style="font-size:0.8rem; color:var(--color-text-muted); margin-bottom:14px;" id="admin-audit-count"></p>
+
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>เวลา</th>
+                  <th>ผู้ดำเนินการ</th>
+                  <th>การกระทำ</th>
+                  <th>รายละเอียด</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-audit-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ================= ADS VIEW ================= -->
+        <section class="admin-view" id="admin-view-ads">
+          <div class="admin-toolbar">
+            <h2 style="font-size:1.2rem; color:var(--color-text-main); margin-bottom:0;">จัดการพื้นที่โฆษณา</h2>
+            <button class="btn btn-gold" id="admin-add-ad-btn">+ อัปโหลดโฆษณาใหม่</button>
+          </div>
+
+          <div class="admin-table-wrap" style="margin-top:20px;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>รูปภาพ</th>
+                  <th>ชื่อโฆษณา</th>
+                  <th>ตำแหน่ง</th>
+                  <th>สถานะ</th>
+                  <th>วันที่สร้าง</th>
+                  <th>จัดการ</th>
+                </tr>
+              </thead>
+              <tbody id="admin-ads-tbody"></tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= EVENT EDITOR MODAL (add / edit) ================= -->
+  <div class="admin-modal" id="admin-event-modal">
+    <div class="admin-modal__card">
+      <button class="admin-modal__close" id="admin-event-modal-close" aria-label="ปิด">✕</button>
+      <div class="admin-modal__body">
+        <h3 class="admin-modal__title" id="admin-event-modal-title">เพิ่มกิจกรรมใหม่</h3>
+        <div class="admin-form-error" id="admin-event-form-error"></div>
+
+        <form id="admin-event-form">
+          <div class="admin-form-grid">
+            <div class="admin-field admin-field--full">
+              <label>ชื่องาน / เทศกาล *</label>
+              <input type="text" name="title" required maxlength="120" placeholder="เช่น งานประเพณีไหลเรือไฟ" />
+            </div>
+
+            <div class="admin-field">
+              <label>ป้ายกำกับ (Tag) *</label>
+              <input type="text" name="tag" required placeholder="เช่น เทศกาลประจำปี, งานประจำปี" />
+            </div>
+
+            <div class="admin-field">
+              <label>ป้ายบัตร (Badge)</label>
+              <input type="text" name="badge" placeholder="เช่น เทศกาลประจำปี" />
+            </div>
+
+            <div class="admin-field admin-field--full">
+              <label>คำอธิบาย</label>
+              <textarea name="desc" maxlength="300" rows="3" placeholder="รายละเอียดกิจกรรมสั้นๆ"></textarea>
+            </div>
+
+            <div class="admin-field">
+              <label>วันเริ่มต้น *</label>
+              <input type="date" name="startDate" required />
+            </div>
+
+            <div class="admin-field">
+              <label>วันสิ้นสุด *</label>
+              <input type="date" name="endDate" required />
+            </div>
+
+            <div class="admin-field admin-field--full">
+              <label>วันที่แสดงในการ์ด (ข้อความภาษาไทย)</label>
+              <input type="text" name="dates" placeholder="เช่น 24 ต.ค. – 2 พ.ย., ทุกวันศุกร์–อาทิตย์" />
+              <div class="admin-field-hint">ถ้าเว้นว่างระบบจะสร้างจากวันเริ่มต้น/สิ้นสุดให้อัตโนมัติ</div>
+            </div>
+
+            <div class="admin-field admin-field--full">
+              <label>สถานที่จัดงาน</label>
+              <input type="text" name="location" placeholder="เช่น ริมแม่น้ำโขง อำเภอเมืองนครพนม" />
+            </div>
+
+            <div class="admin-field admin-field--full">
+              <label>รูปภาพหลัก (Banner)</label>
+              <div class="admin-photo-slots" style="grid-template-columns: 1fr; max-width: 320px;">
+                <div class="admin-photo-slot" id="admin-event-banner-slot" style="aspect-ratio: 16/9; width: 100%;">
+                  <span class="admin-photo-slot__icon">＋</span>
+                </div>
+              </div>
+              <input type="file" id="admin-event-banner-upload" accept="image/*" style="display: none;" />
+              <input type="hidden" name="banner" id="admin-event-banner-hidden" />
+            </div>
+
+            <div class="admin-field admin-field--full">
+              <label>ลิงก์ "ดูรายละเอียด"</label>
+              <input type="text" name="ctaHref" placeholder="/Fronend/pages/events.html หรือ URL ภายนอก" />
+            </div>
+
+            <div class="admin-field" style="display:flex; align-items:center; gap:8px; margin-top:16px;">
+              <input type="checkbox" name="active" id="admin-event-active" style="width:auto;" />
+              <label for="admin-event-active" style="margin:0;">แสดงในหน้าเว็บ (Active)</label>
+            </div>
+
+            <div class="admin-field" style="display:flex; align-items:center; gap:8px; margin-top:16px;">
+              <input type="checkbox" name="showAsPopup" id="admin-event-popup" style="width:auto;" />
+              <label for="admin-event-popup" style="margin:0;">แสดงเป็น Popup ต้อนรับเมื่อเข้าเว็บ</label>
+            </div>
+          </div>
+
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="admin-event-cancel-btn">ยกเลิก</button>
+            <button type="submit" class="btn btn-gold">บันทึกกิจกรรม</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= PLACE EDITOR MODAL (add / edit) ================= -->
+  <div class="admin-modal" id="admin-place-modal">
+    <div class="admin-modal__card">
+      <button class="admin-modal__close" id="admin-place-modal-close" aria-label="ปิด">✕</button>
+      <div class="admin-modal__body">
+        <h3 class="admin-modal__title" id="admin-place-modal-title">เพิ่มสถานที่ใหม่</h3>
+
+        <div class="admin-form-error" id="admin-place-form-error"></div>
+
+        <form id="admin-place-form">
+          <div class="admin-form-grid">
+            <div class="admin-field admin-field--full">
+              <label>ชื่อสถานที่ *</label>
+              <input type="text" name="name" required maxlength="120" />
+            </div>
+
+            <div class="admin-field">
+              <label>หมวดหมู่ *</label>
+              <select name="category" required>
+                <option value="cafe">คาเฟ่</option>
+                <option value="restaurant">ร้านอาหาร (สายกิน)</option>
+                <option value="temple">วัด/สถานที่ศักดิ์สิทธิ์</option>
+                <option value="mutelu">มูเตลู</option>
+                <option value="shopping">ช้อปปิ้ง</option>
+                <option value="culture">วัฒนธรรม</option>
+                <option value="nature">ธรรมชาติ</option>
+                <option value="fitness">ออกกำลังกาย</option>
+                <option value="landmark">แลนด์มาร์ก</option>
+              </select>
+            </div>
+            
+            <div class="admin-field">
+              <label>หมวดหมู่ที่ 2 (ตัวเลือกเสริม)</label>
+              <select name="category2">
+                <option value="">ไม่มีหมวดหมู่ที่ 2</option>
+                <option value="cafe">คาเฟ่</option>
+                <option value="restaurant">ร้านอาหาร (สายกิน)</option>
+                <option value="temple">วัด/สถานที่ศักดิ์สิทธิ์</option>
+                <option value="mutelu">มูเตลู</option>
+                <option value="shopping">ช้อปปิ้ง</option>
+                <option value="culture">วัฒนธรรม</option>
+                <option value="nature">ธรรมชาติ</option>
+                <option value="fitness">ออกกำลังกาย</option>
+                <option value="landmark">แลนด์มาร์ก</option>
+              </select>
+            </div>
+
+            <div class="admin-field">
+              <label>พื้นที่ / อำเภอ *</label>
+              <input type="text" name="area" required placeholder="เช่น ริมโขง, อำเภอเมือง" />
+            </div>
+
+            <div class="admin-field admin-field--full">
+              <label>คำอธิบาย *</label>
+              <textarea name="desc" required maxlength="400"></textarea>
+            </div>
+
+            <div class="admin-field admin-field--full">
+              <label>รูปภาพสถานที่ * <span class="admin-field-hint" style="display:inline; margin:0;">(อัปโหลดได้สูงสุด 10 รูป รูปแรกจะเป็นภาพหลัก ถ้ามีไม่ถึง 10 รูปก็ไม่เป็นไร)</span></label>
+              <div class="admin-photo-slots" id="admin-place-photo-slots"></div>
+              <input type="file" id="admin-place-photo-input" accept="image/jpeg,image/png,image/webp" multiple class="visually-hidden" />
+              <input type="hidden" name="img" />
+            </div>
+
+            <div class="admin-field">
+              <label>ช่วงราคา *</label>
+              <input type="text" name="price" required placeholder="ฟรี / ฿ / ฿฿ / ฿฿฿" />
+            </div>
+
+            <div class="admin-field">
+              <label>คะแนนเริ่มต้น (1-5)</label>
+              <input type="number" name="rating" min="1" max="5" step="0.1" />
+            </div>
+
+            <div class="admin-field">
+              <label>ละติจูด (lat) *</label>
+              <input type="number" name="lat" step="0.0001" required />
+            </div>
+
+            <div class="admin-field">
+              <label>ลองจิจูด (lng) *</label>
+              <input type="number" name="lng" step="0.0001" required />
+            </div>
+
+            <div class="admin-field">
+              <label>ยอดผู้เยี่ยมชม/เดือน (ประมาณ)</label>
+              <input type="number" name="popularity" min="0" step="1" />
+            </div>
+
+            <div class="admin-field" style="display:flex; align-items:center; gap:8px; margin-top:22px;">
+              <input type="checkbox" name="published" id="admin-place-published" style="width:auto;" />
+              <label for="admin-place-published" style="margin:0;">เผยแพร่บนหน้าเว็บทันที</label>
+            </div>
+          </div>
+
+          <div class="admin-form-actions">
+            <button type="button" class="btn btn-outline" id="admin-place-cancel-btn">ยกเลิก</button>
+            <button type="submit" class="btn btn-gold">บันทึกสถานที่</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= GLOBAL DELETE-CONFIRM BANNER (Places/Reviews/Media all share this) ================= -->
+  <div class="admin-confirm-banner admin-confirm-banner--floating" id="admin-confirm-banner" style="display:none;">
+    <span id="admin-confirm-text"></span>
+    <div class="admin-confirm-banner__actions">
+      <button class="btn btn-outline btn-sm" id="admin-confirm-cancel">ยกเลิก</button>
+      <button class="btn btn-gold btn-sm" id="admin-confirm-ok">ยืนยันลบ</button>
+    </div>
+  </div>
+
+  <!-- ================= TOAST ================= -->
+  <div class="admin-toast" id="admin-toast"></div>
+
+  <!-- ================= Scripts ================= -->
+  <script src="/Fronend/js/places-data.js"></script>
+  <!-- Firebase Web SDK 10.13.2 (pinned, compat build) — Google Sign-In -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
+  <script src="/Fronend/js/firebase.js"></script>
+  <script src="/Fronend/js/api-client.js?v=34"></script>
+  <script src="/Fronend/js/auth-state.js"></script>
+  <script src="/Fronend/js/main.js"></script>
+  <script src="/Fronend/js/auth.js"></script>
+  <script src="/Fronend/js/admin.js?v=34" defer></script>
+    <!-- Add/Edit Ad Modal -->
+    <div class="admin-modal" id="admin-ad-modal">
+      <div class="admin-modal__card">
+        <button class="admin-modal__close" onclick="closeAdminAdModal()" aria-label="ปิด">✕</button>
+        <div class="admin-modal__body">
+          <h3 class="admin-modal__title" id="admin-ad-modal-title">อัปโหลดโฆษณา</h3>
+          <form class="admin-form" id="admin-ad-form">
+            <input type="hidden" id="admin-ad-id" />
+            <div class="admin-form-grid">
+              <div class="admin-field admin-field--full">
+                <label>ชื่อโฆษณา *</label>
+                <input type="text" id="admin-ad-title" required />
+              </div>
+
+              <div class="admin-field admin-field--full">
+                <label>ตำแหน่งแสดงโฆษณา *</label>
+                <select id="admin-ad-placement" required>
+                  <option value="home">หน้าหลักแนวนอน (Home Page)</option>
+                  <option value="lifestyle">ตามหน้าสไตล์การท่องเที่ยวแนวตั้ง (Lifestyle Pages)</option>
+                </select>
+              </div>
+              
+              <div class="admin-field admin-field--full">
+                <label>รูปภาพแบนเนอร์ *</label>
+                <div class="file-dropzone" onclick="document.getElementById('admin-ad-image').click()" style="cursor: pointer; text-align: center; border: 2px dashed var(--border-light); border-radius: var(--radius-md); padding: 30px 20px; transition: all var(--dur-fast);">
+                  <input type="file" id="admin-ad-image" accept="image/jpeg, image/png, image/webp" hidden />
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-gold-main); margin-bottom:10px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <p>คลิกเพื่อเลือกไฟล์ หรือลากไฟล์รูปภาพมาวางที่นี่</p>
+                  <p style="font-size:0.75rem; color:var(--color-text-light); margin-top:5px;">JPG, PNG, WebP</p>
+                </div>
+                <div id="admin-ad-image-preview" style="margin-top: 10px; max-width: 100%; border-radius: 8px; overflow: hidden; display: none;">
+                  <img src="" style="width:100%; height:auto; display:block;" />
+                </div>
+              </div>
+              
+              <div class="admin-field admin-field--full" style="display: flex; align-items: center; gap: 8px;">
+                <input type="checkbox" id="admin-ad-is-active" checked style="width:auto; margin:0;" />
+                <label for="admin-ad-is-active" style="margin-bottom:0;">เปิดใช้งานทันที</label>
+              </div>
+
+              <div class="admin-field admin-field--full" style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closeAdminAdModal()">ยกเลิก</button>
+                <button type="submit" class="btn btn-primary" id="admin-ad-submit">บันทึกโฆษณา</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>

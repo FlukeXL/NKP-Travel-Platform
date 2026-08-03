@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Test Ad Load</title>
+</head>
+<body>
+  <div class="promo-strip" id="home-promo-strip" style="padding:20px 24px; display:flex; justify-content:center; background:#FAF8F3;">
+    <div style="max-width:1000px; width:100%; text-align:center;">
+      <div class="promo-strip__frame" id="home-promo-frame" style="border-radius:12px; overflow:hidden; border:1px dashed #d4c9a8; padding:6px;">
+        <img src="/Fronend/assets/images/promos/featured.png" alt="โปรโมท" style="width:100%; height:auto; display:block; border-radius:8px;" />
+      </div>
+    </div>
+  </div>
+
+  <script>
+    window.MNX_API = {
+      get: async (url) => {
+        if (url === '/promos/active') {
+          return {
+            success: true,
+            data: [
+              {
+                "_id": "no781Pv6mr7ldKBNefww",
+                "title": "AI",
+                "imageUrl": "/uploads/1785256495016-29984637.png",
+                "isActive": true,
+                "placement": "home"
+              }
+            ]
+          };
+        }
+      }
+    };
+    window.mnxResolveUploadUrl = (url) => `http://localhost:4000${url}`;
+
+    async function loadActivePromo() {
+      const frame = document.getElementById('home-promo-frame');
+      if (!frame) return;
+
+      try {
+        const res = await window.MNX_API.get('/promos/active');
+        if (res.data && res.data.length > 0) {
+          const item = res.data[0];
+          if (item) {
+            const resolvedUrl = typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(item.imageUrl) : item.imageUrl;
+            frame.innerHTML = `<img src="${resolvedUrl}" alt="${item.title}" style="width:100%; height:auto; display:block; border-radius:8px;" />`;
+          }
+        }
+      } catch (err) {
+        console.error('Promo load error:', err);
+      }
+    }
+
+    loadActivePromo().then(() => {
+      console.log("Resulting HTML:", document.getElementById('home-promo-frame').innerHTML);
+    });
+  </script>
+</body>
+</html>

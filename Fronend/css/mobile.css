@@ -1,0 +1,1703 @@
+/* ----------------------------------------------------------
+   1. MOBILE SCALE TOKENS
+---------------------------------------------------------- */
+html.mnx-is-mobile {
+  --mnx-m-header-h: 52px;
+  --mnx-m-tabbar-h: 62px;
+  --mnx-m-safe-t: env(safe-area-inset-top, 0px);
+  --mnx-m-safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+@media (max-width: 900px) {
+  html.mnx-is-mobile {
+    --section-padding: 40px 16px;
+  }
+}
+
+/* ----------------------------------------------------------
+   2. PAGE SCAFFOLDING
+   No top padding reserved for the header anymore — the header is
+   a small floating pill that stays hidden (opacity/pointer-events)
+   until the user scrolls past the hero video / page-hero, so the
+   video/hero is always the very first, fullscreen thing a visitor
+   sees on every page (see initMobileHeaderReveal in mobile-shell.js).
+---------------------------------------------------------- */
+html.mnx-is-mobile body {
+  overflow-x: hidden;
+}
+
+/* Reserve room for the fixed bottom tab bar on the FOOTER itself
+   (dark background) rather than on <body> (ivory/cream background)
+   — the old approach left a plain cream-colored strip showing
+   through below the black footer on every page, since that
+   clearance padding was body's own background color, not the
+   footer's. Every page ends with the footer component, so giving
+   IT the extra bottom padding + keeping its own dark background
+   guarantees there's never a stray light-colored strip at the very
+   end of any page again. */
+html.mnx-is-mobile footer.footer {
+  padding-bottom: calc(var(--mnx-m-tabbar-h) + var(--mnx-m-safe-b) + 26px);
+}
+
+html.mnx-is-mobile a,
+html.mnx-is-mobile button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ----------------------------------------------------------
+   3. TOP CAPSULE — Premium Info Bar with brand pill + live metrics.
+   Glass capsule floating at the top with a subtle gold border,
+   brand identity on the left, and 4 live metrics separated by
+   elegant vertical gold lines. Hidden by default, revealed on
+   scroll (mnx-m-header--visible).
+---------------------------------------------------------- */
+.mnx-m-header {
+  position: fixed;
+  top: calc(var(--mnx-m-safe-t) + 10px);
+  left: 0;
+  right: 0;
+  z-index: 500;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-14px);
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease-luxury), transform 0.4s var(--ease-luxury), visibility 0.4s;
+}
+
+.mnx-m-header.mnx-m-header--visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.mnx-m-infobar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(11, 11, 12, 0.82);
+  backdrop-filter: blur(28px) saturate(200%);
+  -webkit-backdrop-filter: blur(28px) saturate(200%);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: var(--radius-pill);
+  padding: 4px 5px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.08) inset,
+    0 -1px 0 rgba(0, 0, 0, 0.2) inset,
+    0 16px 40px rgba(0, 0, 0, 0.45),
+    0 0 20px rgba(201, 162, 39, 0.06);
+}
+
+/* Thin gold hairline highlight along the top edge */
+.mnx-m-infobar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 203, 119, 0.6), transparent);
+  pointer-events: none;
+}
+
+/* ---- Brand pill (left side) ---- */
+.mnx-m-infobar__brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px 6px 10px;
+  border-right: 1px solid rgba(201, 162, 39, 0.2);
+  margin-right: 2px;
+}
+
+.mnx-m-infobar__brand-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2ecc71;
+  box-shadow: 0 0 6px rgba(46, 204, 113, 0.6);
+  animation: mnx-brand-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes mnx-brand-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 6px rgba(46, 204, 113, 0.6); }
+  50% { opacity: 0.6; box-shadow: 0 0 3px rgba(46, 204, 113, 0.3); }
+}
+
+.mnx-m-infobar__brand-text {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ---- Metrics container ---- */
+.mnx-m-infobar__metrics {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+/* ---- Vertical separator between metrics ---- */
+.mnx-m-infobar__sep {
+  width: 1px;
+  height: 16px;
+  background: rgba(201, 162, 39, 0.18);
+  flex-shrink: 0;
+}
+
+.mnx-m-infobar__pill {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px;
+  border-radius: var(--radius-pill);
+  color: rgba(255, 255, 255, 0.88);
+  transition: background 0.2s var(--ease-luxury);
+}
+
+.mnx-m-infobar__pill:active {
+  background: rgba(201, 162, 39, 0.16);
+}
+
+.mnx-m-infobar__icon {
+  display: flex;
+  color: var(--color-gold-light);
+}
+
+.mnx-m-infobar__icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.mnx-m-infobar__value {
+  font-family: var(--font-numeral);
+  font-size: 0.74rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mnx-m-infobar__dot {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #7fbf6a;
+  border: 1.5px solid rgba(11, 11, 12, 0.9);
+}
+
+.mnx-m-infobar__dot.mnx-m-dot--moderate { background: #e08a3c; }
+.mnx-m-infobar__dot.mnx-m-dot--bad { background: #c9392f; }
+
+@media (max-width: 360px) {
+  .mnx-m-infobar__pill {
+    padding: 6px 7px;
+    gap: 4px;
+  }
+  .mnx-m-infobar__value {
+    font-size: 0.68rem;
+  }
+  .mnx-m-infobar__brand-text {
+    font-size: 0.65rem;
+    letter-spacing: 1px;
+  }
+  .mnx-m-infobar__brand {
+    padding: 6px 8px 6px 8px;
+  }
+  .mnx-m-infobar__icon svg {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* ----------------------------------------------------------
+   3b. NAV DROPDOWNS (ไลฟ์สไตล์ / เช็คอิน) — redesigned to read as
+   a single connected piece growing directly out of the tab bar
+   button that opened it, iOS-context-menu style, instead of a
+   disconnected card floating in the middle of the screen:
+     - Docked flush against the tab bar (tiny 6px gap) instead of
+       a big 20px gap, so there's no dead space implying it's a
+       separate floating element.
+     - Horizontally anchored above the SPECIFIC button that
+       triggered it (set dynamically via --mnx-m-dd-left in JS)
+       instead of always centering under the whole screen — this
+       is what actually makes it read as "coming from" that button.
+     - Grows from a bottom-anchored transform-origin, scaling +
+       sliding up very slightly, mimicking a menu genuinely
+       unfurling out of the header rather than fading in place.
+     - A small diamond "tail" beneath the card points down at the
+       tab bar, visually welding the two pieces into one continuous
+       shape — the actual missing "sod-klong" (coherent) detail.
+     - Height is capped to a sensible, content-fit size (not 60vh)
+       so it never sprawls to feel oversized.
+---------------------------------------------------------- */
+.mnx-m-dropdown--from-tabbar {
+  position: fixed;
+  left: var(--mnx-m-dd-left, 50%);
+  bottom: calc(var(--mnx-m-tabbar-h) + var(--mnx-m-safe-b) + 6px);
+  transform: translateX(-50%) translateY(10px) scale(0.94);
+  transform-origin: center bottom;
+  z-index: 615;
+  width: min(268px, calc(100vw - 28px));
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  background: rgba(11, 11, 12, 0.95);
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  border: 1px solid rgba(201, 162, 39, 0);
+  border-radius: 22px;
+  box-shadow: none;
+  transition: max-height 0.32s var(--ease-luxury), opacity 0.22s var(--ease-luxury),
+              border-color 0.28s var(--ease-luxury), transform 0.32s var(--ease-luxury);
+  pointer-events: none;
+}
+
+.mnx-m-dropdown--from-tabbar.is-open {
+  max-height: min(60vh, 336px);
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+  border-color: rgba(201, 162, 39, 0.3);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 18px 46px rgba(0, 0, 0, 0.48);
+  pointer-events: auto;
+}
+
+/* Scrollable inner wrapper — keeps the outer card (which carries
+   the border/shadow/tail) un-clipped while its CONTENT scrolls
+   independently, so the connecting tail below never gets cut off
+   by overflow like it would if the outer card scrolled directly. */
+.mnx-m-dropdown__inner {
+  max-height: min(60vh, 336px);
+  overflow-y: auto;
+  padding: 7px;
+}
+
+/* Thin gold hairline along the top edge — same signature detail
+   as the tab bar / infobar capsules, so the dropdown clearly reads
+   as part of the same premium component family. */
+.mnx-m-dropdown--from-tabbar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 203, 119, 0.5), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* The connecting "tail" — a small rotated square peeking out from
+   under the card's bottom edge, pointing at the tab bar beneath it,
+   visually welding the dropdown to the button that opened it. */
+.mnx-m-dropdown--from-tabbar::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -5px;
+  width: 12px;
+  height: 12px;
+  background: rgba(11, 11, 12, 0.95);
+  border: 1px solid rgba(201, 162, 39, 0);
+  border-top: none;
+  border-left: none;
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 0 0 3px 0;
+  opacity: 0;
+  transition: opacity 0.22s var(--ease-luxury), border-color 0.28s var(--ease-luxury);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.mnx-m-dropdown--from-tabbar.is-open::after {
+  opacity: 1;
+  border-color: rgba(201, 162, 39, 0.3);
+}
+
+.mnx-m-dropdown__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 13px;
+  border-radius: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.86rem;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+.mnx-m-dropdown__item:active {
+  background: rgba(201, 162, 39, 0.14);
+}
+
+.mnx-m-dropdown__icon {
+  display: flex;
+  flex-shrink: 0;
+  color: var(--color-gold-light);
+}
+
+.mnx-m-dropdown__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ----------------------------------------------------------
+   4. ENVIRONMENT DROPDOWN — drops DOWN from the Info Bar capsule,
+   mirroring the same connected-card visual language as the
+   ไลฟ์สไตล์/เช็คอิน dropdowns (which grow UP from the tab bar), just
+   anchored to the top instead of the bottom, and with its "tail"
+   pointing UP at the Info Bar rather than down at the tab bar.
+   Replaces the old full-width bottom sheet that used to slide up
+   from the screen's bottom edge — visually disconnected from the
+   Info Bar that triggered it.
+---------------------------------------------------------- */
+.mnx-m-dropdown--from-header {
+  position: fixed;
+  left: var(--mnx-m-dd-left, 50%);
+  top: calc(var(--mnx-m-safe-t) + 62px);
+  transform: translateX(-50%) translateY(-10px) scale(0.94);
+  transform-origin: center top;
+  z-index: 615;
+  width: min(300px, calc(100vw - 28px));
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  background: rgba(11, 11, 12, 0.95);
+  backdrop-filter: blur(26px) saturate(180%);
+  -webkit-backdrop-filter: blur(26px) saturate(180%);
+  border: 1px solid rgba(201, 162, 39, 0);
+  border-radius: 22px;
+  box-shadow: none;
+  transition: max-height 0.32s var(--ease-luxury), opacity 0.22s var(--ease-luxury),
+              border-color 0.28s var(--ease-luxury), transform 0.32s var(--ease-luxury);
+  pointer-events: none;
+}
+
+.mnx-m-dropdown--from-header.is-open {
+  max-height: min(74vh, 480px);
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+  border-color: rgba(201, 162, 39, 0.3);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.06) inset,
+    0 18px 46px rgba(0, 0, 0, 0.48);
+  pointer-events: auto;
+}
+
+.mnx-m-dropdown--from-header .mnx-m-dropdown__inner {
+  max-height: min(74vh, 480px);
+}
+
+/* Thin gold hairline along the top edge — same signature detail
+   shared by every capsule/dropdown in the mobile shell. */
+.mnx-m-dropdown--from-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 203, 119, 0.5), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* The connecting "tail" — points UP at the Info Bar above it
+   (mirror image of the tab-bar dropdown's downward-pointing tail),
+   welding this panel visually to the pill that opened it. */
+.mnx-m-dropdown--from-header::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -5px;
+  width: 12px;
+  height: 12px;
+  background: rgba(11, 11, 12, 0.95);
+  border: 1px solid rgba(201, 162, 39, 0);
+  border-bottom: none;
+  border-right: none;
+  transform: translateX(-50%) rotate(45deg);
+  border-radius: 3px 0 0 0;
+  opacity: 0;
+  transition: opacity 0.22s var(--ease-luxury), border-color 0.28s var(--ease-luxury);
+  pointer-events: none;
+  z-index: -1;
+}
+
+.mnx-m-dropdown--from-header.is-open::after {
+  opacity: 1;
+  border-color: rgba(201, 162, 39, 0.3);
+}
+
+.mnx-m-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 610;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.3s ease;
+}
+
+.mnx-m-overlay.is-visible {
+  display: block;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* ----------------------------------------------------------
+   5. ENVIRONMENT SHEET CONTENT
+---------------------------------------------------------- */
+.mnx-m-env-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  margin-bottom: 16px;
+  max-width: 100%;
+}
+
+.mnx-m-env-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 9px 15px;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s var(--ease-luxury);
+}
+
+.mnx-m-env-tab svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.mnx-m-env-tab.is-active {
+  background: var(--grad-gold);
+  border-color: transparent;
+  color: var(--color-black);
+  font-weight: 600;
+}
+
+.mnx-m-env-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.mnx-m-env-value-row__num {
+  font-family: var(--font-numeral);
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--color-white);
+  line-height: 1;
+}
+
+.mnx-m-env-value-row__unit {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mnx-m-env-status {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 18px;
+}
+
+.mnx-m-env-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 160px;
+  margin-bottom: 18px;
+}
+
+#mnx-m-env-chart {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.mnx-m-env-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--color-gold);
+  color: var(--color-gold-light);
+  font-size: 0.86rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.mnx-m-env-download svg {
+  width: 16px;
+  height: 16px;
+}
+
+.mnx-m-env-download:active {
+  background: var(--color-gold);
+  color: var(--color-black);
+}
+
+/* ----------------------------------------------------------
+   6. BOTTOM TAB BAR — Clean, pill-shaped floating dock.
+   True Modern Luxury Premium style: no muddy backgrounds,
+   perfect pill shape, elegant glassmorphism, and a crisp
+   glowing gold active state.
+---------------------------------------------------------- */
+.mnx-m-tabbar {
+  position: fixed;
+  left: 16px;
+  right: 16px;
+  bottom: calc(16px + var(--mnx-m-safe-b));
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  height: 64px; /* Fixed, comfortable touch target size */
+  background: rgba(28, 28, 30, 0.75); /* Lighter, cleaner glass */
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08); /* Clean subtle edge */
+  border-radius: 100px; /* Perfect pill shape */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.1) inset,
+    0 12px 32px rgba(0, 0, 0, 0.4); /* Softer, floating shadow */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(14px);
+  pointer-events: none;
+  transition: opacity 0.4s var(--ease-luxury), transform 0.4s var(--ease-luxury), visibility 0.4s;
+}
+
+.mnx-m-tabbar.mnx-m-tabbar--visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ---- Tab Button ---- */
+.mnx-m-tabbar__btn {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  flex: 1;
+  height: 100%;
+  color: rgba(255, 255, 255, 0.5); /* Clearer unselected color */
+  font-size: 0.65rem; /* Slightly larger, readable text */
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  background: none;
+  transition: color 0.3s ease;
+}
+
+.mnx-m-tabbar__icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+}
+
+.mnx-m-tabbar__icon svg {
+  width: 22px; /* Slightly larger, clearer icons */
+  height: 22px;
+}
+
+.mnx-m-tabbar__label {
+  position: relative;
+  z-index: 1;
+  white-space: nowrap;
+  transition: transform 0.3s ease;
+}
+
+/* ---- Active State — Clean gold glow, no muddy pill ---- */
+.mnx-m-tabbar__btn.is-active,
+.mnx-m-tabbar__btn.is-dropdown-active {
+  color: #D4AF37; /* Crisp gold */
+}
+
+.mnx-m-tabbar__btn.is-active .mnx-m-tabbar__icon,
+.mnx-m-tabbar__btn.is-dropdown-active .mnx-m-tabbar__icon {
+  transform: translateY(-2px);
+  filter: drop-shadow(0 4px 8px rgba(212, 175, 55, 0.4)); /* Elegant gold glow */
+}
+
+.mnx-m-tabbar__btn.is-active .mnx-m-tabbar__icon svg,
+.mnx-m-tabbar__btn.is-dropdown-active .mnx-m-tabbar__icon svg {
+  stroke-width: 2.2; /* Bolder active icon */
+}
+
+.mnx-m-tabbar__btn.is-active .mnx-m-tabbar__label {
+  transform: translateY(-1px);
+  font-weight: 600;
+}
+
+
+/* ----------------------------------------------------------
+   7. CHECK-IN DROPDOWN SEARCH — live place search built directly
+   into the เช็คอิน dropdown card, mirroring the desktop's own
+   .checkin-menu__search input-with-icon treatment exactly (same
+   pill shape, same placeholder tone), instead of a separate
+   full-screen search sheet.
+---------------------------------------------------------- */
+.mnx-m-dropdown-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.mnx-m-dropdown-search__icon {
+  position: absolute;
+  left: 14px;
+  display: flex;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.mnx-m-dropdown-search__icon svg {
+  width: 15px;
+  height: 15px;
+}
+
+.mnx-m-dropdown-search input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-pill);
+  padding: 11px 14px 11px 38px;
+  color: var(--color-white);
+  font-size: 0.86rem;
+  font-family: var(--font-body);
+}
+
+.mnx-m-dropdown-search input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.mnx-m-dropdown-search input:focus {
+  outline: none;
+  border-color: var(--color-gold);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.mnx-m-dropdown-search-results {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s var(--ease-luxury);
+}
+
+.mnx-m-dropdown-search-results.is-open {
+  max-height: 260px;
+  overflow-y: auto;
+  margin-bottom: 4px;
+}
+
+.mnx-m-search-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 8px;
+  border-radius: 14px;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.mnx-m-search-result:active {
+  background: rgba(201, 162, 39, 0.14);
+}
+
+.mnx-m-search-result img {
+  width: 40px;
+  height: 40px;
+  border-radius: 11px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.mnx-m-search-result strong {
+  display: block;
+  font-size: 0.86rem;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.mnx-m-search-result small {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.mnx-m-search-result__pin {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+.mnx-m-search-empty {
+  padding: 16px 8px;
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+}
+
+/* ----------------------------------------------------------
+   8. ACCOUNT/AUTH BLOCK — auth-aware content injected by
+   mobile-shell.js into the เช็คอิน dropdown (mirrors where the
+   desktop's own .navbar__mobile places its auth buttons: directly
+   after the เช็คอิน accordion section).
+---------------------------------------------------------- */
+.mnx-m-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 12px 10px;
+  border-radius: 14px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.88rem;
+  font-weight: 500;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.mnx-m-menu-item:active {
+  background: rgba(201, 162, 39, 0.14);
+}
+
+.mnx-m-menu-item__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  flex-shrink: 0;
+  color: var(--color-gold-light);
+}
+
+.mnx-m-menu-item__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.mnx-m-menu-item--danger .mnx-m-menu-item__icon {
+  color: #e2685f;
+}
+
+.mnx-m-menu-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 8px 0;
+}
+
+.mnx-m-menu-account-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 4px 12px;
+}
+
+.mnx-m-menu-account-head img {
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(201, 162, 39, 0.4);
+  flex-shrink: 0;
+}
+
+.mnx-m-menu-account-name {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.mnx-m-menu-account-email {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.mnx-m-menu-auth-row {
+  display: flex;
+  gap: 10px;
+  padding: 6px 10px 4px;
+}
+
+.mnx-m-menu-auth-row .btn {
+  flex: 1;
+  justify-content: center;
+}
+
+.mnx-m-menu-item--danger {
+  color: #e2685f;
+}
+
+html.mnx-is-mobile .hero {
+  height: 100dvh;
+  min-height: 480px;
+}
+
+html.mnx-is-mobile .hero__content {
+  padding: 0 22px;
+}
+
+html.mnx-is-mobile .hero__title {
+  font-size: clamp(1.7rem, 7vw, 2.4rem);
+}
+
+html.mnx-is-mobile .hero__subtitle {
+  font-size: 0.88rem;
+}
+
+html.mnx-is-mobile .hero__cta {
+  flex-direction: column;
+  width: 100%;
+  max-width: 260px;
+  gap: 12px;
+}
+
+html.mnx-is-mobile .hero__cta .btn {
+  width: 100%;
+}
+
+html.mnx-is-mobile .page-hero {
+  height: 46vh;
+  min-height: 280px;
+  max-height: 380px;
+}
+
+html.mnx-is-mobile .page-hero__title {
+  font-size: clamp(1.4rem, 6.5vw, 2rem);
+}
+
+html.mnx-is-mobile .page-hero__subtitle {
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+html.mnx-is-mobile .page-hero__content {
+  padding: 0 20px 24px;
+}
+
+html.mnx-is-mobile .quick-jump {
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 0;
+  padding: 14px 16px;
+  background: var(--color-black);
+  position: relative;
+  z-index: 6;
+}
+
+html.mnx-is-mobile .quick-jump::-webkit-scrollbar {
+  display: none;
+}
+
+/* Event popup — keep centered, just tighten on very small phones */
+html.mnx-is-mobile .event-popup__card {
+  max-width: 92vw;
+}
+
+/* ----------------------------------------------------------
+   10. HOME PAGE — showcase, widget sections, cards
+---------------------------------------------------------- */
+html.mnx-is-mobile .showcase {
+  padding: 36px 0 32px;
+}
+
+/* REDESIGNED (was overlapping/broken): the previous mobile version
+   forced the slide into a fixed 420px height split 56%/44% between
+   image and info, then relied on the info panel's
+   "display:flex; flex-direction:column; justify-content:center"
+   (from home.css, shared with desktop) to vertically center its
+   5 children (tag/title/desc/meta/button) inside that leftover
+   ~185px. Those children have no flex-shrink:0, so when their
+   combined natural height exceeded the available space, flexbox
+   squeezed the description down to a collapsed 0px box while the
+   tag and button — which don't shrink — spilled OUTSIDE the info
+   panel's edges. That's exactly the overlapping mess reported.
+
+   Fixed properly by not fighting a fixed height at all: the card
+   now sizes itself to its content (image at a fixed, tasteful
+   aspect ratio + info panel that's simply as tall as it needs to
+   be), every child gets flex-shrink:0 so nothing can be silently
+   crushed, and the description is capped by line-clamp alone
+   (no competing height squeeze) — so it always renders exactly 2
+   clean lines, never 0. */
+html.mnx-is-mobile .showcase__slider {
+  border-radius: 20px;
+  margin: 0 16px;
+  height: auto;
+  min-height: 0;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* CSS Grid stacking instead of absolute positioning: every slide is
+   placed in the SAME single grid cell (grid-area: 1/1) on their
+   actual direct parent (.showcase__slides — the plain wrapper div
+   home.css never styles), which still crossfades them via
+   opacity/visibility exactly like before, but — unlike
+   position:absolute — grid items DO contribute to their parent's
+   height:auto sizing. That's what fixes the slider collapsing to
+   0px (absolutely-positioned children are removed from flow
+   entirely, so a height:auto ancestor around them has nothing to
+   size itself against). The container ends up exactly as tall as
+   its tallest slide, which is the visually active one 99% of the
+   time anyway. */
+html.mnx-is-mobile .showcase__slides {
+  display: grid;
+}
+
+html.mnx-is-mobile .showcase__slide {
+  position: relative;
+  grid-area: 1 / 1;
+  grid-template-columns: 1fr !important;
+  grid-template-rows: auto !important;
+  height: auto;
+}
+
+html.mnx-is-mobile .showcase__slide-img {
+  position: relative;
+  height: 52vw;
+  max-height: 240px;
+  min-height: 180px;
+}
+
+html.mnx-is-mobile .showcase__slide-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 10px;
+  padding: 22px 22px 26px;
+}
+
+html.mnx-is-mobile .showcase__slide-info > * {
+  flex-shrink: 0;
+}
+
+html.mnx-is-mobile .showcase__slide-tag {
+  font-size: 0.7rem;
+  margin-bottom: 0;
+}
+
+html.mnx-is-mobile .showcase__slide-title {
+  font-size: 1.2rem;
+  margin-bottom: 0;
+  line-height: 1.3;
+}
+
+html.mnx-is-mobile .showcase__slide-desc {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  margin-bottom: 0;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  overflow: hidden;
+}
+
+html.mnx-is-mobile .showcase__slide-meta {
+  margin-bottom: 0;
+  font-size: 0.74rem;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+html.mnx-is-mobile .showcase__btn {
+  position: relative !important;
+  bottom: auto !important;
+  left: auto !important;
+  align-self: flex-start;
+  margin-top: 12px !important;
+  padding: 10px 24px;
+}
+
+/* Dot pagination — anchored near the TOP of the image instead of
+   the bottom (which no longer has a fixed/predictable position
+   now that the slide's height is content-driven, not a fixed
+   box), so it never depends on the image's exact rendered height. */
+html.mnx-is-mobile .showcase__nav {
+  left: 20px;
+  bottom: auto;
+  top: 16px;
+}
+
+html.mnx-is-mobile .showcase__arrows {
+  display: none;
+}
+
+html.mnx-is-mobile .sponsor-widget {
+  padding: 14px 16px;
+}
+
+html.mnx-is-mobile .sponsor-widget__inner img {
+  max-height: 60px;
+}
+
+html.mnx-is-mobile .widget-section {
+  padding: 32px 0;
+}
+
+html.mnx-is-mobile .section-head {
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+html.mnx-is-mobile .eyebrow {
+  font-size: 0.68rem;
+}
+
+html.mnx-is-mobile .section-title {
+  font-size: clamp(1.1rem, 4.6vw, 1.4rem);
+  margin: 4px 0 6px;
+}
+
+html.mnx-is-mobile .section-sub {
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+/* Card grid — a comfortable 2-up grid that never gets too small,
+   too tall, or too wide on any phone from 320px to 430px+. */
+html.mnx-is-mobile .widget-grid {
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+html.mnx-is-mobile .widget-card__img-wrap {
+  height: 128px;
+}
+
+html.mnx-is-mobile .widget-card__body {
+  padding: 12px 13px 14px;
+}
+
+html.mnx-is-mobile .widget-card__title {
+  font-size: 0.86rem;
+  margin-bottom: 4px;
+}
+
+html.mnx-is-mobile .widget-card__desc {
+  font-size: 0.74rem;
+  margin-bottom: 8px;
+}
+
+html.mnx-is-mobile .widget-card__rating,
+html.mnx-is-mobile .widget-card__coords {
+  font-size: 0.68rem;
+}
+
+@media (max-width: 340px) {
+  html.mnx-is-mobile .widget-grid {
+    grid-template-columns: 1fr;
+  }
+  html.mnx-is-mobile .widget-card__img-wrap {
+    height: 160px;
+  }
+}
+
+/* ---- "แนะนำเฉพาะสำหรับคุณ" (AI-personalized) — redesigned as a
+   clearly-labeled horizontal scroll rail instead of a tall stacked
+   grid. The user specifically flagged this section as unclear/too
+   long on mobile: giving it a distinct dark "AI recommendation"
+   card style + horizontal scroll (like the category rails on the
+   attractions page) makes it instantly readable as "these are
+   picks curated for me" rather than blending into the generic
+   grid sections below it. ---- */
+html.mnx-is-mobile #section-recommend {
+  padding: 28px 0 30px;
+  background: linear-gradient(180deg, rgba(11, 11, 12, 0.04) 0%, transparent 100%);
+}
+
+html.mnx-is-mobile #section-recommend .section-head {
+  padding: 0 16px;
+}
+
+html.mnx-is-mobile #section-recommend .widget-grid {
+  display: flex;
+  grid-template-columns: unset;
+  gap: 12px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 16px 6px;
+  scroll-snap-type: x mandatory;
+}
+
+html.mnx-is-mobile #section-recommend .widget-grid::-webkit-scrollbar {
+  display: none;
+}
+
+html.mnx-is-mobile #section-recommend .widget-card {
+  flex: 0 0 168px;
+  scroll-snap-align: start;
+  border: 1px solid rgba(201, 162, 39, 0.22);
+}
+
+html.mnx-is-mobile #section-recommend .widget-card__img-wrap {
+  height: 110px;
+}
+
+html.mnx-is-mobile #section-recommend .widget-card__body {
+  padding: 10px 12px 12px;
+}
+
+html.mnx-is-mobile #section-recommend .widget-card__desc {
+  display: none;
+}
+
+html.mnx-is-mobile #section-recommend .widget-card__coords {
+  display: none;
+}
+
+/* ----------------------------------------------------------
+   11. ATTRACTIONS — place cards, category rows, MAP
+---------------------------------------------------------- */
+html.mnx-is-mobile .category-section {
+  padding: 30px 0;
+}
+
+html.mnx-is-mobile .category-section__head {
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+html.mnx-is-mobile .category-section__icon {
+  width: 36px;
+  height: 36px;
+  font-size: 1.02rem;
+}
+
+html.mnx-is-mobile .category-section__count {
+  font-size: 0.74rem;
+}
+
+/* Horizontal rail cards — fixed comfortable width, not too long/wide */
+html.mnx-is-mobile .place-card,
+html.mnx-is-mobile .video-card {
+  width: 168px;
+}
+
+html.mnx-is-mobile .place-card__img-wrap {
+  height: 118px;
+}
+
+html.mnx-is-mobile .place-card__body {
+  padding: 11px 12px 14px;
+}
+
+html.mnx-is-mobile .place-card__title {
+  font-size: 0.84rem;
+}
+
+html.mnx-is-mobile .place-card__desc {
+  font-size: 0.72rem;
+  -webkit-line-clamp: 2;
+}
+
+html.mnx-is-mobile .place-card__meta {
+  font-size: 0.68rem;
+  padding-top: 8px;
+}
+
+html.mnx-is-mobile .scroll-row__arrow {
+  display: none;
+}
+
+/* MAP — the specific ask: easy to use, appropriately large but
+   not oversized. A fixed comfortable height band + full-bleed
+   width (not container-clipped) so panning has room. */
+html.mnx-is-mobile .site-map {
+  padding: 30px 0 26px;
+}
+
+html.mnx-is-mobile .site-map__legend {
+  gap: 8px 12px;
+  margin-bottom: 16px;
+  font-size: 0.72rem;
+}
+
+html.mnx-is-mobile .site-map__legend-item {
+  font-size: 0.72rem;
+}
+
+html.mnx-is-mobile .site-map__frame {
+  height: min(62vh, 420px);
+  min-height: 320px;
+  border-radius: 18px;
+  margin: 0 -16px;
+  border-radius: 0;
+}
+
+html.mnx-is-mobile .site-map__hint {
+  font-size: 0.72rem;
+  padding: 0 16px;
+}
+
+html.mnx-is-mobile .leaflet-control-zoom a {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 36px !important;
+  font-size: 1.1rem !important;
+}
+
+/* ----------------------------------------------------------
+   12. LIFESTYLE CATEGORY PAGES
+---------------------------------------------------------- */
+html.mnx-is-mobile .lifestyle-stats {
+  margin-top: -20px;
+  padding: 0 16px;
+}
+
+html.mnx-is-mobile .lifestyle-stat {
+  padding: 14px 8px;
+}
+
+html.mnx-is-mobile .lifestyle-stat__value {
+  font-size: 1.15rem;
+}
+
+html.mnx-is-mobile .lifestyle-stat__label {
+  font-size: 0.6rem;
+}
+
+html.mnx-is-mobile .lifestyle-interest-banner {
+  margin-top: 28px;
+  padding: 18px 18px;
+  border-radius: 20px;
+}
+
+html.mnx-is-mobile .lifestyle-interest-banner__count {
+  font-size: 1.6rem;
+}
+
+html.mnx-is-mobile .lifestyle-interest-banner__label {
+  font-size: 0.82rem;
+}
+
+html.mnx-is-mobile .lifestyle-popular {
+  padding: 34px 0 10px;
+}
+
+html.mnx-is-mobile .lifestyle-popular-grid {
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+html.mnx-is-mobile .lifestyle-popular-card--rank-1 .lifestyle-popular-card__img-wrap {
+  height: 170px;
+}
+
+html.mnx-is-mobile .lifestyle-popular-card__img-wrap {
+  height: 150px;
+}
+
+html.mnx-is-mobile .lifestyle-grid-section {
+  padding: 0 0 40px;
+}
+
+html.mnx-is-mobile .lifestyle-grid-wrap {
+  display: block;
+}
+
+html.mnx-is-mobile .lifestyle-ad {
+  display: none;
+}
+
+/* Same well-proportioned 2-up rule as the home widget-grid */
+html.mnx-is-mobile .lifestyle-grid-track {
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+html.mnx-is-mobile .lifestyle-card__img-wrap {
+  height: 118px;
+}
+
+html.mnx-is-mobile .lifestyle-card__body {
+  padding: 10px 12px 13px;
+}
+
+html.mnx-is-mobile .lifestyle-card__title {
+  font-size: 0.82rem;
+}
+
+html.mnx-is-mobile .lifestyle-card__desc {
+  font-size: 0.7rem;
+}
+
+html.mnx-is-mobile .lifestyle-video {
+  padding: 34px 0 40px;
+}
+
+/* ----------------------------------------------------------
+   13. MODALS — bottom sheet style on mobile
+---------------------------------------------------------- */
+html.mnx-is-mobile .place-modal,
+html.mnx-is-mobile .video-modal,
+html.mnx-is-mobile .auth-modal {
+  padding: 0;
+  align-items: flex-end;
+}
+
+html.mnx-is-mobile .place-modal__card {
+  max-width: 100%;
+  max-height: 92dvh;
+  border-radius: 24px 24px 0 0;
+}
+
+html.mnx-is-mobile .place-modal__layout {
+  grid-template-columns: 1fr;
+  grid-template-rows: 46vw 1fr;
+  height: auto;
+  max-height: unset;
+}
+
+html.mnx-is-mobile .place-modal__gallery-viewport {
+  flex: none;
+  width: 100% !important;
+  aspect-ratio: auto !important;
+  height: 46vw;
+  min-height: 200px;
+  max-height: 260px;
+}
+
+html.mnx-is-mobile .place-modal__gallery-fg {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+html.mnx-is-mobile .place-modal__body {
+  height: unset;
+  max-height: 58dvh;
+}
+
+html.mnx-is-mobile .place-modal__scroll {
+  padding: 20px 20px 32px;
+}
+
+html.mnx-is-mobile .place-modal__title {
+  font-size: 1.22rem;
+}
+
+html.mnx-is-mobile .place-modal__desc {
+  font-size: 0.85rem;
+}
+
+html.mnx-is-mobile .video-modal__card {
+  max-width: 100%;
+  max-height: 96dvh;
+  border-radius: 24px 24px 0 0;
+  grid-template-columns: 1fr;
+  grid-template-rows: 54vw auto;
+}
+
+html.mnx-is-mobile .video-modal__detail-panel {
+  max-height: 42dvh;
+  overflow-y: auto;
+  padding: 18px 20px 24px;
+}
+
+html.mnx-is-mobile .auth-modal__card {
+  max-width: 100%;
+  border-radius: 24px 24px 0 0;
+  max-height: 90dvh;
+  overflow-y: auto;
+}
+
+html.mnx-is-mobile .auth-modal__body {
+  padding: 22px 20px 30px;
+}
+
+/* ----------------------------------------------------------
+   14. CHECK-IN PAGE
+---------------------------------------------------------- */
+html.mnx-is-mobile .upload-slots {
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+html.mnx-is-mobile .post-card,
+html.mnx-is-mobile .composer {
+  border-radius: 18px;
+}
+
+/* ----------------------------------------------------------
+   15. VIDEOS PAGE
+---------------------------------------------------------- */
+html.mnx-is-mobile .videos-grid {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px;
+}
+
+html.mnx-is-mobile .videos-page__filters {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  gap: 8px;
+}
+
+/* ----------------------------------------------------------
+   16. PROFILE PAGE
+---------------------------------------------------------- */
+html.mnx-is-mobile .profile-cover {
+  height: 150px;
+}
+
+html.mnx-is-mobile .profile-cover__avatar {
+  width: 80px;
+  height: 80px;
+}
+
+html.mnx-is-mobile .profile-header {
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+html.mnx-is-mobile .profile-stats {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+html.mnx-is-mobile .profile-stat {
+  min-width: 78px;
+  flex-shrink: 0;
+}
+
+html.mnx-is-mobile .profile-checkins-grid {
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+/* ----------------------------------------------------------
+   17. WEATHER PAGE
+---------------------------------------------------------- */
+html.mnx-is-mobile .weather-hero {
+  height: 42vw;
+  min-height: 170px;
+}
+
+html.mnx-is-mobile .weather-current__temp {
+  font-size: clamp(2.6rem, 13vw, 4.2rem);
+}
+
+html.mnx-is-mobile .metric-panel {
+  padding: 34px 0;
+}
+
+html.mnx-is-mobile .metric-panel__body {
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+html.mnx-is-mobile .gauge-card,
+html.mnx-is-mobile .chart-card {
+  min-width: 0;
+  padding: 20px 16px 18px;
+}
+
+html.mnx-is-mobile .stat-grid {
+  grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+  gap: 10px;
+}
+
+html.mnx-is-mobile .chart-card__canvas-wrap {
+  height: 220px;
+  min-width: 0;
+}
+
+html.mnx-is-mobile .chart-card__canvas-wrap canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+html.mnx-is-mobile .gauge {
+  width: 150px;
+  height: 150px;
+}
+
+/* ----------------------------------------------------------
+   18. FOOTER — redesigned compact for mobile. The old approach
+   just stacked all 5 columns into ONE column, which is what made
+   it feel endlessly long (5 stacked link lists with no visual
+   rhythm). Redesigned as: centered brand block up top, then the
+   4 link columns paired into a tight 2×2 grid (still all the same
+   content/links, nothing removed), finishing with a slim
+   centered bottom bar — reads as one cohesive compact footer
+   instead of a long scroll of plain links.
+---------------------------------------------------------- */
+html.mnx-is-mobile footer.footer {
+  padding-top: 32px;
+  padding-left: 20px;
+  padding-right: 20px;
+  /* padding-bottom is set once, near the top of this file (section 2),
+     to clear the fixed bottom tab bar — not repeated here so it can't
+     accidentally get overwritten back to a small value again. */
+}
+
+html.mnx-is-mobile .footer__inner {
+  padding-bottom: 28px;
+}
+
+html.mnx-is-mobile .footer__brand {
+  text-align: center;
+  margin-bottom: 28px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+html.mnx-is-mobile .footer__logo {
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+html.mnx-is-mobile .footer__tagline {
+  font-size: 0.78rem;
+  margin-bottom: 14px;
+}
+
+html.mnx-is-mobile .footer__socials {
+  justify-content: center;
+}
+
+/* NOTE: intentionally NOT using :nth-of-type(odd/even) here — that
+   selector counts by TAG NAME only, not class, so with .footer__brand
+   also being a <div> sibling, nth-of-type indices get shifted and
+   silently drop the 4th .footer__col from the pairing. A plain flex-
+   wrap on the container is both simpler and immune to that trap. */
+html.mnx-is-mobile .footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 16px;
+}
+
+html.mnx-is-mobile .footer__brand {
+  flex: 0 0 100%;
+}
+
+html.mnx-is-mobile .footer__col {
+  flex: 0 0 calc(50% - 8px);
+  margin-bottom: 22px;
+}
+
+html.mnx-is-mobile .footer__col h5 {
+  font-size: 0.72rem;
+  margin-bottom: 12px;
+}
+
+html.mnx-is-mobile .footer__col {
+  gap: 9px;
+}
+
+html.mnx-is-mobile .footer__col a {
+  font-size: 0.8rem;
+}
+
+html.mnx-is-mobile .footer__contact-info {
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+html.mnx-is-mobile .footer__bottom {
+  flex-direction: column;
+  text-align: center;
+  gap: 8px;
+  padding: 18px 0 0;
+}
+
+html.mnx-is-mobile .footer__legal {
+  gap: 16px;
+}
+
+/* ----------------------------------------------------------
+   19. UTILITY / A11Y
+---------------------------------------------------------- */
+html.mnx-is-mobile .widget-card:hover,
+html.mnx-is-mobile .place-card:hover,
+html.mnx-is-mobile .lifestyle-card:hover,
+html.mnx-is-mobile .lifestyle-popular-card:hover,
+html.mnx-is-mobile .video-card:hover {
+  transform: none;
+}
+
+/* Admin panel is desktop-focused; on mobile, show a brief notice
+   instead of trying to cram the full dashboard into a phone screen. */
+html.mnx-is-mobile .admin-shell {
+  display: none !important;
+}
+
+html.mnx-is-mobile .admin-mobile-notice {
+  display: flex !important;
+}
+
+/* ---- Admin mobile notice ---- */
+.admin-mobile-notice {
+  display: none;
+  min-height: 100dvh;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+  gap: 12px;
+  background: var(--color-black);
+  color: var(--color-white);
+}
+
+.admin-mobile-notice__icon {
+  display: flex;
+  color: var(--color-gold-light);
+  margin-bottom: 8px;
+}
+
+.admin-mobile-notice__icon svg {
+  width: 44px;
+  height: 44px;
+}
+
+.admin-mobile-notice h2 {
+  font-family: var(--font-display);
+  color: var(--color-white);
+  font-size: 1.3rem;
+}
+
+.admin-mobile-notice p {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.88rem;
+  max-width: 320px;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}

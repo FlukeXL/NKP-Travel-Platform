@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1c1c24"/>
+      <stop offset="100%" stop-color="#0a0a0d"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8cb77"/>
+      <stop offset="100%" stop-color="#9c7a1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg1)"/>
+  <circle cx="400" cy="220" r="180" fill="none" stroke="url(#gold)" stroke-width="1.5" stroke-dasharray="12 6" opacity="0.25"/>
+  <circle cx="400" cy="220" r="120" fill="none" stroke="url(#gold)" stroke-width="1" opacity="0.3"/>
+  <!-- Planning / Architecture Icon -->
+  <g transform="translate(360, 160)" stroke="url(#gold)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="0" y="0" width="80" height="60" rx="8"/>
+    <line x1="15" y1="20" x2="65" y2="20"/>
+    <line x1="15" y1="35" x2="45" y2="35"/>
+    <circle cx="40" cy="90" r="18"/>
+    <path d="M15 110 C15 95, 25 85, 40 85 C55 85, 65 95, 65 110"/>
+  </g>
+  <text x="400" y="360" font-family="'Space Grotesk', sans-serif" font-size="20" fill="#e8cb77" text-anchor="middle" font-weight="600" letter-spacing="3">TEAM PHOTO 01 : PROJECT PLANNING</text>
+  <text x="400" y="390" font-family="'Prompt', sans-serif" font-size="15" fill="#8a8578" text-anchor="middle">การประชุมระดมความคิดและวางแผนสถาปัตยกรรมระบบ MapNexus</text>
+</svg>

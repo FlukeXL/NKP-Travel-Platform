@@ -1,0 +1,725 @@
+/* ============================================================
+   ABOUT US (เกี่ยวกับเรา) — MapNexus Luxury Design System
+   ============================================================ */
+
+/* ---- Breadcrumbs & Hero Additions ---- */
+.about-hero {
+  position: relative;
+  min-height: 48vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: radial-gradient(circle at 50% 30%, rgba(201, 162, 39, 0.12) 0%, rgba(11, 11, 12, 0.98) 70%),
+              linear-gradient(180deg, #0b0b0c 0%, #16161a 100%);
+  padding: 140px 24px 70px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(201, 162, 39, 0.18);
+}
+
+.about-hero::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-image: 
+    radial-gradient(rgba(201, 162, 39, 0.15) 1px, transparent 1px),
+    radial-gradient(rgba(232, 203, 119, 0.08) 1px, transparent 1px);
+  background-size: 40px 40px, 20px 20px;
+  background-position: 0 0, 20px 20px;
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.about-hero__container {
+  position: relative;
+  z-index: 2;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.about-hero__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 18px;
+  border-radius: var(--radius-pill);
+  background: rgba(201, 162, 39, 0.12);
+  border: 1px solid rgba(201, 162, 39, 0.35);
+  color: var(--color-gold-light);
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  margin-bottom: 20px;
+  backdrop-filter: blur(8px);
+}
+
+.about-hero__title {
+  font-size: clamp(2.4rem, 5vw, 3.8rem);
+  font-weight: 700;
+  color: var(--color-white);
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+
+.about-hero__title em {
+  font-style: italic;
+  background: var(--grad-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.about-hero__desc {
+  font-size: 1.15rem;
+  color: var(--color-text-muted);
+  line-height: 1.7;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ---- Section Base Styling ---- */
+.about-section {
+  padding: 90px 0;
+  position: relative;
+}
+
+.about-section--dark {
+  background: #0e0e11;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.about-section--light-accent {
+  background: radial-gradient(circle at 50% 0%, rgba(201, 162, 39, 0.06) 0%, transparent 60%), #121216;
+}
+
+.section-head--center {
+  text-align: center;
+  max-width: 750px;
+  margin: 0 auto 60px;
+}
+
+.section-head--center .eyebrow {
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.section-head--center .section-title {
+  font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+  color: var(--color-white);
+  margin-bottom: 14px;
+}
+
+/* ============================================================
+   1. STORY & LOGO SECTION
+   ============================================================ */
+.story-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.story-content {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.story-lead {
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: var(--color-ivory);
+  font-weight: 500;
+  border-left: 3px solid var(--color-gold);
+  padding-left: 20px;
+}
+
+.story-p {
+  font-size: 1.02rem;
+  line-height: 1.8;
+  color: #b0aaa0;
+}
+
+.story-highlights {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 14px;
+}
+
+.highlight-box {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 162, 39, 0.18);
+  border-radius: var(--radius-md);
+  padding: 18px 16px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease, border-color 0.3s ease;
+}
+
+.highlight-box:hover {
+  transform: translateY(-4px);
+  border-color: rgba(201, 162, 39, 0.45);
+}
+
+.highlight-num {
+  display: block;
+  font-family: var(--font-numeral);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-gold);
+  line-height: 1.1;
+  margin-bottom: 4px;
+}
+
+.highlight-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+/* ---- Logo Card ---- */
+.logo-card {
+  position: relative;
+  background: linear-gradient(145deg, rgba(26, 26, 32, 0.9) 0%, rgba(18, 18, 22, 0.95) 100%);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 40px 32px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45), 0 0 30px rgba(201, 162, 39, 0.08);
+  overflow: hidden;
+}
+
+.logo-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(201, 162, 39, 0.12) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.logo-card__img-wrap {
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 24px;
+  border-radius: 50%;
+  background: rgba(11, 11, 12, 0.8);
+  border: 2px solid rgba(201, 162, 39, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 30px rgba(201, 162, 39, 0.25);
+  padding: 16px;
+}
+
+.logo-card__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.5));
+}
+
+.logo-card__title {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--color-white);
+  margin-bottom: 6px;
+}
+
+.logo-card__subtitle {
+  font-size: 0.9rem;
+  color: var(--color-gold-light);
+  margin-bottom: 18px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.logo-card__desc {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: #9f988d;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 18px;
+}
+
+/* ============================================================
+   2. ADVISORS SECTION (อาจารย์ที่ปรึกษา 2 คน)
+   ============================================================ */
+.advisors-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 32px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.advisor-card {
+  position: relative;
+  background: linear-gradient(145deg, rgba(24, 24, 30, 0.85) 0%, rgba(16, 16, 20, 0.95) 100%);
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 36px 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.35);
+  transition: transform 0.35s var(--ease-luxury), border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.advisor-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(201, 162, 39, 0.55);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), 0 0 25px rgba(201, 162, 39, 0.15);
+}
+
+.advisor-badge {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: rgba(201, 162, 39, 0.15);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  color: var(--color-gold-light);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.advisor-avatar-wrap {
+  position: relative;
+  width: 140px;
+  height: 140px;
+  margin-bottom: 22px;
+  border-radius: 50%;
+  padding: 4px;
+  background: linear-gradient(135deg, var(--color-gold-light), var(--color-gold-dark));
+  box-shadow: 0 8px 25px rgba(201, 162, 39, 0.25);
+}
+
+.advisor-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #25252d;
+  display: block;
+}
+
+.advisor-name {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: var(--color-white);
+  margin-bottom: 6px;
+}
+
+.advisor-role {
+  font-size: 0.92rem;
+  color: var(--color-gold-light);
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.advisor-dept {
+  font-size: 0.88rem;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  margin-bottom: 18px;
+}
+
+.advisor-focus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin-top: auto;
+}
+
+.advisor-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #d1cbc0;
+  font-size: 0.78rem;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+}
+
+/* ============================================================
+   3. DEVELOPERS TEAM SECTION (ทีมนักพัฒนา 4 คน)
+   ============================================================ */
+.team-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.dev-card {
+  position: relative;
+  background: linear-gradient(160deg, rgba(24, 24, 30, 0.9) 0%, rgba(14, 14, 18, 0.95) 100%);
+  border: 1px solid rgba(201, 162, 39, 0.2);
+  border-radius: var(--radius-lg);
+  padding: 28px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.3);
+  transition: transform 0.35s var(--ease-luxury), border-color 0.35s ease, box-shadow 0.35s ease;
+  overflow: hidden;
+}
+
+.dev-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(201, 162, 39, 0.5);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 20px rgba(201, 162, 39, 0.12);
+}
+
+.dev-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--grad-gold);
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.dev-card:hover::before {
+  opacity: 1;
+}
+
+.dev-avatar-wrap {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 18px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, rgba(201, 162, 39, 0.6), rgba(201, 162, 39, 0.1));
+}
+
+.dev-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  background: #25252d;
+  display: block;
+}
+
+.dev-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--color-white);
+  margin-bottom: 4px;
+}
+
+.dev-nickname {
+  font-size: 0.82rem;
+  color: var(--color-gold);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.dev-role-badge {
+  background: rgba(201, 162, 39, 0.1);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  color: var(--color-gold-light);
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 14px;
+}
+
+.dev-desc {
+  font-size: 0.85rem;
+  color: #a49e93;
+  line-height: 1.55;
+  margin-bottom: 18px;
+  flex-grow: 1;
+}
+
+.dev-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 18px;
+}
+
+.dev-skill-tag {
+  font-size: 0.72rem;
+  padding: 2px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+  color: #ccc6ba;
+}
+
+.dev-socials {
+  display: flex;
+  gap: 10px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  width: 100%;
+  justify-content: center;
+}
+
+.dev-social-link {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #b0aaa0;
+  transition: all 0.25s ease;
+}
+
+.dev-social-link:hover {
+  background: var(--color-gold);
+  color: var(--color-black);
+  border-color: var(--color-gold);
+  transform: translateY(-2px);
+}
+
+.dev-social-link svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* ============================================================
+   4. TEAM GALLERY SECTION (รูปภาพทีม 5 รูป)
+   ============================================================ */
+.gallery-mosaic {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr;
+  grid-template-rows: 240px 240px;
+  gap: 20px;
+}
+
+.gallery-item {
+  position: relative;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  border: 1px solid rgba(201, 162, 39, 0.25);
+  background: #191920;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  group: "";
+}
+
+.gallery-item--featured {
+  grid-column: 1 / 2;
+  grid-row: 1 / 3;
+}
+
+.gallery-item__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s var(--ease-luxury);
+  display: block;
+}
+
+.gallery-item:hover .gallery-item__img {
+  transform: scale(1.06);
+}
+
+.gallery-item__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(11, 11, 12, 0.9) 100%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.gallery-item:hover .gallery-item__overlay {
+  opacity: 1;
+}
+
+.gallery-item__tag {
+  display: inline-block;
+  background: rgba(201, 162, 39, 0.85);
+  color: var(--color-black);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 6px;
+  width: fit-content;
+}
+
+.gallery-item__caption {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-white);
+  line-height: 1.4;
+}
+
+.gallery-item__zoom {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(11, 11, 12, 0.7);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-gold-light);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+.gallery-item:hover .gallery-item__zoom {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ---- Lightbox Modal ---- */
+.gallery-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(8, 8, 10, 0.92);
+  backdrop-filter: blur(16px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s;
+}
+
+.gallery-modal.is-open {
+  opacity: 1;
+  visibility: visible;
+}
+
+.gallery-modal__content {
+  position: relative;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.gallery-modal__img {
+  max-width: 100%;
+  max-height: 75vh;
+  object-fit: contain;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(201, 162, 39, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+}
+
+.gallery-modal__caption {
+  color: var(--color-ivory);
+  font-size: 1.1rem;
+  margin-top: 16px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.gallery-modal__close {
+  position: absolute;
+  top: -45px;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: var(--color-white);
+  border-radius: 50%;
+  font-size: 1.3rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.gallery-modal__close:hover {
+  background: var(--color-gold);
+  color: var(--color-black);
+  transform: scale(1.1);
+}
+
+/* ============================================================
+   5. RESPONSIVE BREAKPOINTS
+   ============================================================ */
+@media (max-width: 1080px) {
+  .team-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .gallery-mosaic {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+  }
+
+  .gallery-item--featured {
+    grid-column: 1 / -1;
+    height: 320px;
+  }
+
+  .gallery-item:not(.gallery-item--featured) {
+    height: 220px;
+  }
+}
+
+@media (max-width: 860px) {
+  .story-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+
+  .advisors-grid {
+    grid-template-columns: 1fr;
+    max-width: 500px;
+  }
+
+  .about-hero {
+    padding: 120px 20px 60px;
+    min-height: 40vh;
+  }
+}
+
+@media (max-width: 580px) {
+  .team-grid {
+    grid-template-columns: 1fr;
+    max-width: 380px;
+    margin: 0 auto;
+  }
+
+  .story-highlights {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-mosaic {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .gallery-item--featured,
+  .gallery-item:not(.gallery-item--featured) {
+    height: 220px;
+  }
+}

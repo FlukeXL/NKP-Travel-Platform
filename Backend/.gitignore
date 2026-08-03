@@ -1,0 +1,7 @@
+node_modules/
+.env
+.devdata/
+uploads/*
+!uploads/.gitkeep
+*.log
+nakhon-phanom-lifestyle-travel-firebase-adminsdk-fbsvc-631cccd9b9.json

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>สภาพแวดล้อม | Nakhon Phanom Lifestyle Travel Platform</title>
+  <meta name="description" content="ข้อมูลสภาพแวดล้อม PM2.5 สภาพอากาศ อุณหภูมิ และระดับแม่น้ำโขงของจังหวัดนครพนม พร้อมกราฟย้อนหลัง 7 วันและไฟล์ Excel" />
+
+  <!-- Design system + shared components -->
+  <link rel="stylesheet" href="/Fronend/css/style.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/footer.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/weather.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/auth.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=34" />
+</head>
+<body>
+
+  <!-- ================= FLOATING HEADER (Navbar + Infobar) — shared, same as every page ================= -->
+  <div class="floating-header" id="site-floating-header" data-desktop-only>
+    <div data-include="/Fronend/components/navbar.html"></div>
+    <div data-include="/Fronend/components/infobar.html"></div>
+  </div>
+
+  <!-- ================= MOBILE SHELL (fully independent from desktop) ================= -->
+  <div data-mobile-only>
+    <div data-include="/Fronend/components/mobile-shell.html"></div>
+  </div>
+
+  <!-- ================= AUTH MODAL (login / register popup) — shared site-wide ================= -->
+  <div data-include="/Fronend/components/auth-modal.html"></div>
+
+  <!-- ================= PAGE HERO ================= -->
+  <section class="page-hero" id="page-hero">
+    <img class="page-hero__img" src="/assets/images/weather/page-hero.jpg" alt="สภาพแวดล้อมนครพนม" />
+    <div class="page-hero__overlay"></div>
+    <div class="page-hero__content">
+      <div class="page-hero__breadcrumb">
+        <a href="/Fronend/index.html">หน้าหลัก</a> <span>/</span> <span class="text-gold">สภาพแวดล้อม</span>
+      </div>
+      <h1 class="page-hero__title">สภาพแวดล้อม<em>นครพนม</em></h1>
+      <p class="page-hero__subtitle">ข้อมูลจริงแบบเรียลไทม์ พร้อมย้อนหลัง 7 วัน วิเคราะห์และดาวน์โหลดเป็น Excel ได้ทันที</p>
+    </div>
+  </section>
+
+  <!-- Quick jump anchors -->
+  <nav class="quick-jump" aria-label="ลิงก์ลัดในหน้านี้">
+    <a class="quick-jump__link" href="#panel-pm25">PM2.5</a>
+    <a class="quick-jump__link" href="#panel-weather">สภาพอากาศ</a>
+    <a class="quick-jump__link" href="#panel-temp">อุณหภูมิ</a>
+    <a class="quick-jump__link" href="#panel-mekong">ระดับแม่น้ำโขง</a>
+  </nav>
+
+  <!-- ================= DISTRICT FILTER (PM2.5 + Temperature only) ================= -->
+  <section class="district-bar">
+    <div class="container">
+      <span class="district-bar__label">เลือกเขตอำเภอ — ใช้กรองเฉพาะข้อมูล PM2.5 และอุณหภูมิ ส่วนสภาพอากาศและระดับแม่น้ำโขงแสดงภาพรวมทั้งจังหวัด</span>
+      <div class="district-bar__chips" id="district-chips"><!-- filled by js/weather.js --></div>
+    </div>
+  </section>
+
+  <!-- ================= PANEL 1: PM2.5 ================= -->
+  <section class="metric-panel" id="panel-pm25">
+    <div class="container">
+      <div class="metric-panel__head fade-in">
+        <div class="metric-panel__icon"></div>
+        <div class="metric-panel__title-wrap">
+          <span class="eyebrow">Air Quality Monitor</span>
+          <h2 class="section-title" style="margin:6px 0 0; font-size:1.6rem;">PM2.5</h2>
+          <p class="metric-panel__sub">ค่าฝุ่นละอองขนาดเล็ก แบ่งตามเขตอำเภอ พร้อมข้อมูลย้อนหลัง 7 วันจริง</p>
+        </div>
+        <div class="metric-panel__actions">
+          <button class="btn btn-outline btn-sm" id="pm25-export">⬇ ดาวน์โหลด Excel</button>
+        </div>
+      </div>
+
+      <div class="metric-panel__body fade-in">
+        <div class="gauge-card" id="pm25-gauge">
+          <div class="gauge"><div class="gauge__value"></div></div>
+          <span class="gauge-card__status"></span>
+          <p class="gauge-card__district"></p>
+        </div>
+
+        <div class="chart-card">
+          <!-- Full pollutant breakdown (PM10, CO, NO2, SO2, O3, AQI) —
+               supplements the headline PM2.5 gauge with the complete
+               air quality data set, filled by js/weather.js renderPm25Panel. -->
+          <div class="stat-grid" id="pm25-stat-grid"></div>
+
+          <div class="chart-card__canvas-wrap">
+            <canvas id="pm25-chart"></canvas>
+          </div>
+          <div class="chart-card__tablewrap">
+            <table class="data-table">
+              <thead><tr><th>วันที่</th><th>ค่า PM2.5</th></tr></thead>
+              <tbody id="pm25-table-body"></tbody>
+            </table>
+          </div>
+          <div class="band-legend" data-band-legend="default"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PANEL 2: สภาพอากาศ ================= -->
+  <section class="metric-panel" id="panel-weather">
+    <div class="container">
+      <div class="metric-panel__head fade-in">
+        <div class="metric-panel__icon"></div>
+        <div class="metric-panel__title-wrap">
+          <span class="eyebrow">Weather Condition</span>
+          <h2 class="section-title" style="margin:6px 0 0; font-size:1.6rem;">สภาพอากาศ</h2>
+          <p class="metric-panel__sub">ภาพรวมทั้งจังหวัด ไม่แบ่งเขตอำเภอ พร้อมข้อมูลย้อนหลัง 7 วันจริง</p>
+        </div>
+        <div class="metric-panel__actions">
+          <button class="btn btn-outline btn-sm" id="weather-export">⬇ ดาวน์โหลด Excel</button>
+        </div>
+      </div>
+
+      <div class="metric-panel__body fade-in">
+        <div class="gauge-card" id="weather-gauge">
+          <div class="gauge"><div class="gauge__value"></div></div>
+          <span class="gauge-card__status"></span>
+          <p class="gauge-card__district"></p>
+        </div>
+
+        <div class="chart-card">
+          <!-- Full weather data set (feels-like, wind, pressure,
+               visibility, UV index) — filled by js/weather.js
+               renderWeatherPanel. -->
+          <div class="stat-grid" id="weather-stat-grid"></div>
+
+          <div class="chart-card__canvas-wrap">
+            <canvas id="weather-chart"></canvas>
+          </div>
+          <div class="chart-card__tablewrap">
+            <table class="data-table">
+              <thead><tr><th>วันที่</th><th>อุณหภูมิ</th></tr></thead>
+              <tbody id="weather-table-body"></tbody>
+            </table>
+          </div>
+          <div class="band-legend" data-band-legend="default"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PANEL 3: อุณหภูมิ ================= -->
+  <section class="metric-panel" id="panel-temp">
+    <div class="container">
+      <div class="metric-panel__head fade-in">
+        <div class="metric-panel__icon"></div>
+        <div class="metric-panel__title-wrap">
+          <span class="eyebrow">Temperature Monitor</span>
+          <h2 class="section-title" style="margin:6px 0 0; font-size:1.6rem;">อุณหภูมิ</h2>
+          <p class="metric-panel__sub">แบ่งตามเขตอำเภอ พร้อมข้อมูลย้อนหลัง 7 วันจริง</p>
+        </div>
+        <div class="metric-panel__actions">
+          <button class="btn btn-outline btn-sm" id="temp-export">⬇ ดาวน์โหลด Excel</button>
+        </div>
+      </div>
+
+      <div class="metric-panel__body fade-in">
+        <div class="gauge-card" id="temp-gauge">
+          <div class="gauge"><div class="gauge__value"></div></div>
+          <span class="gauge-card__status"></span>
+          <p class="gauge-card__district"></p>
+        </div>
+
+        <div class="chart-card">
+          <div class="stat-grid" id="temp-stat-grid"></div>
+
+          <div class="chart-card__canvas-wrap">
+            <canvas id="temp-chart"></canvas>
+          </div>
+          <div class="chart-card__tablewrap">
+            <table class="data-table">
+              <thead><tr><th>วันที่</th><th>อุณหภูมิ</th></tr></thead>
+              <tbody id="temp-table-body"></tbody>
+            </table>
+          </div>
+          <div class="band-legend" data-band-legend="default"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= PANEL 4: ระดับแม่น้ำโขง ================= -->
+  <section class="metric-panel" id="panel-mekong">
+    <div class="container">
+      <div class="metric-panel__head fade-in">
+        <div class="metric-panel__icon"></div>
+        <div class="metric-panel__title-wrap">
+          <span class="eyebrow">Mekong River Level</span>
+          <h2 class="section-title" style="margin:6px 0 0; font-size:1.6rem;">ระดับแม่น้ำโขง</h2>
+          <p class="metric-panel__sub">ภาพรวมทั้งจังหวัด ไม่แบ่งเขตอำเภอ พร้อมข้อมูลย้อนหลัง 7 วันจริง</p>
+        </div>
+        <div class="metric-panel__actions">
+          <button class="btn btn-outline btn-sm" id="mekong-export">⬇ ดาวน์โหลด Excel</button>
+        </div>
+      </div>
+
+      <div class="metric-panel__body fade-in">
+        <div class="gauge-card" id="mekong-gauge">
+          <div class="gauge"><div class="gauge__value"></div></div>
+          <span class="gauge-card__status"></span>
+          <p class="gauge-card__district"></p>
+        </div>
+
+        <div class="chart-card">
+          <div class="stat-grid" id="mekong-stat-grid"></div>
+
+          <div class="chart-card__canvas-wrap">
+            <canvas id="mekong-chart"></canvas>
+          </div>
+          <div class="chart-card__tablewrap">
+            <table class="data-table">
+              <thead><tr><th>วันที่</th><th>ระดับน้ำ</th></tr></thead>
+              <tbody id="mekong-table-body"></tbody>
+            </table>
+          </div>
+          <div class="band-legend" data-band-legend="mekong"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <div data-include="/Fronend/components/footer.html"></div>
+
+  <!-- ================= Scripts ================= -->
+  <!-- Chart.js 4.5.1 (pinned) — 7-day history line charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js?v=34"></script>
+  <!-- SheetJS 0.20.3 (pinned) — Excel export -->
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js?v=34"></script>
+
+  <script src="/Fronend/js/i18n.js?v=34"></script>
+  <script src="/Fronend/js/places-data.js?v=34"></script>
+  <!-- Firebase Web SDK 10.13.2 (pinned, compat build) — Google Sign-In -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=34"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=34"></script>
+  <script src="/Fronend/js/firebase.js?v=34"></script>
+  <script src="/Fronend/js/api-client.js?v=34"></script>
+  <script src="/Fronend/js/environment-data.js?v=34"></script>
+  <script src="/Fronend/js/auth-state.js?v=34"></script>
+  <script src="/Fronend/js/main.js?v=34"></script>
+  <script src="/Fronend/js/navbar.js?v=34"></script>
+  <script src="/Fronend/js/auth.js?v=34"></script>
+  <script src="/Fronend/js/excel-export.js?v=34"></script>
+  <script src="/Fronend/js/infobar.js?v=34"></script>
+  <script src="/Fronend/js/weather.js?v=34"></script>
+  <script src="/Fronend/js/mobile-shell.js?v=34"></script>
+  <!-- ================= AI TOUR GUIDE ================= -->
+  <div data-include="/Fronend/components/ai-tour-guide.html"></div>
+  <script src="/Fronend/js/ai-tour-guide.js?v=34"></script>
+</body>
+</html>

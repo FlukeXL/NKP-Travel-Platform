@@ -1,0 +1,50 @@
+<div class="ai-guide-fab" id="ai-guide-fab" aria-label="Nakhon Phanom AI Guide">
+  <div class="ai-guide-fab__ring"></div>
+  <img src="/Fronend/assets/images/Planvis.png" alt="AI Guide" class="ai-guide-fab__image" />
+</div>
+
+<div class="ai-guide-chat" id="ai-guide-chat" style="display: none;">
+  <div class="ai-guide-chat__glass-overlay"></div>
+  <div class="ai-guide-chat__content">
+    <div class="ai-guide-chat__header">
+      <div class="ai-guide-chat__header-info">
+        <div class="ai-guide-chat__avatar-wrap">
+          <img src="/Fronend/assets/images/Planvis.png" alt="AI Guide" class="ai-guide-chat__avatar-image" />
+          <div class="ai-guide-chat__status-dot"></div>
+        </div>
+        <div>
+          <h4 class="ai-guide-chat__title">Nakhon Phanom Guide</h4>
+          <p class="ai-guide-chat__status">Exclusive AI Concierge</p>
+        </div>
+      </div>
+      <button class="ai-guide-chat__close" id="ai-guide-chat-close" aria-label="Close chat">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+    </div>
+
+    <div class="ai-guide-chat__messages" id="ai-guide-chat-messages">
+      <div class="ai-guide-chat__message ai-guide-chat__message--bot">
+        <div class="ai-guide-chat__bubble">
+          สวัสดีครับ ผมคือ Planvis AI ไกด์ส่วนตัวของคุณผมจะพาเที่ยวจังหวัดนครพนมเองครับ
+          ยินดีต้อนรับสู่ประสบการณ์การท่องเที่ยวเหนือระดับ ให้ผมช่วยออกแบบการเดินทางที่สมบูรณ์แบบสำหรับคุณนะครับ
+        </div>
+      </div>
+    </div>
+
+    <div class="ai-guide-chat__input-area">
+      <textarea class="ai-guide-chat__input" id="ai-guide-chat-input"
+        placeholder="พิมพ์ข้อความ... (เช่น แนะนำที่เที่ยว 1 วัน)" rows="1"></textarea>
+      <button class="ai-guide-chat__send" id="ai-guide-chat-send" aria-label="Send">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22222a"/>
+      <stop offset="100%" stop-color="#0f0f14"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f8e7a8"/>
+      <stop offset="50%" stop-color="#c9a227"/>
+      <stop offset="100%" stop-color="#8a6915"/>
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" fill="url(#bg)"/>
+  <circle cx="150" cy="150" r="142" fill="none" stroke="url(#gold)" stroke-width="3" opacity="0.6"/>
+  <!-- Advisor Icon -->
+  <circle cx="150" cy="115" r="48" fill="url(#gold)" opacity="0.9"/>
+  <!-- Glasses accent -->
+  <circle cx="135" cy="112" r="12" fill="none" stroke="#111" stroke-width="2.5" opacity="0.6"/>
+  <circle cx="165" cy="112" r="12" fill="none" stroke="#111" stroke-width="2.5" opacity="0.6"/>
+  <line x1="147" y1="112" x2="153" y2="112" stroke="#111" stroke-width="2.5" opacity="0.6"/>
+  <path d="M65 242 C65 188, 98 172, 150 172 C202 172, 235 188, 235 242 Z" fill="url(#gold)" opacity="0.9"/>
+  <!-- Tie / Collar -->
+  <polygon points="150,185 142,215 150,230 158,215" fill="#111" opacity="0.6"/>
+  <text x="150" y="278" font-family="'Space Grotesk', sans-serif" font-size="14" fill="#e8cb77" text-anchor="middle" font-weight="600" letter-spacing="2">ADVISOR 01 / PHOTO</text>
+</svg>

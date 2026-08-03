@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#141d24"/>
+      <stop offset="100%" stop-color="#0a0a0d"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8cb77"/>
+      <stop offset="100%" stop-color="#9c7a1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg4)"/>
+  <circle cx="400" cy="220" r="160" fill="none" stroke="url(#gold)" stroke-width="1.5" stroke-dasharray="10 5" opacity="0.25"/>
+  <!-- AI / Code Testing Icon -->
+  <g transform="translate(360, 150)" stroke="url(#gold)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="20,40 0,60 20,80"/>
+    <polyline points="60,40 80,60 60,80"/>
+    <line x1="50" y1="30" x2="30" y2="90"/>
+    <circle cx="40" cy="15" r="10"/>
+    <line x1="40" y1="0" x2="40" y2="5"/>
+  </g>
+  <text x="400" y="360" font-family="'Space Grotesk', sans-serif" font-size="20" fill="#e8cb77" text-anchor="middle" font-weight="600" letter-spacing="3">TEAM PHOTO 04 : SYSTEM &amp; AI TESTING</text>
+  <text x="400" y="390" font-family="'Prompt', sans-serif" font-size="15" fill="#8a8578" text-anchor="middle">การทดสอบฟังก์ชัน AI Tour Guide, ข้อมูลเรียลไทม์ และระบบแผนที่</text>
+</svg>

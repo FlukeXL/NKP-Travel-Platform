@@ -1,0 +1,55 @@
+<div class="place-modal" id="place-modal" role="dialog" aria-modal="true" aria-labelledby="place-modal-title">
+  <div class="place-modal__card">
+    <button class="place-modal__close" id="place-modal-close" aria-label="ปิดหน้าต่าง"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="16" height="16"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+
+    <div class="place-modal__layout">
+      <!-- ---- Left: photo gallery ---- -->
+      <div class="place-modal__gallery">
+        <div class="place-modal__gallery-viewport">
+          <div class="place-modal__gallery-track" id="place-gallery-track"><!-- filled by js --></div>
+          <button class="place-modal__arrow place-modal__arrow--prev" id="place-gallery-prev" aria-label="รูปก่อนหน้า">‹</button>
+          <button class="place-modal__arrow place-modal__arrow--next" id="place-gallery-next" aria-label="รูปถัดไป">›</button>
+          <span class="place-modal__gallery-counter" id="place-gallery-counter"></span>
+        </div>
+        <div class="place-modal__gallery-dots" id="place-gallery-dots"></div>
+      </div>
+
+      <!-- ---- Right: details + reviews ---- -->
+      <div class="place-modal__body">
+        <div class="place-modal__scroll">
+          <span class="place-modal__category" id="place-modal-category"></span>
+          <h3 class="place-modal__title" id="place-modal-title"></h3>
+
+          <div class="place-modal__rating-row">
+            <span class="place-modal__stars" id="place-modal-stars"></span>
+            <span class="place-modal__rating-value" id="place-modal-rating-value"></span>
+            <span class="place-modal__rating-count" id="place-modal-rating-count"></span>
+          </div>
+
+          <p class="place-modal__desc" id="place-modal-desc"></p>
+          <button class="place-modal__desc-toggle" id="place-modal-desc-toggle" aria-label="ขยาย/ย่อคำอธิบาย" style="display:none;">อ่านต่อ ▾</button>
+
+          <div class="place-modal__meta-row">
+            <span class="place-modal__meta-item" id="place-modal-area"></span>
+            <a class="place-modal__meta-item place-modal__map-link" id="place-modal-coords" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><path d="M9 4L4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z"/><path d="M9 4v14M15 6v14"/></svg>
+              ดูแผนที่ / พิกัด
+            </a>
+            <span class="place-modal__meta-item place-modal__price" id="place-modal-price"></span>
+          </div>
+
+          <div class="place-modal__divider"></div>
+
+          <div class="place-modal__reviews-head">
+            <h4>รีวิวจากผู้ใช้งาน</h4>
+            <span class="place-modal__reviews-count" id="place-modal-review-count"></span>
+          </div>
+
+          <!-- Filled by js/place-modal.js: either a lock prompt (guest)
+               or the review form + review list (signed-in user). -->
+          <div class="place-modal__reviews-wrap" id="place-modal-reviews-wrap"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

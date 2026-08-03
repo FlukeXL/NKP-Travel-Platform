@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nakhon Phanom Lifestyle Travel Platform</title>
+  <meta name="description"
+    content="เว็บไซต์ท่องเที่ยวจังหวัดนครพนม แนะนำสถานที่ท่องเที่ยว ไลฟ์สไตล์การเที่ยว เทศกาล และข้อมูลสภาพแวดล้อมเรียลไทม์" />
+
+  <!-- Design system + shared components -->
+  <link rel="stylesheet" href="/Fronend/css/style.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/hero.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/home.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/footer.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/auth.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/place-modal.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/attractions.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/videos.css?v=34" />
+  <link rel="stylesheet" href="/Fronend/css/video-modal.css?v=34" />
+</head>
+
+<body>
+
+  <div class="floating-header" id="site-floating-header" data-desktop-only>
+    <div data-include="/Fronend/components/navbar.html"></div>
+    <div data-include="/Fronend/components/infobar.html"></div>
+  </div>
+
+  <!-- ================= MOBILE SHELL (fully independent from desktop) ================= -->
+  <div data-mobile-only>
+    <div data-include="/Fronend/components/mobile-shell.html"></div>
+  </div>
+
+  <!-- ================= AUTH MODAL (login / register popup) — shared site-wide ================= -->
+  <div data-include="/Fronend/components/auth-modal.html"></div>
+
+  <!-- ================= PLACE DETAIL MODAL (shared site-wide) ================= -->
+  <div data-include="/Fronend/components/place-modal.html"></div>
+
+  <!-- ================= VIDEO MODAL ================= -->
+  <div data-include="/Fronend/components/video-modal.html"></div>
+
+  <!-- ================= HERO VIDEO ================= -->
+  <section class="hero" id="hero">
+    <video class="hero__video" autoplay muted loop playsinline poster="/assets/images/hero-poster.jpg">
+      <!-- TODO: add real drone/lifestyle footage of Nakhon Phanom -->
+      <source src="assets/Videos/Mapnexus.mp4" type="video/mp4" />
+    </video>
+    <div class="hero__overlay"></div>
+
+    <div class="hero__content">
+      <span class="hero__kicker">Welcome to Nakhon Phanom</span>
+      <h1 class="hero__title">Nakhon Phanom <em>Lifestyle</em> Travel Platform</h1>
+      <p class="hero__subtitle">สัมผัสเสน่ห์ริมโขง วัฒนธรรมล้านช้าง และไลฟ์สไตล์การเที่ยวที่เป็นคุณ</p>
+      <div class="hero__cta">
+        <a href="/Fronend/pages/attractions.html" class="btn btn-gold">เริ่มต้นการเดินทาง</a>
+        <a href="#showcase" class="btn btn-ghost">สำรวจสถานที่</a>
+      </div>
+    </div>
+
+    <div class="hero__scroll-cue">Scroll</div>
+  </section>
+
+  <!-- ================= EVENT / FESTIVAL POPUP (once per website visit / session) ================= -->
+  <div class="event-popup" id="event-popup" role="dialog" aria-modal="true" aria-labelledby="event-popup-title">
+    <div class="event-popup__card">
+      <button class="event-popup__close" id="event-popup-close" aria-label="ปิดหน้าต่างแจ้งเตือน">✕</button>
+
+      <!-- Magazine-style media header: image/gradient with title overlaid at the bottom -->
+      <div class="event-popup__media">
+        <img class="event-popup__media-img" data-field="event-banner-img" alt="" />
+        <div class="event-popup__media-pattern"></div>
+        <div class="event-popup__media-gradient"></div>
+        <span class="event-popup__media-emoji" aria-hidden="true"></span>
+      </div>
+
+      <div class="event-popup__body">
+        <div class="event-popup__header-text" style="margin-bottom: 16px;">
+          <span class="event-popup__tag" data-field="event-tag" style="color: var(--color-gold-dark);"></span>
+          <h3 class="event-popup__title" id="event-popup-title" data-field="event-title"
+            style="color: var(--color-black); text-shadow: none;"></h3>
+        </div>
+        <p class="event-popup__desc" data-field="event-desc"></p>
+
+        <div class="event-popup__meta">
+          <div class="event-popup__meta-item">
+            <span class="event-popup__meta-icon"></span>
+            <div>
+              <span class="event-popup__meta-label">วันจัดงาน</span>
+              <span class="event-popup__meta-value" data-field="event-dates"></span>
+            </div>
+          </div>
+          <div class="event-popup__meta-item">
+            <span class="event-popup__meta-icon"></span>
+            <div>
+              <span class="event-popup__meta-label">สถานที่</span>
+              <span class="event-popup__meta-value" data-field="event-location"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="event-popup__countdown-chip">
+          <span class="event-popup__countdown-dot"></span>
+          <span data-field="event-countdown"></span>
+        </div>
+
+        <div class="event-popup__actions">
+          <button class="btn btn-outline" id="event-popup-dismiss">ปิดหน้าต่างนี้</button>
+          <a href="#" class="btn btn-gold" data-field="event-cta">ดูรายละเอียดเทศกาล</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SHOWCASE CAROUSEL (12s auto-rotate) ================= -->
+  <section class="showcase" id="showcase" data-aos="fade-up">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <div>
+          <span class="eyebrow">Featured Destinations</span>
+          <h2 class="section-title">สถานที่แนะนำประจำสัปดาห์</h2>
+        </div>
+        <p class="section-sub">กิจกรรม</p>
+      </div>
+
+      <div class="showcase__slider" id="showcase-slider" data-aos="fade-up">
+        <div class="showcase__slides"><!-- filled by js/home2.js --></div>
+        <div class="showcase__arrows">
+          <button class="showcase__arrow showcase__arrow--prev" aria-label="ก่อนหน้า">‹</button>
+          <button class="showcase__arrow showcase__arrow--next" aria-label="ถัดไป">›</button>
+        </div>
+        <div class="showcase__nav"><!-- filled by js/home2.js --></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= VIDEO REVIEWS ================= -->
+  <section class="widget-section" id="section-videos" style="padding-top: 10px;" data-aos="fade-up">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <div>
+          <span class="eyebrow">Video Reviews by Travelers</span>
+          <div class="wardoo__brand">
+            <h2 class="section-title"><span class="wardoo__brand-mark">Wardoo</span> · วิดีโอคอนเท้นจากสายเที่ยวจริงๆ
+            </h2>
+          </div>
+        </div>
+        <a href="/Fronend/pages/videos.html" class="btn btn-outline">ดูทั้งหมด</a>
+      </div>
+      <div class="videos-grid" id="home-videos-grid" data-aos="fade-up"><!-- filled by js/home2.js --></div>
+    </div>
+  </section>
+
+  <!-- ================= AD BANNER STRIP (small, non-intrusive) ================= -->
+  <div class="promo-strip" id="home-promo-strip" style="padding:20px 24px; display:flex; justify-content:center; background:#FAF8F3;" data-aos="fade-up">
+    <div style="max-width:1000px; width:100%; text-align:center;">
+      <div class="promo-strip__frame" id="home-promo-frame" style="border-radius:12px; overflow:hidden; border:1px dashed #d4c9a8; padding:6px;">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= SECTION 0: แนะนำเฉพาะสำหรับคุณ (AI-personalized) =================-->
+  <section class="widget-section widget-section--recommend" id="section-recommend" data-aos="fade-up">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <div>
+          <span class="eyebrow">Just For You</span>
+          <h2 class="section-title">แนะนำเฉพาะสำหรับคุณ</h2>
+          <p class="section-sub" id="recommend-reason">เข้าสู่ระบบเพื่อรับคำแนะนำที่ตรงกับไลฟ์สไตล์ของคุณ</p>
+        </div>
+      </div>
+
+      <div class="widget-grid" id="home-recommend-grid" data-aos="fade-up"><!-- filled by js/home2.js --></div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 1: อาหารเวียดนาม / อาหารพื้นถิ่น / วัฒนธรรม =================-->
+  <section class="widget-section" id="section-food-culture" data-aos="fade-up">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <div>
+          <span class="eyebrow">Local and Vietnamese cuisine</span>
+          <h2 class="section-title">อาหารพื้นถิ่น และ อาหารเวียดนาม</h2>
+        </div>
+        <a href="/Fronend/pages/attractions.html#cat-restaurant" class="btn btn-outline">ดูทั้งหมด</a>
+      </div>
+
+      <div class="widget-grid" id="home-food-culture-grid" data-aos="fade-up"><!-- filled by js/home2.js --></div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 2: คาเฟ่ =================-->
+  <section class="widget-section" id="section-cafe" data-aos="fade-up">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <div>
+          <span class="eyebrow">Cafe & Coffee Shops</span>
+          <h2 class="section-title">คาเฟ่สุดชิคในนครพนม</h2>
+        </div>
+        <a href="/Fronend/pages/cafe.html" class="btn btn-outline">ดูทั้งหมด</a>
+      </div>
+
+      <div class="widget-grid" id="home-cafe-grid" data-aos="fade-up"><!-- filled by js/home2.js --></div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 3: เทศกาลจังหวัดนครพนม ================= -->
+  <section class="widget-section" id="section-festivals" data-aos="fade-up">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <div>
+          <span class="eyebrow">Festivals & Traditions</span>
+          <h2 class="section-title">เทศกาลของจังหวัดนครพนม</h2>
+        </div>
+        <a href="/Fronend/pages/events.html" class="btn btn-outline">ดูทั้งหมด</a>
+      </div>
+
+      <div class="widget-grid">
+        <article class="widget-card widget-card--festival" data-aos="fade-up">
+          <div class="widget-card__img-wrap">
+            <img src="/assets/images/events/fire-boat-festival.jpg" alt="งานไหลเรือไฟ" />
+            <span class="widget-card__badge">เทศกาลประจำปี</span>
+          </div>
+          <div class="widget-card__body">
+            <span class="widget-card__dates">24 ต.ค. – 2 พ.ย.</span>
+            <h4 class="widget-card__title">งานประเพณีไหลเรือไฟ</h4>
+            <p class="widget-card__desc">เทศกาลแห่งแสงสีบนสายน้ำโขง สืบสานวัฒนธรรมออกพรรษา</p>
+          </div>
+        </article>
+
+        <article class="widget-card widget-card--festival" data-aos="fade-up" data-aos-delay="100">
+          <div class="widget-card__img-wrap">
+            <img src="/assets/images/events/songkran-nakhonphanom.jpg" alt="สงกรานต์นครพนม" />
+            <span class="widget-card__badge">เทศกาลประจำปี</span>
+          </div>
+          <div class="widget-card__body">
+            <span class="widget-card__dates">13 – 15 เม.ย.</span>
+            <h4 class="widget-card__title">สงกรานต์ริมโขง</h4>
+            <p class="widget-card__desc">รื่นเริงสงกรานต์สไตล์ลุ่มน้ำโขง พร้อมการแสดงวัฒนธรรม</p>
+          </div>
+        </article>
+
+        <article class="widget-card widget-card--festival" data-aos="fade-up" data-aos-delay="200">
+          <div class="widget-card__img-wrap">
+            <img src="/assets/images/events/that-phanom-fair.jpg" alt="งานประจำปีพระธาตุพนม" />
+            <span class="widget-card__badge">งานประจำปี</span>
+          </div>
+          <div class="widget-card__body">
+            <span class="widget-card__dates">เดือน 3 (ตามจันทรคติ)</span>
+            <h4 class="widget-card__title">งานประจำปีพระธาตุพนม</h4>
+            <p class="widget-card__desc">งานบุญใหญ่ประจำปี นมัสการองค์พระธาตุพนมอันศักดิ์สิทธิ์</p>
+          </div>
+        </article>
+
+        <article class="widget-card widget-card--festival" data-aos="fade-up" data-aos-delay="300">
+          <div class="widget-card__img-wrap">
+            <img src="/assets/images/events/indochina-fair.jpg" alt="งานกาชาดอินโดจีน" />
+            <span class="widget-card__badge">งานประจำปี</span>
+          </div>
+          <div class="widget-card__body">
+            <span class="widget-card__dates">ธ.ค. (ปลายปี)</span>
+            <h4 class="widget-card__title">งานกาชาดและงานประจำปีจังหวัด</h4>
+            <p class="widget-card__desc">มหกรรมสินค้าและวัฒนธรรมกลุ่มประเทศอินโดจีน</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SECTION 4: กิจกรรมออกกำลังกาย / Marathon =================-->
+  <section class="widget-section" id="section-fitness" data-aos="fade-up">
+    <div class="container">
+      <div class="section-head" data-aos="fade-up">
+        <div>
+          <span class="eyebrow">Active Lifestyle</span>
+          <h2 class="section-title">กิจกรรมส่งเสริมสุขภาพ</h2>
+        </div>
+        <a href="/Fronend/pages/attractions.html#cat-fitness" class="btn btn-outline">ดูทั้งหมด</a>
+      </div>
+
+      <div class="widget-grid" id="home-fitness-grid" data-aos="fade-up"><!-- filled by js/home2.js --></div>
+    </div>
+  </section>
+
+  <!-- ================= FOOTER ================= -->
+  <div data-include="/Fronend/components/footer.html"></div>
+
+  <!-- ================= AI TOUR GUIDE ================= -->
+  <div data-include="/Fronend/components/ai-tour-guide.html"></div>
+
+  <!-- ================= Scripts ================= -->
+  <script src="/Fronend/js/i18n.js?v=34"></script>
+  <script src="/Fronend/js/places-data.js?v=34"></script>
+  <script src="/Fronend/js/reviews-data.js?v=34"></script>
+  <!-- Firebase Web SDK 10.13.2 (pinned, compat build) — Google Sign-In -->
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=34"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=34"></script>
+  <script src="/Fronend/js/firebase.js?v=34"></script>
+  <script src="/Fronend/js/api-client.js?v=34"></script>
+  <script src="/Fronend/js/environment-data.js?v=34"></script>
+  <script src="/Fronend/js/auth-state.js?v=34"></script>
+  <script src="/Fronend/js/recommend.js?v=34"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="/Fronend/js/main.js?v=34"></script>
+  <script src="/Fronend/js/navbar.js?v=34"></script>
+  <script src="/Fronend/js/auth.js?v=34"></script>
+  <script src="/Fronend/js/place-modal.js?v=34"></script>
+  <script src="/Fronend/js/video-modal.js?v=34"></script>
+  <!-- Chart.js 4.5.1 + SheetJS 0.20.3 (pinned) — Infobar's mini history chart + Excel download -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js?v=34"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js?v=34"></script>
+  <script src="/Fronend/js/excel-export.js?v=34"></script>
+  <script src="/Fronend/js/infobar.js?v=34"></script>
+  <script src="/Fronend/js/home2.js?v=34"></script>
+  <script src="/Fronend/js/mobile-shell.js?v=34"></script>
+  <script src="/Fronend/js/ai-tour-guide.js?v=34"></script>
+</body>
+
+</html>

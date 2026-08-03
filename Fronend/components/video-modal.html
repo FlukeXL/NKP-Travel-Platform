@@ -1,0 +1,50 @@
+<div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-labelledby="video-modal-place">
+  <div class="video-modal__card">
+    <button class="video-modal__close" id="video-modal-close" aria-label="ปิดหน้าต่าง"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="16" height="16"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+
+    <div class="video-modal__player-wrap">
+      <video id="video-modal-player" class="video-modal__player" controls playsinline></video>
+    </div>
+
+    <div class="video-modal__body">
+      <div class="video-modal__scroll">
+        <div class="video-modal__author-row">
+          <img id="video-modal-avatar" class="video-modal__avatar" src="" alt="" />
+          <div>
+            <div id="video-modal-author" class="video-modal__author-name"></div>
+            <div id="video-modal-place" class="video-modal__place"></div>
+          </div>
+        </div>
+
+        <div id="video-modal-stars" class="video-modal__stars"></div>
+        <p id="video-modal-caption" class="video-modal__caption"></p>
+
+        <a href="#" id="video-modal-view-place" class="btn btn-outline btn-sm video-modal__view-place-btn">ดูรายละเอียดสถานที่นี้</a>
+
+        <div class="video-modal__actions">
+          <button class="video-modal__action-btn" id="video-modal-like">
+            <svg class="video-modal__icon-heart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="17" height="17"><path d="M12 20s-7-4.5-9.3-8.8C1.4 8 2.6 4.6 6 4c2-.4 3.8.6 6 3 2.2-2.4 4-3.4 6-3 3.4.6 4.6 4 3.3 7.2C19 15.5 12 20 12 20Z"/></svg>
+            <span id="video-modal-like-count">0</span>
+          </button>
+          <span class="video-modal__action-btn video-modal__action-btn--static">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M4 5h16v11H8l-4 4V5Z"/></svg>
+            <span id="video-modal-comment-count">0</span>
+          </span>
+          <button class="video-modal__action-btn" id="video-modal-share">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="15" height="15"><circle cx="18" cy="5" r="2.4"/><circle cx="6" cy="12" r="2.4"/><circle cx="18" cy="19" r="2.4"/><path d="M8.2 10.8l7.6-4.4M8.2 13.2l7.6 4.4"/></svg>
+            <span id="video-modal-share-label">แชร์วิดีโอ</span>
+          </button>
+        </div>
+
+        <div class="video-modal__divider"></div>
+
+        <h4 class="video-modal__comments-title">ความคิดเห็น</h4>
+        <div class="video-modal__comment-form">
+          <input type="text" id="video-modal-comment-input" placeholder="แสดงความคิดเห็น..." maxlength="300" />
+          <button id="video-modal-comment-submit">ส่ง</button>
+        </div>
+        <div id="video-modal-comment-list" class="video-modal__comment-list"></div>
+      </div>
+    </div>
+  </div>
+</div>

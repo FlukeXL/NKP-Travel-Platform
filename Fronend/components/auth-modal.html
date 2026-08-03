@@ -1,0 +1,138 @@
+
+<div class="auth-modal" id="auth-modal" role="dialog" aria-modal="true" aria-labelledby="auth-modal-title">
+  <div class="auth-modal__card">
+    <button class="auth-modal__close" id="auth-modal-close" aria-label="ปิดหน้าต่าง"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="16" height="16"><path d="M5 5l14 14M19 5L5 19"/></svg></button>
+
+    <div class="auth-modal__body">
+      <div class="auth-modal__brand">
+        <img src="/Fronend/assets/images/logo.png" alt="" />
+        <span>NAKHON<span class="text-gold">PHANOM</span></span>
+      </div>
+
+      <!-- Success state — shown briefly after a mock sign-in, then modal auto-closes -->
+      <div class="auth-modal__success" id="auth-modal-success">
+        <div class="auth-modal__success-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="28" height="28"><path d="M5 12.5l4.5 4.5L19 7"/></svg></div>
+        <h3 class="auth-modal__title" id="auth-success-title">เข้าสู่ระบบสำเร็จ</h3>
+        <p class="auth-modal__subtitle">ยินดีต้อนรับกลับมาครับ กำลังพาคุณไปยังหน้าเดิม...</p>
+      </div>
+
+      <div id="auth-modal-forms">
+        <h3 class="auth-modal__title" id="auth-modal-title">ยินดีต้อนรับ</h3>
+        <p class="auth-modal__subtitle">เข้าสู่ระบบเพื่อเช็คอิน กดหัวใจ และคอมเมนต์ได้เต็มรูปแบบ</p>
+
+        <p class="auth-modal__api-error" id="auth-modal-api-error" role="alert"></p>
+
+        <div class="auth-modal__tabs">
+          <button class="auth-modal__tab is-active" data-auth-tab="login">เข้าสู่ระบบ</button>
+          <button class="auth-modal__tab" data-auth-tab="register">สมัครสมาชิก</button>
+        </div>
+
+        <!-- ================= LOGIN PANEL ================= -->
+        <form class="auth-modal__panel is-active" id="auth-panel-login" data-auth-panel="login" novalidate>
+          <div class="auth-field" data-field="login-email">
+            <label for="login-email">อีเมล</label>
+            <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" />
+            <span class="auth-field__error">กรุณากรอกอีเมลให้ถูกต้อง</span>
+          </div>
+          <div class="auth-field" data-field="login-password">
+            <label for="login-password">รหัสผ่าน</label>
+            <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" />
+            <span class="auth-field__error">กรุณากรอกรหัสผ่าน</span>
+          </div>
+
+          <div class="auth-modal__row">
+            <label class="auth-modal__checkbox">
+              <input type="checkbox" /> จดจำฉันไว้
+            </label>
+            <a href="#" class="auth-modal__forgot">ลืมรหัสผ่าน?</a>
+          </div>
+
+          <button type="submit" class="btn btn-gold auth-modal__submit">เข้าสู่ระบบ</button>
+
+          <div class="auth-modal__divider">หรือ</div>
+
+          <button type="button" class="auth-google-btn" data-auth-google>
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9A8.7 8.7 0 0 0 17.64 9.2z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.55-1.85.87-3.06.87a5.1 5.1 0 0 1-4.8-3.52H1.2v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M4.2 10.91a5.1 5.1 0 0 1 0-3.82V4.76H1.2a9 9 0 0 0 0 8.48z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8.6 8.6 0 0 0 9 0 9 9 0 0 0 1.2 4.76l3 2.33A5.1 5.1 0 0 1 9 3.58z"/></svg>
+            เข้าสู่ระบบด้วย Google
+          </button>
+
+          <p class="auth-modal__switch">ยังไม่มีบัญชี? <button type="button" data-auth-switch="register">สมัครสมาชิก</button></p>
+        </form>
+
+        <!-- ================= REGISTER PANEL ================= -->
+        <form class="auth-modal__panel" id="auth-panel-register" data-auth-panel="register" novalidate>
+          <div class="auth-field" data-field="register-name">
+            <label for="register-name">ชื่อที่แสดง</label>
+            <input type="text" id="register-name" placeholder="เช่น พลอย นครพนม" autocomplete="name" />
+            <span class="auth-field__error">กรุณากรอกชื่อของคุณ</span>
+          </div>
+          <div class="auth-field" data-field="register-email">
+            <label for="register-email">อีเมล</label>
+            <input type="email" id="register-email" placeholder="you@example.com" autocomplete="email" />
+            <span class="auth-field__error">กรุณากรอกอีเมลให้ถูกต้อง</span>
+          </div>
+          <div class="auth-field" data-field="register-password">
+            <label for="register-password">รหัสผ่าน</label>
+            <input type="password" id="register-password" placeholder="อย่างน้อย 8 ตัวอักษร" autocomplete="new-password" />
+            <span class="auth-field__error">รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร</span>
+          </div>
+          <div class="auth-field" data-field="register-birthdate">
+            <label for="register-birthdate">วันเดือนปีเกิด</label>
+            <input type="date" id="register-birthdate" autocomplete="bday" />
+            <span class="auth-field__error">กรุณาเลือกวันเดือนปีเกิด</span>
+          </div>
+
+          <div class="auth-field auth-field--chips">
+            <label>สนใจสถานที่แนวไหน (เลือกได้หลายอย่าง)</label>
+            <div class="auth-chip-group" id="register-interests">
+              <button type="button" data-interest="cafe">คาเฟ่</button>
+              <button type="button" data-interest="restaurant">ร้านอาหาร</button>
+              <button type="button" data-interest="temple">วัด/ศักดิ์สิทธิ์</button>
+              <button type="button" data-interest="nature">ธรรมชาติ</button>
+              <button type="button" data-interest="fitness">ออกกำลังกาย</button>
+              <button type="button" data-interest="culture">วัฒนธรรม</button>
+              <button type="button" data-interest="landmark">แลนด์มาร์ก</button>
+            </div>
+          </div>
+
+          <div class="auth-field">
+            <label>สภาพแวดล้อมที่ชอบ</label>
+            <div class="auth-toggle-group" id="register-env-pref">
+              <button type="button" data-env="indoor">ในร่ม</button>
+              <button type="button" data-env="outdoor">กลางแจ้ง</button>
+              <button type="button" data-env="both" class="is-active">ทั้งสองแบบ</button>
+            </div>
+          </div>
+
+          <div class="auth-field">
+            <label>สไตล์การเที่ยว</label>
+            <div class="auth-toggle-group" id="register-pace-pref">
+              <button type="button" data-pace="comfort">สบาย ผ่อนคลาย</button>
+              <button type="button" data-pace="adventure">ผจญภัย ท้าทาย</button>
+              <button type="button" data-pace="both" class="is-active">ทั้งสองแบบ</button>
+            </div>
+          </div>
+
+          <div class="auth-modal__row" style="margin-bottom: 22px;">
+            <label class="auth-modal__checkbox">
+              <input type="checkbox" id="register-terms" /> ฉันยอมรับข้อกำหนดการใช้งาน
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-gold auth-modal__submit">สมัครสมาชิก</button>
+
+          <div class="auth-modal__divider">หรือ</div>
+
+          <button type="button" class="auth-google-btn" data-auth-google>
+            <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.9A8.7 8.7 0 0 0 17.64 9.2z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.9-2.26c-.8.55-1.85.87-3.06.87a5.1 5.1 0 0 1-4.8-3.52H1.2v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M4.2 10.91a5.1 5.1 0 0 1 0-3.82V4.76H1.2a9 9 0 0 0 0 8.48z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58A8.6 8.6 0 0 0 9 0 9 9 0 0 0 1.2 4.76l3 2.33A5.1 5.1 0 0 1 9 3.58z"/></svg>
+            สมัครด้วย Google
+          </button>
+
+          <p class="auth-modal__switch">มีบัญชีอยู่แล้ว? <button type="button" data-auth-switch="login">เข้าสู่ระบบ</button></p>
+
+          <p class="auth-modal__terms">การสมัครสมาชิกถือว่าคุณยอมรับ <a href="#">ข้อกำหนดการใช้งาน</a> และ <a href="#">นโยบายความเป็นส่วนตัว</a> ของเรา</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

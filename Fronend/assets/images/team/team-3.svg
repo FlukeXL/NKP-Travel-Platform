@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#191924"/>
+      <stop offset="100%" stop-color="#0a0a0d"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8cb77"/>
+      <stop offset="100%" stop-color="#9c7a1e"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="500" fill="url(#bg3)"/>
+  <circle cx="400" cy="220" r="160" fill="none" stroke="url(#gold)" stroke-width="1.5" stroke-dasharray="10 5" opacity="0.25"/>
+  <!-- Advisor Meeting Icon -->
+  <g transform="translate(355, 150)" stroke="url(#gold)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="45" cy="30" r="20"/>
+    <path d="M15 80 C15 60, 30 50, 45 50 C60 50, 75 60, 75 80"/>
+    <circle cx="85" cy="40" r="14"/>
+    <path d="M70 80 C70 68, 78 62, 88 62 C98 62, 106 68, 106 80"/>
+  </g>
+  <text x="400" y="360" font-family="'Space Grotesk', sans-serif" font-size="20" fill="#e8cb77" text-anchor="middle" font-weight="600" letter-spacing="3">TEAM PHOTO 03 : ADVISOR CONSULTATION</text>
+  <text x="400" y="390" font-family="'Prompt', sans-serif" font-size="15" fill="#8a8578" text-anchor="middle">การขอรับคำปรึกษาและข้อเสนอแนะจากอาจารย์ที่ปรึกษาโครงการ</text>
+</svg>
