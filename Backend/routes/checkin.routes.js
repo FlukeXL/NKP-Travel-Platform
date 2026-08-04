@@ -2,11 +2,19 @@ const express = require('express');
 const router = express.Router();
 const checkinController = require('../controllers/checkin.controller');
 const { requireAuth, requireAdmin, optionalAuth } = require('../middleware/auth');
-const upload = require('../middleware/upload');
+const { uploadReview } = require('../middleware/upload');
 
 router.get('/feed', optionalAuth, checkinController.getFeed);
 
-router.post('/', requireAuth, upload.array('photos', 5), checkinController.addPost);
+router.post(
+  '/',
+  requireAuth,
+  uploadReview.fields([
+    { name: 'photos', maxCount: 5 },
+    { name: 'video', maxCount: 1 },
+  ]),
+  checkinController.addPost
+);
 router.delete('/:postId', requireAuth, checkinController.deletePost);
 router.delete('/:postId/moderate', requireAuth, requireAdmin, checkinController.adminDeletePost);
 

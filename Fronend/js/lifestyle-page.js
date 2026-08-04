@@ -65,7 +65,7 @@ async function renderLifestylePopular() {
     const ratingHtml = stats ? `<span class="stars">★</span> ${stats.avg.toFixed(1)} <span class="lifestyle-popular-card__review-count">(${stats.count})</span>` : 'ยังไม่มีคะแนน';
     const visits = p.popularity >= 1000 ? `${(p.popularity / 1000).toFixed(1)}K` : `${p.popularity}`;
     return `
-      <article class="lifestyle-popular-card lifestyle-popular-card--rank-${i + 1}" data-place-open="${p.id}">
+      <article class="lifestyle-popular-card lifestyle-popular-card--rank-${i + 1}" data-place-open="${p.id}" style="cursor: pointer;">
         <div class="lifestyle-popular-card__img-wrap">
           <img src="${p.img}" alt="${p.name}" draggable="false" />
           <span class="lifestyle-popular-card__rank">${rankLabels[i]}</span>
@@ -113,10 +113,10 @@ async function renderLifestylePlaceGrid() {
     const stats = window.MNX_REVIEWS?.stats(p.id);
     const ratingHtml = stats ? `<span class="stars">★</span> ${stats.avg.toFixed(1)}` : 'ยังไม่มีคะแนน';
     return `
-    <article class="lifestyle-card">
+    <article class="lifestyle-card" data-place-open="${p.id}" style="cursor: pointer;">
       <div class="lifestyle-card__img-wrap" data-place-open="${p.id}">
         <img src="${p.img}" alt="${p.name}" draggable="false" />
-        <span class="lifestyle-card__gallery-hint">${p.images.length} รูป</span>
+        <span class="lifestyle-card__gallery-hint">${p.images.length} รูป · ดูรายละเอียด</span>
         <button class="lifestyle-card__favorite" data-favorite-id="${p.id}" aria-label="บันทึกเป็นรายการที่ชอบ">♡</button>
       </div>
       <div class="lifestyle-card__body" data-place-open="${p.id}">
@@ -246,18 +246,47 @@ async function loadActivePromo() {
   const frame = document.querySelector('[data-promo-frame]');
   if (!frame) return;
 
+  const adLabel = frame.closest('[aria-label]');
+
   try {
     const res = await window.MNX_API.get('/promos/active?t=' + Date.now());
     if (res && res.length > 0) {
       const item = res.find(p => p.placement === 'lifestyle') || res[0];
-      if (item) {
+      if (item && item.imageUrl) {
         const resolvedUrl = typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(item.imageUrl) : item.imageUrl;
-        frame.innerHTML = `<img src="${resolvedUrl}" alt="${item.title}" style="width:100%; height:auto; display:block; border-radius:12px;" />`;
+        frame.innerHTML = `
+          <a href="${item.linkUrl || '#'}" target="${item.linkUrl ? '_blank' : '_self'}" rel="noopener" style="display:block;">
+            <img src="${resolvedUrl}" alt="${item.title}" style="width:100%; height:auto; display:block; border-radius:12px;" loading="lazy" />
+          </a>
+          <div style="font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; color:#999; text-align:center; margin-top:6px;" data-i18n="ad.sponsored">พื้นที่ประชาสัมพันธ์</div>`;
+        if (window.MNX_I18N && window.MNX_I18N.getLang() !== 'TH') window.MNX_I18N.translateDom(window.MNX_I18N.getLang());
+        return;
       }
     }
   } catch (err) {
     console.error('Promo load error:', err);
   }
+
+  // Fallback: show ติดต่อโฆษณา CTA
+  frame.innerHTML = `
+    <a href="/Fronend/contact.html" class="promo-contact-cta" style="
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:12px; min-height:200px; padding:24px; text-decoration:none;
+      background: linear-gradient(135deg, rgba(201,162,39,0.08) 0%, rgba(201,162,39,0.03) 100%);
+      border-radius:12px; border: 1px dashed rgba(201,162,39,0.35);
+      transition: background 0.2s, border-color 0.2s;
+    "
+    onmouseover="this.style.background='linear-gradient(135deg,rgba(201,162,39,0.14) 0%,rgba(201,162,39,0.07) 100%)'; this.style.borderColor='rgba(201,162,39,0.55)'"
+    onmouseout="this.style.background='linear-gradient(135deg,rgba(201,162,39,0.08) 0%,rgba(201,162,39,0.03) 100%)'; this.style.borderColor='rgba(201,162,39,0.35)'"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="36" height="36">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span style="font-size:0.82rem; font-weight:700; color:#c9a227; text-align:center; letter-spacing:0.03em;" data-i18n="ad.contact">ติดต่อโฆษณา</span>
+      <span style="font-size:0.7rem; color:#999; text-align:center; line-height:1.5;" data-i18n="ad.contact_cta">สนใจลงโฆษณา / ประชาสัมพันธ์ ติดต่อเรา</span>
+    </a>
+    <div style="font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; color:#ccc; text-align:center; margin-top:6px;" data-i18n="ad.sponsored">พื้นที่ประชาสัมพันธ์</div>`;
+  if (window.MNX_I18N && window.MNX_I18N.getLang() !== 'TH') window.MNX_I18N.translateDom(window.MNX_I18N.getLang());
 }
 
 async function renderLifestylePage() {

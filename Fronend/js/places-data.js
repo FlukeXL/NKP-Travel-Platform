@@ -16,9 +16,12 @@ function mnxBuildGallery(baseImg) {
 }
 
 function mnxResolveUploadUrl(url) {
-  if (!url || !url.startsWith('/uploads/')) return url;
-  const apiOrigin = window.MNX_API?.baseUrl.replace(/\/api\/?$/, '') || '';
-  return `${apiOrigin}${url}`;
+  if (!url) return '/assets/images/Blendy Boo.jpg';
+  if (url.startsWith('/uploads/')) {
+    const apiOrigin = window.MNX_API?.baseUrl.replace(/\/api\/?$/, '') || '';
+    return `${apiOrigin}${url}`;
+  }
+  return url;
 }
 
 const MNX_PLACES_RAW = [

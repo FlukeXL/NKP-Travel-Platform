@@ -13,10 +13,10 @@ async function renderCategoryRail(trackId, category) {
     const stats = window.MNX_REVIEWS?.stats(p.id);
     const ratingHtml = stats ? `<span class="stars">${mnxSingleStarIcon()}</span> ${stats.avg.toFixed(1)}` : 'ยังไม่มีคะแนน';
     return `
-    <article class="place-card">
+    <article class="place-card" data-place-open="${p.id}" style="cursor: pointer;">
       <div class="place-card__img-wrap" data-place-open="${p.id}">
         <img src="${p.img}" alt="${p.name}" draggable="false" />
-        <span class="place-card__gallery-hint">${mnxImageIcon()} ${p.images.length} รูป · ดูรายละเอียดและรีวิว</span>
+        <span class="place-card__gallery-hint">${mnxImageIcon()} ${p.images.length} รูป · ดูรายละเอียด</span>
         <button class="place-card__favorite" data-favorite-id="${p.id}" aria-label="บันทึกเป็นรายการที่ชอบ">${mnxHeartIcon(false)}</button>
       </div>
       <div class="place-card__body" data-place-open="${p.id}">

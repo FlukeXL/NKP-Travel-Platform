@@ -69,12 +69,15 @@ function mnxOpenPlaceModal(placeId) {
   mnxPlaceReturnFocusEl = document.activeElement;
 
   // ---- Gallery ----
-  els.track.innerHTML = place.images.map((src, i) => `
+  els.track.innerHTML = place.images.map((src, i) => {
+    const resolvedSrc = typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(src) : src;
+    return `
     <div class="place-modal__gallery-slide">
-      <img src="${src}" class="place-modal__gallery-bg" aria-hidden="true" draggable="false" />
-      <img src="${src}" class="place-modal__gallery-fg" alt="${place.name} — รูปที่ ${i + 1}" draggable="false" />
+      <img src="${resolvedSrc}" class="place-modal__gallery-bg" aria-hidden="true" draggable="false" onerror="this.src='/Fronend/assets/images/Blendy Boo.jpg'" />
+      <img src="${resolvedSrc}" class="place-modal__gallery-fg" alt="${place.name} — รูปที่ ${i + 1}" draggable="false" onerror="this.src='/Fronend/assets/images/Blendy Boo.jpg'" />
     </div>
-  `).join('');
+  `;
+  }).join('');
   els.dots.innerHTML = place.images.map((_, i) => `<button data-index="${i}" aria-label="ไปยังรูปที่ ${i + 1}"></button>`).join('');
   mnxPlaceGalleryGoTo(0);
   mnxStartPlaceGalleryAutoplay();
@@ -476,12 +479,60 @@ function initPlaceModal() {
     }, { passive: true });
   }
 
+  els.track?.addEventListener('click', (e) => {
+    const fg = e.target.closest('.place-modal__gallery-fg');
+    if (fg && fg.src) {
+      mnxOpenImageLightbox(fg.src, fg.alt || '');
+    }
+  });
+
   document.addEventListener('auth:changed', () => {
     if (els.modal.classList.contains('is-open') && mnxCurrentPlaceId) {
       const place = window.mnxGetPlace(mnxCurrentPlaceId);
       if (place) renderPlaceReviewsSection(place);
     }
   });
+}
+
+function mnxOpenImageLightbox(src, alt = '') {
+  let lightbox = document.getElementById('mnx-image-lightbox');
+  if (!lightbox) {
+    lightbox = document.createElement('div');
+    lightbox.id = 'mnx-image-lightbox';
+    lightbox.className = 'mnx-image-lightbox';
+    lightbox.innerHTML = `
+      <button class="mnx-image-lightbox__close" aria-label="ปิดรูปภาพ">✕</button>
+      <img class="mnx-image-lightbox__img" src="" alt="" />
+    `;
+    document.body.appendChild(lightbox);
+
+    lightbox.querySelector('.mnx-image-lightbox__close').addEventListener('click', (e) => {
+      e.stopPropagation();
+      mnxCloseImageLightbox();
+    });
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox || e.target.classList.contains('mnx-image-lightbox__close')) {
+        mnxCloseImageLightbox();
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && lightbox.classList.contains('is-open')) {
+        mnxCloseImageLightbox();
+      }
+    });
+  }
+
+  const img = lightbox.querySelector('.mnx-image-lightbox__img');
+  if (img) {
+    img.src = src;
+    img.alt = alt;
+  }
+  lightbox.classList.add('is-open');
+}
+
+function mnxCloseImageLightbox() {
+  const lightbox = document.getElementById('mnx-image-lightbox');
+  if (lightbox) lightbox.classList.remove('is-open');
 }
 
 // Global click listener for opening place details

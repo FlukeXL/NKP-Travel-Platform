@@ -4,9 +4,10 @@ const userModel = require('../models/user.model');
 const devStore = require('../utils/devStore');
 const { asyncHandler, ok } = require('../utils/helper');
 const { ApiError } = require('../middleware/errorHandler');
-const { safeUnlink } = require('../utils/video');
-const { UPLOAD_DIR } = require('../middleware/upload');
+const { getVideoDurationSeconds, safeUnlink, generateVideoPoster } = require('../utils/video');
+const { UPLOAD_DIR, VIDEO_UPLOAD_DIR } = require('../middleware/upload');
 const path = require('path');
+const fs = require('fs');
 const { recordAuditLog } = require('../utils/auditLog');
 
 const DEV_POSTS = 'checkin_posts';
@@ -16,6 +17,8 @@ const DEV_NOTES = 'checkin_notes';
 
 const MAX_HASHTAGS = 10;
 const MAX_PHOTOS = 5;
+const MAX_VIDEO_SECONDS = 61;
+const MAX_PHOTO_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB per photo
 
 async function resolveAuthorInfo(req) {
   let author = req.user.email;
@@ -71,14 +74,43 @@ const addPost = asyncHandler(async (req, res) => {
   if (!Array.isArray(hashtags)) hashtags = [];
   hashtags = hashtags.filter((h) => typeof h === 'string' && h.trim()).slice(0, MAX_HASHTAGS);
 
-  const photoFiles = req.files || [];
+  const photoFiles = req.files?.photos || [];
+  const videoFile = req.files?.video?.[0] || null;
 
   try {
     if (!place) throw new ApiError(400, 'กรุณาระบุชื่อสถานที่');
-    if (!photoFiles.length) throw new ApiError(400, 'กรุณาอัปโหลดรูปภาพอย่างน้อย 1 รูป');
-    if (photoFiles.length > MAX_PHOTOS) throw new ApiError(400, `อัปโหลดรูปได้สูงสุด ${MAX_PHOTOS} รูป`);
+    if (!photoFiles.length && !videoFile) {
+      throw new ApiError(400, 'กรุณาอัปโหลดรูปภาพหรือวิดีโออย่างน้อย 1 รายการ');
+    }
+    if (photoFiles.length > MAX_PHOTOS) {
+      throw new ApiError(400, `อัปโหลดรูปได้สูงสุด ${MAX_PHOTOS} รูป`);
+    }
+    const oversizedPhoto = photoFiles.find((f) => f.size > MAX_PHOTO_SIZE_BYTES);
+    if (oversizedPhoto) {
+      throw new ApiError(400, 'ไฟล์รูปภาพต้องไม่เกิน 8 MB ต่อรูป');
+    }
     if (rating !== null && (!Number.isInteger(rating) || rating < 0 || rating > 5)) {
       throw new ApiError(400, 'คะแนนต้องเป็นตัวเลข 0-5 ดาว');
+    }
+
+    let videoPayload = null;
+    if (videoFile) {
+      const durationSec = await getVideoDurationSeconds(videoFile.path).catch(() => {
+        throw new ApiError(400, 'ไม่สามารถอ่านไฟล์วิดีโอได้ กรุณาลองใหม่ด้วยไฟล์ MP4/MOV/WebM');
+      });
+      if (durationSec > MAX_VIDEO_SECONDS) {
+        throw new ApiError(400, `วิดีโอต้องมีความยาวไม่เกิน 1 นาที (ไฟล์นี้ยาว ${Math.round(durationSec)} วินาที)`);
+      }
+
+      const posterFilename = `${path.parse(videoFile.filename).name}.jpg`;
+      const posterPath = path.join(VIDEO_UPLOAD_DIR, posterFilename);
+      await generateVideoPoster(videoFile.path, posterPath).catch(() => null);
+
+      videoPayload = {
+        url: `/uploads/videos/${videoFile.filename}`,
+        posterUrl: fs.existsSync(posterPath) ? `/uploads/videos/${posterFilename}` : null,
+        durationSec: Math.round(durationSec),
+      };
     }
 
     const photoUrls = photoFiles.map((f) => `/uploads/${f.filename}`);
@@ -86,26 +118,29 @@ const addPost = asyncHandler(async (req, res) => {
 
     if (isFirebaseReady()) {
       const doc = await checkinModel.addPost({
-        uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, hashtags, rating, visibility,
+        uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, video: videoPayload, hashtags, rating, visibility,
       });
       return ok(res, { post: doc }, 201);
     }
 
     const id = `ci_${Date.now()}`;
     const doc = {
-      id, uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, hashtags,
+      id, uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, video: videoPayload, hashtags,
       rating, visibility, likeCount: 0, commentCount: 0, createdAt: new Date().toISOString(),
     };
     devStore.set(DEV_POSTS, id, doc);
     return ok(res, { post: doc }, 201);
   } catch (err) {
     photoFiles.forEach((f) => safeUnlink(f.path));
+    if (videoFile) safeUnlink(videoFile.path);
     throw err;
   }
 });
 
 function cleanupPostFiles(post) {
   (post.photos || []).forEach((url) => safeUnlink(path.join(UPLOAD_DIR, path.basename(url))));
+  if (post.video?.url) safeUnlink(path.join(VIDEO_UPLOAD_DIR, path.basename(post.video.url)));
+  if (post.video?.posterUrl) safeUnlink(path.join(VIDEO_UPLOAD_DIR, path.basename(post.video.posterUrl)));
 }
 
 const deletePost = asyncHandler(async (req, res) => {

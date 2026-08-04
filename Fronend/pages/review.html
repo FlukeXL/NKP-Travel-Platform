@@ -7,16 +7,17 @@
   <meta name="description" content="เช็คอินสถานที่ท่องเที่ยวนครพนม แชร์รูปภาพ ให้คะแนน และเขียนบันทึกประสบการณ์การเดินทางส่วนตัว" />
 
   <!-- Design system + shared components -->
-  <link rel="stylesheet" href="/Fronend/css/style.css?v=44" />
-  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=44" />
-  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=44" />
-  <link rel="stylesheet" href="/Fronend/css/footer.css?v=44" />
-  <link rel="stylesheet" href="/Fronend/css/review.css?v=44" />
-  <link rel="stylesheet" href="/Fronend/css/auth.css?v=44" />
-  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=44" />
-  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=44" />
-  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=44" />
-  <script src="../js/security.js?v=44"></script>
+  <link rel="stylesheet" href="/Fronend/css/style.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/navbar.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/infobar.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/footer.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/review.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/video-modal.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/auth.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/responsive.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/mobile.css?v=50" />
+  <link rel="stylesheet" href="/Fronend/css/ai-tour-guide.css?v=50" />
+  <script src="../js/security.js?v=50"></script>
 </head>
 <body class="page-checkin">
 
@@ -34,6 +35,9 @@
   <!-- ================= AUTH MODAL (login / register popup) — shared site-wide ================= -->
   <div data-include="/Fronend/components/auth-modal.html"></div>
 
+  <!-- ================= VIDEO MODAL (full player popup) ================= -->
+  <div data-include="/Fronend/components/video-modal.html"></div>
+
   <!-- ================= PAGE HERO ================= -->
   <section class="page-hero" id="page-hero">
     <img class="page-hero__img" src="/assets/images/checkin/page-hero.jpg" alt="เช็คอินนครพนม" />
@@ -43,7 +47,7 @@
         <a href="/Fronend/index.html">หน้าหลัก</a> <span>/</span> <span class="text-gold">เช็คอิน</span>
       </div>
       <h1 class="page-hero__title">เช็คอิน<em>ประสบการณ์</em>ของคุณ</h1>
-      <p class="page-hero__subtitle">แชร์โมเมนต์การเที่ยวนครพนม ให้คะแนน ติดแฮชแท็ก และเก็บบันทึกส่วนตัวไว้อ่านย้อนหลัง</p>
+      <p class="page-hero__subtitle">แชร์โมเมนต์การเที่ยวนครพนม โพสต์รูปและวิดีโอ ให้คะแนน ติดแฮชแท็ก และเก็บบันทึกส่วนตัว</p>
     </div>
   </section>
 
@@ -66,11 +70,44 @@
     <!-- ================= COMPOSER ================= -->
     <div class="composer fade-in" id="composer">
       <h2 class="composer__title">เช็คอินสถานที่ใหม่</h2>
-      <p class="composer__sub">อัปโหลดได้สูงสุด 5 รูป พร้อมติดแฮชแท็กและให้คะแนนสถานที่</p>
+      <p class="composer__sub">อัปโหลดรูปภาพได้สูงสุด 5 รูป หรือเพิ่มวิดีโอคลิป (ไม่เกิน 1 นาที) พร้อมติดแฮชแท็กและให้คะแนนสถานที่</p>
 
-      <div class="upload-slots" id="upload-slots"><!-- filled by js/review.js --></div>
-      <input type="file" id="upload-input" accept="image/*" multiple class="visually-hidden" />
-      <span class="upload-slots__count" id="upload-count">อัปโหลดแล้ว 0/5 รูป</span>
+      <div class="composer-media">
+        <div class="composer-media__header">
+          <label class="composer-media__label">รูปภาพสถานที่ (สูงสุด 5 รูป)</label>
+          <span class="upload-slots__count" id="upload-count">อัปโหลดแล้ว 0/5 รูป</span>
+        </div>
+        <div class="upload-slots" id="upload-slots"><!-- filled by js/review.js --></div>
+        <input type="file" id="upload-input" accept="image/jpeg,image/png,image/webp" multiple class="visually-hidden" />
+
+        <!-- Video Upload Zone -->
+        <div class="upload-video-zone" id="upload-video-zone">
+          <label for="upload-video-input" class="upload-video-btn" id="upload-video-btn">
+            <span class="upload-video-btn__icon">🎬</span>
+            <div class="upload-video-btn__text">
+              <strong>เพิ่มวิดีโอคลิป (สั้นไม่เกิน 1 นาที)</strong>
+              <small>แตะเพื่อเลือกวิดีโอจากเครื่อง (ขนาดไม่เกิน 80 MB)</small>
+            </div>
+            <span class="upload-video-btn__tag">เลือกวิดีโอ</span>
+          </label>
+          <input type="file" id="upload-video-input" accept="video/*" class="visually-hidden" />
+
+          <div class="upload-video-preview" id="upload-video-preview" style="display: none;">
+            <div class="upload-video-preview__thumb-wrap">
+              <video id="upload-video-element" playsinline muted preload="metadata"></video>
+              <div class="upload-video-preview__play-icon">▶</div>
+            </div>
+            <div class="upload-video-preview__info">
+              <div class="upload-video-preview__name" id="upload-video-name">video.mp4</div>
+              <div class="upload-video-preview__meta">
+                <span class="upload-video-preview__badge" id="upload-video-duration">🎬 0:00</span>
+                <span class="upload-video-preview__size" id="upload-video-size">0 MB</span>
+              </div>
+            </div>
+            <button type="button" class="upload-video-preview__remove" id="upload-video-remove" aria-label="ลบวิดีโอ">✕ ลบ</button>
+          </div>
+        </div>
+      </div>
 
       <div class="composer__field">
         <label for="composer-place">สถานที่</label>
@@ -149,28 +186,29 @@
   <div data-include="/Fronend/components/footer.html"></div>
 
   <!-- ================= Scripts ================= -->
-  <script src="/Fronend/js/i18n.js?v=44"></script>
+  <script src="/Fronend/js/i18n.js?v=50"></script>
   <!-- Firebase Web SDK 10.13.2 (pinned, compat build) — Google Sign-In -->
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=44"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=44"></script>
-  <script src="/Fronend/js/firebase.js?v=44"></script>
-  <script src="/Fronend/js/api-client.js?v=44"></script>
-  <script src="/Fronend/js/environment-data.js?v=44"></script>
-  <script src="/Fronend/js/auth-state.js?v=44"></script>
-  <script src="/Fronend/js/main.js?v=44"></script>
-  <script src="/Fronend/js/navbar.js?v=44"></script>
-  <script src="/Fronend/js/auth.js?v=44"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js?v=50"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js?v=50"></script>
+  <script src="/Fronend/js/firebase.js?v=50"></script>
+  <script src="/Fronend/js/api-client.js?v=50"></script>
+  <script src="/Fronend/js/environment-data.js?v=50"></script>
+  <script src="/Fronend/js/auth-state.js?v=50"></script>
+  <script src="/Fronend/js/main.js?v=50"></script>
+  <script src="/Fronend/js/navbar.js?v=50"></script>
+  <script src="/Fronend/js/auth.js?v=50"></script>
   <!-- Chart.js 4.5.1 + SheetJS 0.20.3 (pinned) — Infobar's mini history chart + Excel download -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js?v=44"></script>
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js?v=44"></script>
-  <script src="/Fronend/js/excel-export.js?v=44"></script>
-  <script src="/Fronend/js/infobar.js?v=44"></script>
-  <script src="/Fronend/js/places-data.js?v=44"></script>
-  <script src="/Fronend/js/checkin-data.js?v=44"></script>
-  <script src="/Fronend/js/review.js?v=44"></script>
-  <script src="/Fronend/js/mobile-shell.js?v=44"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js?v=50"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js?v=50"></script>
+  <script src="/Fronend/js/excel-export.js?v=50"></script>
+  <script src="/Fronend/js/infobar.js?v=50"></script>
+  <script src="/Fronend/js/places-data.js?v=50"></script>
+  <script src="/Fronend/js/checkin-data.js?v=50"></script>
+  <script src="/Fronend/js/video-modal.js?v=50"></script>
+  <script src="/Fronend/js/review.js?v=50"></script>
+  <script src="/Fronend/js/mobile-shell.js?v=50"></script>
   <!-- ================= AI TOUR GUIDE ================= -->
   <div data-include="/Fronend/components/ai-tour-guide.html"></div>
-  <script src="/Fronend/js/ai-tour-guide.js?v=44"></script>
+  <script src="/Fronend/js/ai-tour-guide.js?v=50"></script>
 </body>
 </html>

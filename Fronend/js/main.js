@@ -1,12 +1,3 @@
-/* ============================================================
-   Shared inline-SVG icon helpers — used across every js/*.js file
-   that builds HTML strings with an icon glyph (rating stars, map
-   pins, footer arrows, etc). Centralized here (main.js loads on
-   every single page) instead of duplicating the same SVG markup
-   in dozens of files, and replaces the old emoji/dingbat character
-   glyphs (★☆→ etc) with the same minimal line-icon language used
-   throughout the site.
-   ============================================================ */
 function mnxSingleStarIcon(filled = true) {
   return `<svg class="mnx-star${filled ? ' is-filled' : ''}" viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round" width="13" height="13"><path d="M12 3.5l2.6 5.3 5.9.8-4.3 4.1 1 5.8L12 16.8l-5.2 2.7 1-5.8-4.3-4.1 5.9-.8L12 3.5Z"/></svg>`;
 }
@@ -26,8 +17,6 @@ function mnxArrowIcon(size = 13) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="${size}" height="${size}" style="vertical-align:-2px;"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
 }
 
-/* Heart icon for favorite/like buttons — filled=true renders solid
-   (liked state), filled=false renders outline-only (unliked). */
 function mnxHeartIcon(filled = false, size = 15) {
   return `<svg viewBox="0 0 24 24" fill="${filled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="${size}" height="${size}"><path d="M12 20s-7-4.5-9.3-8.8C1.4 8 2.6 4.6 6 4c2-.4 3.8.6 6 3 2.2-2.4 4-3.4 6-3 3.4.6 4.6 4 3.3 7.2C19 15.5 12 20 12 20Z"/></svg>`;
 }

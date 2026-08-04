@@ -7,7 +7,7 @@ const UPLOAD_DIR = path.join(__dirname, '..', 'uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 
 const ALLOWED_IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp'];
-const ALLOWED_VIDEO_EXTS = ['.mp4', '.mov', '.webm'];
+const ALLOWED_VIDEO_EXTS = ['.mp4', '.mov', '.webm', '.m4v', '.3gp', '.mkv'];
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, UPLOAD_DIR),
@@ -54,9 +54,10 @@ const reviewStorage = multer.diskStorage({
 function reviewFileFilter(req, file, cb) {
   const ext = path.extname(file.originalname).toLowerCase();
   if (file.fieldname === 'video') {
-    const allowed = ['video/mp4', 'video/quicktime', 'video/webm'];
-    if (!allowed.includes(file.mimetype) || !ALLOWED_VIDEO_EXTS.includes(ext)) {
-      return cb(new ApiError(400, 'อนุญาตเฉพาะไฟล์วิดีโอ MP4, MOV, หรือ WebM เท่านั้น'));
+    const isVideoMime = file.mimetype.startsWith('video/') || file.mimetype === 'application/octet-stream';
+    const isVideoExt = ALLOWED_VIDEO_EXTS.includes(ext);
+    if (!isVideoMime && !isVideoExt) {
+      return cb(new ApiError(400, 'อนุญาตเฉพาะไฟล์วิดีโอ (MP4, MOV, WebM ฯลฯ) เท่านั้น'));
     }
     return cb(null, true);
   }

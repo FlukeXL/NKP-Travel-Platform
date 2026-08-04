@@ -22,11 +22,12 @@ function mnxInvalidateCheckinFeed() {
   MNX_CHECKIN_FEED_CACHE = null;
 }
 
-async function mnxAddCheckinPost({ place, placeId, photos, hashtags, rating, visibility }) {
+async function mnxAddCheckinPost({ place, placeId, photos, video, hashtags, rating, visibility }) {
   const session = window.MNX_AUTH?.getSession();
   if (!session) return { ok: false, reason: 'not-signed-in' };
   if (!place || !place.trim()) return { ok: false, reason: 'no-place' };
-  if (!photos || !photos.length) return { ok: false, reason: 'no-photos' };
+  const hasPhotos = Array.isArray(photos) && photos.length > 0;
+  if (!hasPhotos && !video) return { ok: false, reason: 'no-media', message: 'กรุณาเลือกรูปภาพหรือวิดีโออย่างน้อย 1 รายการ' };
 
   const form = new FormData();
   form.append('place', place.trim());
@@ -34,7 +35,12 @@ async function mnxAddCheckinPost({ place, placeId, photos, hashtags, rating, vis
   form.append('hashtags', JSON.stringify(hashtags || []));
   if (rating) form.append('rating', String(rating));
   form.append('visibility', visibility === 'private' ? 'private' : 'public');
-  photos.slice(0, 5).forEach((file) => form.append('photos', file));
+  if (hasPhotos) {
+    photos.slice(0, 5).forEach((file) => form.append('photos', file));
+  }
+  if (video) {
+    form.append('video', video);
+  }
 
   try {
     const data = await window.MNX_API.postForm('/checkin', form);

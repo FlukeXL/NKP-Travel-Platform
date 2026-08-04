@@ -411,8 +411,25 @@
   box-shadow: var(--shadow-gold);
 }
 
-@media (max-width: 480px) {
+@media (max-width: 860px) {
+  .auth-modal {
+    padding: 16px;
+    align-items: center;
+    justify-content: center;
+  }
+  .auth-modal__card {
+    width: 100%;
+    max-width: 420px;
+    max-height: 88vh;
+    border-radius: var(--radius-lg);
+  }
+  .auth-modal__close {
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+  }
   .auth-modal__body {
-    padding: 32px 22px 26px;
+    padding: 34px 22px 28px;
   }
 }

@@ -359,14 +359,17 @@ async function mnxRenderRecentCheckins(session) {
     }
 
     grid.innerHTML = mine.map((p) => {
-      const mainPhoto = p.photos?.[0] ? mnxProfileAbsoluteUrl(p.photos[0]) : null;
-      if (!mainPhoto) return '';
+      const mainPhoto = p.photos?.[0] ? mnxProfileAbsoluteUrl(p.photos[0]) : (p.video?.posterUrl ? mnxProfileAbsoluteUrl(p.video.posterUrl) : null);
+      const isVideoOnly = !p.photos?.length && p.video?.url;
+      const videoSrc = p.video?.url ? mnxProfileAbsoluteUrl(p.video.url) : '';
+
       return `
         <div class="profile-checkin-card">
-          <img src="${mainPhoto}" alt="${p.place}" loading="lazy" />
+          ${mainPhoto ? `<img src="${mainPhoto}" alt="${p.place}" loading="lazy" />` : (videoSrc ? `<video src="${videoSrc}" playsinline muted preload="metadata"></video>` : '')}
           <div class="profile-checkin-card__overlay">
             <div class="profile-checkin-card__place">${p.place}</div>
           </div>
+          ${p.video ? '<span class="profile-checkin-card__privacy" style="right:8px; left:auto; background:rgba(0,0,0,0.65); color:var(--color-gold);">🎬 วิดีโอ</span>' : ''}
           ${p.visibility === 'private' ? '<span class="profile-checkin-card__privacy">ส่วนตัว</span>' : ''}
         </div>
       `;

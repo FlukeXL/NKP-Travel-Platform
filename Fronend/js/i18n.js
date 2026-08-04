@@ -1,10 +1,3 @@
-/* ============================================================
-   Nakhon Phanom Lifestyle Travel Platform — Internationalization (i18n) Engine
-   Bilingual translation engine (TH / EN) supporting full-site translation,
-   100% reversible DOM text restoration, data-i18n mapping, dynamic observer,
-   and synchronized mobile & desktop language switching.
-   ============================================================ */
-
 (function () {
   'use strict';
 
@@ -28,12 +21,16 @@
       'nav.checkin': 'เช็คอิน',
       'nav.videos': 'วิดีโอรีวิว',
       'nav.about': 'เกี่ยวกับเรา',
+      'nav.contact_ad': 'ติดต่อโฆษณา',
       'nav.login': 'เข้าสู่ระบบ',
       'nav.register': 'สมัครสมาชิก',
       'nav.logout': 'ออกจากระบบ',
       'nav.profile': 'โปรไฟล์ของฉัน',
       'nav.admin': 'ระบบผู้ดูแล (Admin)',
       'nav.lang': 'ภาษา (Language)',
+      'ad.sponsored': 'พื้นที่ประชาสัมพันธ์',
+      'ad.contact': 'ติดต่อโฆษณา',
+      'ad.contact_cta': 'สนใจลงโฆษณา / ประชาสัมพันธ์ ติดต่อเรา',
 
       // Infobar & Environment
       'infobar.pm25': 'PM2.5',
@@ -160,12 +157,16 @@
       'nav.checkin': 'Check-in',
       'nav.videos': 'Video Reviews',
       'nav.about': 'About Us',
+      'nav.contact_ad': 'Advertise With Us',
       'nav.login': 'Login',
       'nav.register': 'Sign Up',
       'nav.logout': 'Sign Out',
       'nav.profile': 'My Profile',
       'nav.admin': 'Admin Panel',
       'nav.lang': 'Language',
+      'ad.sponsored': 'Sponsored',
+      'ad.contact': 'Contact for Ads',
+      'ad.contact_cta': 'Advertise With Us / Contact Us',
 
       // Infobar & Environment
       'infobar.pm25': 'PM2.5',
@@ -358,6 +359,9 @@
     { th: 'ระดับแม่น้ำโขง', en: 'Mekong River Level' },
     { th: 'สภาพการจราจร', en: 'Traffic Conditions' },
     { th: 'แจ้งปัญหา / ติดต่อโฆษณา', en: 'Report Issue / Advertising' },
+    { th: 'ติดต่อโฆษณา', en: 'Contact for Ads' },
+    { th: 'พื้นที่ประชาสัมพันธ์', en: 'Sponsored' },
+    { th: 'สนใจลงโฆษณา / ประชาสัมพันธ์ ติดต่อเรา', en: 'Interested in advertising? Contact us' },
     { th: 'นโยบายความเป็นส่วนตัว', en: 'Privacy Policy' },
     { th: 'ข้อกำหนดการใช้งาน', en: 'Terms of Service' },
 

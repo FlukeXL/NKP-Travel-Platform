@@ -221,7 +221,7 @@ async function renderHomePlaceGrid(gridId, placeIds) {
     const stats = window.MNX_REVIEWS?.stats(p.id);
     const ratingHtml = stats ? `<span class="stars">${mnxSingleStarIcon()}</span> ${stats.avg.toFixed(1)}` : 'ยังไม่มีคะแนน';
     return `
-    <article class="widget-card fade-in">
+    <article class="widget-card fade-in" data-place-open="${p.id}" style="cursor: pointer;">
       <div class="widget-card__img-wrap" data-place-open="${p.id}">
         <img src="${typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(p.img) : p.img}" alt="${p.name}" draggable="false" onerror="this.src='/assets/images/placeholder.jpg'" />
         <span class="widget-card__badge">${MNX_CATEGORY_BADGE[p.category] || p.category}</span>
@@ -260,7 +260,7 @@ async function renderRecommendSection() {
     const stats = window.MNX_REVIEWS?.stats(p.id);
     const ratingHtml = stats ? `<span class="stars">${mnxSingleStarIcon()}</span> ${stats.avg.toFixed(1)}` : 'ยังไม่มีคะแนน';
     return `
-    <article class="widget-card fade-in">
+    <article class="widget-card fade-in" data-place-open="${p.id}" style="cursor: pointer;">
       <div class="widget-card__img-wrap" data-place-open="${p.id}">
         <img src="${typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(p.img) : p.img}" alt="${p.name}" draggable="false" onerror="this.src='/assets/images/placeholder.jpg'" />
         <span class="widget-card__badge">${MNX_CATEGORY_BADGE[p.category] || p.category}</span>
@@ -329,14 +329,41 @@ async function loadActivePromo() {
     const res = await window.MNX_API.get('/promos/active?t=' + Date.now());
     if (res && res.length > 0) {
       const item = res.find(p => p.placement === 'home') || res[0];
-      if (item) {
+      if (item && item.imageUrl) {
         const resolvedUrl = typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(item.imageUrl) : item.imageUrl;
-        frame.innerHTML = `<img src="${resolvedUrl}" alt="${item.title}" style="width:100%; height:auto; display:block; border-radius:8px;" />`;
+        frame.innerHTML = `
+          <a href="${item.linkUrl || '#'}" target="${item.linkUrl ? '_blank' : '_self'}" rel="noopener" style="display:block;">
+            <img src="${resolvedUrl}" alt="${item.title}" style="width:100%; height:auto; display:block; border-radius:8px;" loading="lazy" />
+          </a>
+          <div style="font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; color:#999; text-align:center; margin-top:6px;" data-i18n="ad.sponsored">พื้นที่ประชาสัมพันธ์</div>`;
+        if (window.MNX_I18N && window.MNX_I18N.getLang() !== 'TH') window.MNX_I18N.translateDom(window.MNX_I18N.getLang());
+        return;
       }
     }
   } catch (err) {
     console.error('Promo load error:', err);
   }
+
+  // Fallback: show ติดต่อโฆษณา CTA banner
+  frame.innerHTML = `
+    <a href="/Fronend/contact.html" style="
+      display:flex; align-items:center; justify-content:center; gap:16px;
+      padding:20px 32px; text-decoration:none; min-height:80px;
+      background: linear-gradient(135deg, rgba(201,162,39,0.07) 0%, rgba(201,162,39,0.02) 100%);
+      border-radius:10px; border:1px dashed rgba(201,162,39,0.35);
+      transition: background 0.2s, border-color 0.2s;
+    "
+    onmouseover="this.style.background='linear-gradient(135deg,rgba(201,162,39,0.13) 0%,rgba(201,162,39,0.06) 100%)'; this.style.borderColor='rgba(201,162,39,0.55)'"
+    onmouseout="this.style.background='linear-gradient(135deg,rgba(201,162,39,0.07) 0%,rgba(201,162,39,0.02) 100%)'; this.style.borderColor='rgba(201,162,39,0.35)'"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="28" height="28">
+        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+      </svg>
+      <span style="font-size:0.88rem; font-weight:700; color:#c9a227; letter-spacing:0.03em;" data-i18n="ad.contact">ติดต่อโฆษณา</span>
+      <span style="font-size:0.78rem; color:#aaa;" data-i18n="ad.contact_cta">สนใจลงโฆษณา / ประชาสัมพันธ์ ติดต่อเรา</span>
+    </a>
+    <div style="font-size:0.6rem; letter-spacing:0.1em; text-transform:uppercase; color:#bbb; text-align:center; margin-top:5px;" data-i18n="ad.sponsored">พื้นที่ประชาสัมพันธ์</div>`;
+  if (window.MNX_I18N && window.MNX_I18N.getLang() !== 'TH') window.MNX_I18N.translateDom(window.MNX_I18N.getLang());
 }
 
 async function loadPersonalizedPlaces() {
@@ -372,7 +399,7 @@ async function renderPlacesDirectly(gridId, places) {
     const stats = window.MNX_REVIEWS?.stats(p.id);
     const ratingHtml = stats ? `<span class="stars">${mnxSingleStarIcon()}</span> ${stats.avg.toFixed(1)}` : 'ยังไม่มีคะแนน';
     return `
-    <article class="widget-card fade-in">
+    <article class="widget-card fade-in" data-place-open="${p.id}" style="cursor: pointer;">
       <div class="widget-card__img-wrap" data-place-open="${p.id}">
         <img src="${typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(p.img) : p.img}" alt="${p.name}" draggable="false" onerror="this.src='/assets/images/placeholder.jpg'" />
         <span class="widget-card__badge">${MNX_CATEGORY_BADGE[p.category] || p.category}</span>

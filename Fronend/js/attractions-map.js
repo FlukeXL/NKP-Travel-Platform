@@ -51,7 +51,7 @@ function mnxBuildMapIcon(category) {
   });
 }
 
-function mnxBuildPopupHtml({ name, category, area, price, start, end, note }) {
+function mnxBuildPopupHtml({ id, name, category, area, price, start, end, note }) {
   const style = MNX_MAP_CATEGORY_STYLE[category] || MNX_MAP_CATEGORY_STYLE.landmark;
   const calendarIcon = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="13" height="13"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/></svg>';
   const dateRow = start && end
@@ -59,10 +59,16 @@ function mnxBuildPopupHtml({ name, category, area, price, start, end, note }) {
     : '';
   const noteRow = note ? `<div class="map-popover__dates">${note}</div>` : '';
   const metaRow = area ? `<div class="map-popover__dates">${mnxPinIcon(13)} ${area}${price ? ` · ${price}` : ''}</div>` : '';
+  const actionBtn = id
+    ? `<button type="button" class="btn btn-gold btn-sm" style="width:100%; margin-top:10px; padding:6px 12px; font-size:0.78rem; font-weight:600; border-radius:999px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;" onclick="window.mnxOpenPlaceModal && window.mnxOpenPlaceModal('${id}')">ดูรายละเอียดสถานที่ ✨</button>`
+    : '';
   return `
-    <span class="map-popover__type">${style.label}</span>
-    <h5 class="map-popover__title">${name}</h5>
-    ${dateRow}${metaRow}${noteRow}
+    <div style="cursor:${id ? 'pointer' : 'default'};" ${id ? `onclick="window.mnxOpenPlaceModal && window.mnxOpenPlaceModal('${id}')"` : ''}>
+      <span class="map-popover__type">${style.label}</span>
+      <h5 class="map-popover__title">${name}</h5>
+      ${dateRow}${metaRow}${noteRow}
+    </div>
+    ${actionBtn}
   `;
 }
 
@@ -90,7 +96,7 @@ function initAttractionsMap() {
     if (typeof place.lat !== 'number' || typeof place.lng !== 'number') return;
     const marker = L.marker([place.lat, place.lng], { icon: mnxBuildMapIcon(place.category) }).addTo(map);
     marker.bindPopup(
-      mnxBuildPopupHtml({ name: place.name, category: place.category, area: place.area, price: place.price }),
+      mnxBuildPopupHtml({ id: place.id, name: place.name, category: place.category, area: place.area, price: place.price }),
       { className: 'mnx-map-popup', closeButton: true }
     );
     bounds.push([place.lat, place.lng]);
@@ -98,7 +104,7 @@ function initAttractionsMap() {
 
   MNX_MAP_EVENTS.forEach((evt) => {
     const marker = L.marker([evt.lat, evt.lng], { icon: mnxBuildMapIcon(evt.category) }).addTo(map);
-    marker.bindPopup(mnxBuildPopupHtml(evt), { className: 'mnx-map-popup', closeButton: true });
+    marker.bindPopup(mnxBuildPopupHtml({ id: evt.id || 'event-fireboat', ...evt }), { className: 'mnx-map-popup', closeButton: true });
     bounds.push([evt.lat, evt.lng]);
   });
 

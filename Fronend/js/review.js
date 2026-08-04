@@ -3,6 +3,9 @@ const MAX_RATING = 5;
 
 let mnxComposerPhotoFiles = [];
 let mnxComposerPhotoPreviews = []; 
+let mnxComposerVideoFile = null;
+let mnxComposerVideoPreview = null;
+let mnxComposerVideoDuration = 0;
 let mnxComposerRating = 0;
 let mnxComposerVisibility = 'public';
 let mnxFeedFilter = 'all'; 
@@ -29,10 +32,9 @@ function renderUploadSlots() {
     const slot = document.createElement('div');
     slot.className = 'upload-slot';
     if (preview) {
-      slot.innerHTML = `<img src="${preview}" alt="รูปที่ ${i + 1}" /><button class="upload-slot__remove" data-index="${i}" aria-label="ลบรูป">✕</button>`;
+      slot.innerHTML = `<img src="${preview}" alt="รูปที่ ${i + 1}" /><button type="button" class="upload-slot__remove" data-index="${i}" aria-label="ลบรูป">✕</button>`;
     } else {
-      slot.innerHTML = `<span class="upload-slot__icon">＋</span>`;
-      slot.addEventListener('click', () => document.getElementById('upload-input').click());
+      slot.innerHTML = `<label for="upload-input" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;cursor:pointer;"><span class="upload-slot__icon">＋</span></label>`;
     }
     wrap.appendChild(slot);
   }
@@ -67,6 +69,106 @@ function initUploadInput() {
       reader.readAsDataURL(file);
     });
     input.value = '';
+  });
+}
+
+/* ----------------------------------------------------------
+   Composer — video upload & duration validator (max 1 min)
+---------------------------------------------------------- */
+function initVideoUploadInput() {
+  const btn = document.getElementById('upload-video-btn');
+  const input = document.getElementById('upload-video-input');
+  const preview = document.getElementById('upload-video-preview');
+  const videoEl = document.getElementById('upload-video-element');
+  const nameEl = document.getElementById('upload-video-name');
+  const durationEl = document.getElementById('upload-video-duration');
+  const sizeEl = document.getElementById('upload-video-size');
+  const removeBtn = document.getElementById('upload-video-remove');
+
+  if (!input) return;
+
+  // Fallback click handler if not using label trigger
+  btn?.addEventListener('click', (e) => {
+    if (btn.tagName.toLowerCase() !== 'label') {
+      input.click();
+    }
+  });
+
+  input.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 80 * 1024 * 1024) {
+      alert('ไฟล์วิดีโอมีขนาดใหญ่เกินไป (จำกัดไม่เกิน 80 MB)');
+      input.value = '';
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(file);
+    mnxComposerVideoFile = file;
+    mnxComposerVideoDuration = 0;
+    mnxComposerVideoPreview = objectUrl;
+
+    if (nameEl) nameEl.textContent = file.name || 'video_clip.mp4';
+    if (sizeEl) sizeEl.textContent = `${(file.size / (1024 * 1024)).toFixed(1)} MB`;
+    if (durationEl) durationEl.textContent = '🎬 วิดีโอ';
+    if (videoEl) {
+      videoEl.src = objectUrl;
+      try {
+        videoEl.currentTime = 0.2;
+        videoEl.load();
+      } catch (_) {}
+    }
+
+    if (btn) btn.style.display = 'none';
+    if (preview) preview.style.display = 'flex';
+
+    // Verify video duration without blocking UI
+    const tempVideo = document.createElement('video');
+    tempVideo.preload = 'metadata';
+    tempVideo.src = objectUrl;
+
+    let checked = false;
+    const handleDuration = () => {
+      if (checked) return;
+      checked = true;
+      const duration = tempVideo.duration;
+      if (duration && !isNaN(duration) && duration > 0) {
+        if (duration > 61) {
+          alert(`วิดีโอต้องมีความยาวไม่เกิน 1 นาที (คลิปนี้ยาว ${Math.round(duration)} วินาที)`);
+          removeBtn?.click();
+          return;
+        }
+        mnxComposerVideoDuration = Math.round(duration);
+        if (durationEl) {
+          const mins = Math.floor(duration / 60);
+          const secs = Math.floor(duration % 60);
+          durationEl.textContent = `🎬 ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+      }
+    };
+
+    tempVideo.onloadedmetadata = handleDuration;
+    tempVideo.oncanplay = handleDuration;
+    tempVideo.ondurationchange = handleDuration;
+    try {
+      tempVideo.load();
+    } catch (_) {}
+  });
+
+  removeBtn?.addEventListener('click', (e) => {
+    e?.preventDefault();
+    e?.stopPropagation();
+    mnxComposerVideoFile = null;
+    mnxComposerVideoDuration = 0;
+    if (mnxComposerVideoPreview) {
+      try { URL.revokeObjectURL(mnxComposerVideoPreview); } catch (_) {}
+      mnxComposerVideoPreview = null;
+    }
+    input.value = '';
+    if (videoEl) videoEl.src = '';
+    if (preview) preview.style.display = 'none';
+    if (btn) btn.style.display = 'flex';
   });
 }
 
@@ -148,11 +250,26 @@ function initVisibilityToggle() {
 function mnxResetComposer() {
   mnxComposerPhotoFiles = [];
   mnxComposerPhotoPreviews = [];
+  mnxComposerVideoFile = null;
+  mnxComposerVideoDuration = 0;
+  if (mnxComposerVideoPreview) {
+    URL.revokeObjectURL(mnxComposerVideoPreview);
+    mnxComposerVideoPreview = null;
+  }
   mnxComposerHashtags = [];
   mnxComposerRating = 0;
   mnxComposerVisibility = 'public';
   const placeInput = document.getElementById('composer-place');
   if (placeInput) placeInput.value = '';
+  const videoInput = document.getElementById('upload-video-input');
+  if (videoInput) videoInput.value = '';
+  const videoPreview = document.getElementById('upload-video-preview');
+  if (videoPreview) videoPreview.style.display = 'none';
+  const videoBtn = document.getElementById('upload-video-btn');
+  if (videoBtn) videoBtn.style.display = 'flex';
+  const videoEl = document.getElementById('upload-video-element');
+  if (videoEl) videoEl.src = '';
+
   renderUploadSlots();
   renderHashtagChips();
   initRatingInput();
@@ -171,8 +288,8 @@ function initComposerSubmit() {
     const placeInput = document.getElementById('composer-place');
     const place = placeInput?.value.trim();
 
-    if (!mnxComposerPhotoFiles.length) {
-      alert('กรุณาอัปโหลดรูปภาพอย่างน้อย 1 รูป');
+    if (!mnxComposerPhotoFiles.length && !mnxComposerVideoFile) {
+      alert('กรุณาอัปโหลดรูปภาพหรือวิดีโออย่างน้อย 1 รายการ');
       return;
     }
     if (!place) {
@@ -187,6 +304,7 @@ function initComposerSubmit() {
     const result = await window.MNX_CHECKIN.addPost({
       place,
       photos: mnxComposerPhotoFiles,
+      video: mnxComposerVideoFile,
       hashtags: mnxComposerHashtags,
       rating: mnxComposerRating || null,
       visibility: mnxComposerVisibility,
@@ -242,6 +360,55 @@ function mnxTimeAgo(ts) {
   return `${Math.round(diffHr / 24)} วันที่แล้ว`;
 }
 
+function buildFeedCardMediaHtml(p) {
+  const mediaItems = [];
+
+  // If post has a video, add it as the primary or first slide
+  if (p.video?.url) {
+    const videoSrc = mnxAbsoluteUploadUrl(p.video.url);
+    const posterSrc = p.video.posterUrl ? mnxAbsoluteUploadUrl(p.video.posterUrl) : '';
+    const duration = p.video.durationSec ? `${Math.floor(p.video.durationSec / 60)}:${(p.video.durationSec % 60).toString().padStart(2, '0')}` : '';
+    mediaItems.push({
+      type: 'video',
+      html: `
+        <div class="post-card__media-slide post-card__media-slide--video is-active">
+          <video class="post-card__video-player" src="${videoSrc}" poster="${posterSrc}" playsinline preload="metadata" loop></video>
+          <button class="post-card__video-play-btn" aria-label="เล่นวิดีโอ">▶</button>
+          <div class="post-card__video-badge">🎬 ${duration || 'วิดีโอ'}</div>
+        </div>
+      `,
+    });
+  }
+
+  // Add photos
+  (p.photos || []).forEach((src, idx) => {
+    const isFirst = mediaItems.length === 0;
+    mediaItems.push({
+      type: 'photo',
+      html: `<img src="${mnxAbsoluteUploadUrl(src)}" class="post-card__media-slide post-card__media-slide--photo ${isFirst ? 'is-active' : ''}" alt="${p.place}" loading="lazy" />`,
+    });
+  });
+
+  if (!mediaItems.length) {
+    return `<div class="post-card__gallery"><div class="post-card__media-empty">ไม่มีสื่อ</div></div>`;
+  }
+
+  const slidesHtml = mediaItems.map((m) => m.html).join('');
+  const navHtml = mediaItems.length > 1 ? `
+    <button class="post-card__gallery-arrow post-card__gallery-arrow--prev" aria-label="ก่อนหน้า">‹</button>
+    <button class="post-card__gallery-arrow post-card__gallery-arrow--next" aria-label="ถัดไป">›</button>
+    <div class="post-card__gallery-nav">${mediaItems.map((m, i) => `<span class="${i === 0 ? 'is-active' : ''}">${m.type === 'video' ? '🎬' : ''}</span>`).join('')}</div>
+  ` : '';
+
+  return `
+    <div class="post-card__gallery" data-active="0" data-total="${mediaItems.length}">
+      ${slidesHtml}
+      ${navHtml}
+      ${p.visibility === 'private' ? '<span class="post-card__privacy-badge">ส่วนตัว</span>' : ''}
+    </div>
+  `;
+}
+
 async function renderFeed() {
   const grid = document.getElementById('feed-grid');
   if (!grid) return;
@@ -264,15 +431,7 @@ async function renderFeed() {
 
   grid.innerHTML = posts.map((p) => `
     <article class="post-card" data-post-id="${p.id}">
-      <div class="post-card__gallery" data-active="0">
-        ${p.photos.map((src, i) => `<img src="${mnxAbsoluteUploadUrl(src)}" class="${i === 0 ? 'is-active' : ''}" alt="${p.place}" loading="lazy" />`).join('')}
-        ${p.photos.length > 1 ? `
-          <button class="post-card__gallery-arrow post-card__gallery-arrow--prev" aria-label="ก่อนหน้า">‹</button>
-          <button class="post-card__gallery-arrow post-card__gallery-arrow--next" aria-label="ถัดไป">›</button>
-          <div class="post-card__gallery-nav">${p.photos.map((_, i) => `<span class="${i === 0 ? 'is-active' : ''}"></span>`).join('')}</div>
-        ` : ''}
-        ${p.visibility === 'private' ? '<span class="post-card__privacy-badge">ส่วนตัว</span>' : ''}
-      </div>
+      ${buildFeedCardMediaHtml(p)}
       <div class="post-card__body">
         <div class="post-card__author">
           <img src="${p.avatar || '/assets/images/avatar-placeholder.png'}" alt="${p.author}" />
@@ -310,18 +469,66 @@ function wireFeedCardEvents(grid) {
   grid.querySelectorAll('.post-card').forEach((card) => {
     const postId = card.dataset.postId;
     const gallery = card.querySelector('.post-card__gallery');
-    const imgs = [...card.querySelectorAll('.post-card__gallery img')];
+    const slides = [...card.querySelectorAll('.post-card__media-slide')];
     const dots = [...card.querySelectorAll('.post-card__gallery-nav span')];
 
+    // Video playback controls inside post card
+    const videoSlide = card.querySelector('.post-card__media-slide--video');
+    if (videoSlide) {
+      const video = videoSlide.querySelector('video');
+      const playBtn = videoSlide.querySelector('.post-card__video-play-btn');
+
+      const togglePlay = (e) => {
+        e?.stopPropagation();
+        if (!video) return;
+        if (video.paused) {
+          // Pause all other feed videos
+          document.querySelectorAll('.post-card__video-player').forEach((v) => {
+            if (v !== video) {
+              v.pause();
+              v.closest('.post-card__media-slide--video')?.querySelector('.post-card__video-play-btn')?.classList.remove('is-playing');
+            }
+          });
+          video.play().then(() => {
+            playBtn?.classList.add('is-playing');
+          }).catch(() => {});
+        } else {
+          video.pause();
+          playBtn?.classList.remove('is-playing');
+        }
+      };
+
+      playBtn?.addEventListener('click', togglePlay);
+      video?.addEventListener('click', togglePlay);
+      video?.addEventListener('ended', () => {
+        playBtn?.classList.remove('is-playing');
+      });
+    }
+
     const goTo = (idx) => {
-      const clamped = (idx + imgs.length) % imgs.length;
-      imgs.forEach((img, i) => img.classList.toggle('is-active', i === clamped));
+      if (!slides.length) return;
+      const clamped = (idx + slides.length) % slides.length;
+      slides.forEach((slide, i) => {
+        slide.classList.toggle('is-active', i === clamped);
+        // If moving away from video, pause it
+        if (i !== clamped && slide.classList.contains('post-card__media-slide--video')) {
+          const v = slide.querySelector('video');
+          v?.pause();
+          slide.querySelector('.post-card__video-play-btn')?.classList.remove('is-playing');
+        }
+      });
       dots.forEach((d, i) => d.classList.toggle('is-active', i === clamped));
-      gallery.dataset.active = clamped;
+      if (gallery) gallery.dataset.active = clamped;
     };
 
-    card.querySelector('.post-card__gallery-arrow--prev')?.addEventListener('click', () => goTo(Number(gallery.dataset.active) - 1));
-    card.querySelector('.post-card__gallery-arrow--next')?.addEventListener('click', () => goTo(Number(gallery.dataset.active) + 1));
+    card.querySelector('.post-card__gallery-arrow--prev')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      goTo(Number(gallery.dataset.active || 0) - 1);
+    });
+    card.querySelector('.post-card__gallery-arrow--next')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      goTo(Number(gallery.dataset.active || 0) + 1);
+    });
 
     const likeBtn = card.querySelector('.post-card__like');
     likeBtn?.addEventListener('click', async () => {
@@ -536,6 +743,7 @@ async function mnxRenderAllAuthDependent() {
 document.addEventListener('includes:loaded', () => {
   renderUploadSlots();
   initUploadInput();
+  initVideoUploadInput();
   renderHashtagChips();
   initHashtagInput();
   initRatingInput();

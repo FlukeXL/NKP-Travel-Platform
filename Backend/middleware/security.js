@@ -36,17 +36,17 @@ function createRateLimiter(windowMs, max, message) {
   });
 }
 
-// 1. Global API rate limit: 300 requests per 15 minutes per IP
+// 1. Global API rate limit: 1000 requests per 15 minutes per IP
 const globalLimiter = createRateLimiter(
   15 * 60 * 1000,
-  300,
+  1000,
   'คำขอใช้งาน API ถี่เกินไป กรุณารอ 15 นาทีแล้วลองใหม่'
 );
 
-// 2. Strict Auth rate limit: 15 login/register attempts per 15 minutes per IP (Anti Brute-Force)
+// 2. Strict Auth rate limit: 50 login/register attempts per 15 minutes per IP (Anti Brute-Force)
 const authLimiter = createRateLimiter(
   15 * 60 * 1000,
-  15,
+  50,
   'มีการพยายามเข้าสู่ระบบหรือสมัครสมาชิกบ่อยเกินไป เพื่อความปลอดภัยกรุณารอ 15 นาที'
 );
 

@@ -26,7 +26,7 @@ function notesCollection() {
   return db.collection(COLLECTIONS.CHECKIN_NOTES);
 }
 
-async function addPost({ uid, author, avatar, place, placeId, photos, hashtags, rating, visibility }) {
+async function addPost({ uid, author, avatar, place, placeId, photos, video, hashtags, rating, visibility }) {
   const doc = {
     uid,
     author,
@@ -34,6 +34,7 @@ async function addPost({ uid, author, avatar, place, placeId, photos, hashtags, 
     place,
     placeId: placeId || null,
     photos: Array.isArray(photos) ? photos : [],
+    video: video || null,
     hashtags: Array.isArray(hashtags) ? hashtags : [],
     rating: rating || null,
     visibility: visibility === 'private' ? 'private' : 'public',

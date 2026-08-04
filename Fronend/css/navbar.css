@@ -129,7 +129,35 @@
   color: var(--color-gold-light) !important;
 }
 
-/* ---- Dropdown (Lifestyle + Checkin + Account triggers) ---- */
+/* ---- ติดต่อโฆษณา — gold highlight pill ---- */
+.navbar__contact-ad {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-gold-light) !important;
+  background: rgba(201, 162, 39, 0.10);
+  border: 1px solid rgba(201, 162, 39, 0.30);
+  border-radius: 20px;
+  padding: 4px 12px 4px 10px !important;
+  font-size: 0.84rem !important;
+  font-weight: 600;
+  transition: background var(--dur-fast) var(--ease-luxury),
+              border-color var(--dur-fast) var(--ease-luxury),
+              box-shadow var(--dur-fast) var(--ease-luxury);
+}
+
+.navbar__contact-ad:hover {
+  background: rgba(201, 162, 39, 0.20) !important;
+  border-color: rgba(201, 162, 39, 0.55) !important;
+  box-shadow: 0 0 12px rgba(201, 162, 39, 0.20);
+  color: #f0d87a !important;
+}
+
+.navbar__contact-ad::after {
+  display: none !important; /* no underline for pill link */
+}
+
+
 .navbar__has-dropdown {
   position: relative;
 }

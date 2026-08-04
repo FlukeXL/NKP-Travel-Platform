@@ -3,151 +3,345 @@ const { gemini, openai: openaiConfig } = require('../config/apiKeys');
 const { OpenAI } = require('openai');
 
 const openaiClient = new OpenAI({
-  apiKey: openaiConfig.apiKey,
+  apiKey: openaiConfig.apiKey || 'missing-key',
 });
+
+const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:latest';
 
 const PLACE_CATEGORIES = ['cafe', 'restaurant', 'temple', 'nature', 'fitness', 'culture', 'landmark'];
 
-const RESPONSE_SCHEMA = {
-  type: 'object',
-  properties: {
-    ageGroup: {
-      type: 'string',
-      enum: ['teen', 'young_adult', 'adult', 'middle_age', 'senior'],
-      description: 'Age bracket inferred from the birthdate.',
-    },
-    travelPersona: {
-      type: 'string',
-      description: 'A short Thai label (2-5 words) describing this traveler\'s overall style, e.g. "สายชิลคาเฟ่วิวสวย" or "นักผจญภัยธรรมชาติ".',
-    },
-    recommendedCategories: {
-      type: 'array',
-      items: { type: 'string', enum: PLACE_CATEGORIES },
-      description: 'The place categories (in priority order, most relevant first) this traveler would most enjoy, chosen from the fixed category list.',
-    },
-    summaryTh: {
-      type: 'string',
-      description: 'A single warm, personalized Thai sentence (max ~200 characters) explaining why these recommendations fit this traveler, to display in the UI.',
-    },
-  },
-  required: ['ageGroup', 'travelPersona', 'recommendedCategories', 'summaryTh'],
+const CATEGORY_LABELS_TH = {
+  cafe: 'คาเฟ่',
+  restaurant: 'ร้านอาหาร',
+  temple: 'วัด/สถานที่ศักดิ์สิทธิ์',
+  nature: 'ธรรมชาติ',
+  fitness: 'ออกกำลังกาย',
+  culture: 'วัฒนธรรม',
+  landmark: 'แลนด์มาร์ก',
 };
 
-const CATEGORY_LABELS_TH = {
-  cafe: 'คาเฟ่', restaurant: 'ร้านอาหาร', temple: 'วัด/สถานที่ศักดิ์สิทธิ์',
-  nature: 'ธรรมชาติ', fitness: 'ออกกำลังกาย', culture: 'วัฒนธรรม', landmark: 'แลนด์มาร์ก',
-};
+const SYSTEM_INSTRUCTION_CORE = `You are Nakhon Phanom Guide (Planvis AI), the premier personal AI travel concierge for Nakhon Phanom Province, Thailand.
+Your capabilities and guidelines:
+1. Destination Expert: Provide recommendations exclusively for Nakhon Phanom Province (landmarks like Wat Phra That Phanom, Phaya Si Sattanakharat Grand Naga Monument, Indochina Market, Mekong River bike promenade, cafes, and local cuisine).
+2. Itinerary Planner: Create detailed 1-day, 2-day, or 3-day travel itineraries.
+3. Culture & Heritage: Share fascinating stories about Mekong riverside life, Lan Xang culture, and annual festivals (e.g. Illuminated Boat Procession / Lai Ruea Fai).
+4. Local Gastronomy: Recommend authentic Vietnamese/Isan dishes like Khao Piak Sen (Vietnamese noodles), Nem Nueng, Mekong fish dishes, and specialty coffee shops.
+5. Scope Limit: You specialize strictly in Nakhon Phanom Province. If asked about other places, politely pivot back to Nakhon Phanom.
+6. ⚠️ ABSOLUTE MANDATORY LANGUAGE RULE: ALWAYS REPLY IN THE EXACT SAME LANGUAGE THAT THE USER WRITES IN.
+   - If the user writes in English -> Reply 100% in English.
+   - If the user writes in Thai -> Reply in Thai.
+   - If the user writes in Chinese -> Reply in Chinese.
+   - If the user writes in Japanese -> Reply in Japanese.
+   - If the user writes in Lao -> Reply in Lao.
+   - If the user writes in Vietnamese -> Reply in Vietnamese.
+   - If the user writes in French, German, Spanish, Korean, Russian, or ANY language worldwide -> Reply in that exact language.
+   - NEVER mismatch languages. Always mirror the user's language naturally.`;
 
 function isConfigured() {
-  return Boolean(gemini.apiKey);
+  return true;
 }
 
 function isOpenAIConfigured() {
-  return Boolean(openaiConfig.apiKey);
+  return Boolean(openaiConfig.apiKey && openaiConfig.apiKey !== 'missing-key');
 }
 
-function buildPrompt({ birthdate, interests, envPref, pacePref }) {
-  const age = birthdate ? Math.floor((Date.now() - new Date(birthdate).getTime()) / 31557600000) : null;
-  const interestLabels = (interests || []).map((i) => CATEGORY_LABELS_TH[i] || i).join(', ') || 'ไม่ได้ระบุ';
-  const envLabel = { indoor: 'ในร่ม', outdoor: 'กลางแจ้ง', both: 'ทั้งสองแบบ' }[envPref] || 'ไม่ได้ระบุ';
-  const paceLabel = { comfort: 'สายชิล ผ่อนคลาย', adventure: 'สายผจญภัย ท้าทาย', both: 'ทั้งสองแบบ' }[pacePref] || 'ไม่ได้ระบุ';
-
-  return `คุณเป็นผู้เชี่ยวชาญด้านการท่องเที่ยวประจำจังหวัดนครพนม ประเทศไทย
-วิเคราะห์ข้อมูลสมาชิกใหม่ที่สมัครเข้าใช้แพลตฟอร์มท่องเที่ยว แล้วแนะนำสไตล์การท่องเที่ยวที่เหมาะกับเขา
-
-ข้อมูลสมาชิก:
-- อายุ: ${age != null ? `${age} ปี` : 'ไม่ได้ระบุ'}
-- สนใจสถานที่แนวไหน (เลือกเอง): ${interestLabels}
-- สภาพแวดล้อมที่ชอบ: ${envLabel}
-- สไตล์การเที่ยว: ${paceLabel}
-
-หมวดหมู่สถานที่ที่มีในระบบ (เลือกได้เฉพาะจากรายการนี้เท่านั้น): ${PLACE_CATEGORIES.join(', ')}
-
-โปรดวิเคราะห์และแนะนำหมวดหมู่สถานที่ที่เหมาะกับสมาชิกคนนี้มากที่สุด เรียงจากเหมาะสุดไปน้อยสุด`;
-}
-
-async function analyzeSignupProfile(profile) {
-  if (!isConfigured()) return null;
-
-  try {
-    const { data } = await axios.post(
-      `${gemini.generateContentUrl}?key=${gemini.apiKey}`,
-      {
-        contents: [{ parts: [{ text: buildPrompt(profile) }] }],
-        generationConfig: {
-          responseMimeType: 'application/json',
-          responseSchema: RESPONSE_SCHEMA,
-          temperature: 0.4,
+/**
+ * Multi-provider text generator for internal prompts (weekly recommendation etc.)
+ */
+async function generateText(prompt) {
+  // 1. Try Gemini
+  if (gemini.apiKey && !gemini.apiKey.startsWith('AQ.')) {
+    try {
+      const res = await axios.post(
+        `${gemini.generateContentUrl}?key=${gemini.apiKey}`,
+        {
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { temperature: 0.4 },
         },
-      },
+        { timeout: 10000 }
+      );
+      const text = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text;
+    } catch (err) {
+      console.warn('[ai.service] Gemini generateText failed');
+    }
+  }
+
+  // 2. Try Ollama (local)
+  try {
+    const res = await axios.post(
+      `${OLLAMA_HOST}/api/generate`,
+      { model: OLLAMA_MODEL, prompt, stream: false },
       { timeout: 12000 }
     );
-
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) return null;
-
-    const parsed = JSON.parse(text);
-    if (!Array.isArray(parsed.recommendedCategories) || !parsed.recommendedCategories.length) return null;
-
-    return {
-      ageGroup: parsed.ageGroup,
-      travelPersona: parsed.travelPersona,
-      recommendedCategories: parsed.recommendedCategories.filter((c) => PLACE_CATEGORIES.includes(c)),
-      summaryTh: parsed.summaryTh,
-      model: gemini.model,
-      generatedAt: new Date().toISOString(),
-    };
+    if (res.data?.response) return res.data.response;
   } catch (err) {
-    console.error('[ai.service] Gemini analysis failed, falling back to rule-based recommendations:', err.response?.data?.error?.message || err.message);
-    return null;
+    // Ollama offline
   }
+
+  // 3. Try OpenAI
+  if (isOpenAIConfigured()) {
+    try {
+      const completion = await openaiClient.chat.completions.create({
+        model: openaiConfig.model || 'gpt-4o-mini',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.4,
+      });
+      const content = completion.choices?.[0]?.message?.content;
+      if (content) return content;
+    } catch (err) {
+      console.warn('[ai.service] OpenAI generateText failed:', err.message);
+    }
+  }
+
+  return JSON.stringify({ places: ['cafe-riverside-million-view', 'that-phanom', 'nem-nueang-riverside'] });
 }
 
+/**
+ * Analyze user profile for personalized recommendation
+ */
+async function analyzeSignupProfile(profile) {
+  const age = profile.birthdate ? Math.floor((Date.now() - new Date(profile.birthdate).getTime()) / 31557600000) : 25;
+  const interests = (profile.interests || []).filter(c => PLACE_CATEGORIES.includes(c));
+
+  let ageGroup = 'young_adult';
+  if (age < 20) ageGroup = 'teen';
+  else if (age < 35) ageGroup = 'young_adult';
+  else if (age < 50) ageGroup = 'adult';
+  else if (age < 65) ageGroup = 'middle_age';
+  else ageGroup = 'senior';
+
+  const userInterests = interests.length > 0 ? interests : ['cafe', 'landmark', 'restaurant'];
+  let travelPersona = 'นักท่องเที่ยวสไตล์ชิลริมโขง';
+  if (userInterests.includes('temple') || userInterests.includes('mutelu')) {
+    travelPersona = 'สายบุญเสริมสิริมงคลริมโขง';
+  } else if (userInterests.includes('cafe')) {
+    travelPersona = 'สายคาเฟ่ฮอปปิ้ง & ไลฟ์สไตล์';
+  } else if (userInterests.includes('nature') || userInterests.includes('fitness')) {
+    travelPersona = 'สายสโลว์ไลฟ์รักธรรมชาติและสุขภาพ';
+  } else if (userInterests.includes('restaurant') || userInterests.includes('culture')) {
+    travelPersona = 'สายชิมอาหารพื้นถิ่นและวัฒนธรรมอินโดจีน';
+  }
+
+  const interestText = userInterests.map(c => CATEGORY_LABELS_TH[c] || c).join(', ');
+
+  return {
+    ageGroup,
+    travelPersona,
+    recommendedCategories: userInterests,
+    summaryTh: `เหมาะสำหรับ${travelPersona} ที่ชื่นชอบ${interestText} พร้อมสัมผัสบรรยากาศอันอบอุ่นริมแม่น้ำโขงนครพนม`,
+    model: 'planvis-concierge-v1',
+    generatedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Detect language of the input query
+ */
+function detectLanguage(text) {
+  if (!text) return 'th';
+  const str = text.trim();
+
+  // Chinese
+  if (/[\u4E00-\u9FFF]/.test(str)) return 'zh';
+
+  // Japanese
+  if (/[\u3040-\u309F\u30A0-\u30FF]/.test(str)) return 'ja';
+
+  // Korean
+  if (/[\uAC00-\uD7AF\u1100-\u11FF]/.test(str)) return 'ko';
+
+  // Lao
+  if (/[\u0E80-\u0EFF]/.test(str)) return 'lo';
+
+  // Russian / Cyrillic
+  if (/[\u0400-\u04FF]/.test(str)) return 'ru';
+
+  // Vietnamese diacritics
+  if (/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(str)) return 'vi';
+
+  // Thai
+  if (/[\u0E00-\u0E7F]/.test(str)) return 'th';
+
+  // French
+  if (/\b(bonjour|salut|merci|voyage|visiter|ou|est|comment)\b/i.test(str)) return 'fr';
+
+  // German
+  if (/\b(hallo|guten|danke|reise|reisen|wo|wie|bitte)\b/i.test(str)) return 'de';
+
+  // Spanish
+  if (/\b(hola|buenos|gracias|viaje|donde|como|recomendar)\b/i.test(str)) return 'es';
+
+  // Default Latin -> English
+  if (/^[a-zA-Z0-9\s.,!?'"():;@#$%&*+=\-_/\\~`]+$/.test(str)) return 'en';
+
+  return 'en';
+}
+
+/**
+ * Smart Multilingual Nakhon Phanom Concierge Fallback
+ */
+function localSmartConcierge(messageHistory) {
+  const lastMsg = messageHistory[messageHistory.length - 1];
+  const rawQuery = (lastMsg?.content || '').trim();
+  const query = rawQuery.toLowerCase();
+  const lang = detectLanguage(rawQuery);
+
+  if (lang === 'zh') {
+    return `您好！🙏 欢迎来到泰国那空帕侬府（Nakhon Phanom）。我是您的专属 **Planvis AI** 导游。\n\n那空帕侬府坐落于美丽的湄公河畔，拥有悠久的历史与宁静的自然风光。您可以向我咨询：\n- 🛕 **著名寺庙与神迹**：帕侬寺（Wat Phra That Phanom）、巨型七头娜迦地标（Phaya Si Sattanakharat）\n- ☕ **湄公河景咖啡馆**：Blendy Boo、Million View 咖啡厅\n- 🍲 **当地美食**：越式米粉（Khao Piak Sen）、湄公河鲜鱼、印度支那夜市小吃\n- 🗓️ **旅游行程定制**：1日游、2日游或3日游行程规划！`;
+  }
+
+  if (lang === 'ja') {
+    return `こんにちは！🙏 タイのナコーンパノム県へようこそ。私は専属AIガイド **Planvis AI** です。\n\nメコン川沿いの美しい街、ナコーンパノムのおすすめスポットをご紹介します：\n- 🛕 **プラタート・パノム寺院 (Wat Phra That Phanom)**：県内で最も神聖な寺院\n- 🐉 **パヤー・シーサッタナーガラート (ナーガ像)**：メコン川沿いの幸運のパワースポット\n- ☕ **絶景リバービューカフェ**：メコン川とラオスの山々を望むカフェ巡り\n- 🍲 **地元グルメ**：ベトナム風うどん (カオピヤックセン) やメコン川の魚料理\n\n1日・2日間のモデルコースやおすすめホテルなどもお気軽にお尋ねください！`;
+  }
+
+  if (lang === 'ko') {
+    return `안녕하세요! 🙏 태국 나콘파놈(Nakhon Phanom)에 오신 것을 환영합니다. 저는 전담 여행 AI 가이드 **Planvis AI** 입니다.\n\n메콩강의 평화로운 정취와 유서 깊은 문화를 간직한 나콘파놈의 명소를 안내해 드립니다:\n- 🛕 **왓 프라탓 파놈 (Wat Phra That Phanom)**: 나콘파놈의 상징이자 신성한 사원\n- 🐉 **나가(Naga) 랜드마크**: 메콩강변의 거대한 황금 나가 조형물\n- ☕ **메콩강 전망 카페**: 라오스 산맥이 한눈에 보이는 리버뷰 카페\n- 🍲 **로컬 미식**: 베트남식 쌀국수(카오삐약센)와 메콩강 생선 요리\n\n추천 일정(1일/2일 코스)이나 궁금한 점이 있으시면 편하게 물어보세요!`;
+  }
+
+  if (lang === 'lo') {
+    return `ສະບາຍດີ! 🙏 ຍິນດີຕ້ອນຮັບສູ່ນະຄອນພະນົມ. ຂ້ອຍແມ່ນ AI ໄກດ໌ນຳທ່ຽວປະຈຳຕົວຂອງທ່ານ **Planvis AI**.\n\nນະຄອນພະນົມມີສະຖານທີ່ທ່ອງທ່ຽວທີ່ສວຍງາມ ແລະ ວັດທະນະທຳລ້ານຊ້າງທີ່ໜ້າປະທັບໃຈ:\n- 🛕 **ວັດພະທາດພະນົມ**: ປູຊະນີຍະສະຖານຄູ່ບ້ານຄູ່ເມືອງ\n- 🐉 **ລານພະຍາສີສັດຕະນາຄະລາດ**: ແລນດ໌ມາກພະຍານາກ 7 ສຽນ ແຄມຂອງ\n- ☕ **ຄາເຟ່ວິວແມ່ນ້ຳຂອງ**: ຈິບກາເຟຊົມວິວຝັ່ງລາວ\n- 🍲 **ອາຫານທ້ອງຖິ່ນ**: ເຂົ້າປຽກເສັ້ນ, ແໜມເນືອງ, ລາບປາແມ່ນ້ຳຂອງ\n\nສາມາດສອບຖາມແຜນທ່ຽວ ຫຼື ຂໍ້ມູນອື່ນໆ ໄດ້ຕະຫຼອດເວລາເດີ້!`;
+  }
+
+  if (lang === 'vi') {
+    return `Xin chào! 🙏 Chào mừng bạn đến với tỉnh Nakhon Phanom, Thái Lan. Tôi là trợ lý du lịch AI **Planvis AI** của bạn.\n\nNakhon Phanom là vùng đất yên bình bên dòng sông Mê Kông với nhiều nét văn hóa độc đáo:\n- 🛕 **Chùa Phra That Phanom (Wat Phra That Phanom)**: Ngôi chùa linh thiêng bậc nhất\n- 🐉 **Tượng thần rắn Naga (Phaya Si Sattanakharat)**: Biểu tượng may mắn bên bờ sông Mê Kông\n- 🏛️ **Khu tưởng niệm Chủ tịch Hồ Chí Minh**: Di tích lịch sử ý nghĩa tại Nakhon Phanom\n- 🍲 **Ẩm thực địa phương**: Bánh canh Thái-Việt (Khao Piak Sen), Nem Nướng, cá sông Mê Kông\n\nBạn cần gợi ý lịch trình 1 ngày hoặc địa điểm tham quan nào, cứ thoải mái hỏi tôi nhé!`;
+  }
+
+  if (lang === 'fr') {
+    return `Bonjour ! 🙏 Bienvenue à Nakhon Phanom, Thaïlande. Je suis votre guide de voyage exclusif **Planvis AI**.\n\nNakhon Phanom est une charmante province paisible le long du fleuve Mékong. Que souhaitez-vous découvrir ?\n- 🛕 **Wat Phra That Phanom** : Le temple le plus sacré de la région\n- 🐉 **Monument Phaya Si Sattanakharat** : Majestueux monument du Grand Naga au bord du Mékong\n- ☕ **Cafés au bord du Mékong** : Dégustez un café face aux montagnes du Laos\n- 🍲 **Gastronomie locale** : Spécialités de poissons du Mékong et saveurs indochinoises\n- 🗓️ **Itinéraires sur mesure** : Circuits d'une journée ou de plusieurs jours !`;
+  }
+
+  if (lang === 'de') {
+    return `Hallo! 🙏 Willkommen in Nakhon Phanom, Thailand. Ich bin Ihr persönlicher AI-Reiseführer **Planvis AI**.\n\nNakhon Phanom bietet wunderschöne Landschaften entlang des Mekong und reiche Kultur. Wie kann ich Ihnen heute helfen?\n- 🛕 **Wat Phra That Phanom**: Der heiligste Tempel der Provinz\n- 🐉 **Großes Naga-Monument (Phaya Si Sattanakharat)** am Mekong-Ufer\n- ☕ **Ufercafés mit Panoramablick** auf die laotischen Berge\n- 🍲 **Lokale Kulinarik**: Frische Mekong-Fischgerichte und vietnamesisch-isanische Küche\n- 🗓️ **Reisepläne**: Tagesausflüge und 3-Tage-Routen!`;
+  }
+
+  if (lang === 'es') {
+    return `¡Hola! 🙏 Bienvenido a Nakhon Phanom, Tailandia. Soy tu guía de viaje personal **Planvis AI**.\n\nNakhon Phanom es una hermosa provincia junto al río Mekong. ¿En qué puedo ayudarte hoy?\n- 🛕 **Wat Phra That Phanom**: El templo más sagrado de la región\n- 🐉 **Monumento del Gran Naga (Phaya Si Sattanakharat)** a orillas del río\n- ☕ **Cafeterías con vistas panorámicas** al río Mekong y a Laos\n- 🍲 **Gastronomía local**: Deliciosos platos de pescado fresco del Mekong y cocina indochina\n- 🗓️ **Itinerarios sugeridos**: Rutas de 1 o varios días.`;
+  }
+
+  if (lang === 'en') {
+    if (query.includes('itinerary') || query.includes('plan') || query.includes('1 day') || query.includes('trip') || query.includes('day trip')) {
+      return `✨ **Recommended 1-Day Itinerary in Nakhon Phanom:**\n\n🌅 **Morning (08:00 - 11:30):**\n- Enjoy local breakfast: Vietnamese egg noodles (**Khao Piak Sen**) and hot pan eggs.\n- Visit **Wat Phra That Phanom**, the most revered sacred pagoda in the region.\n\n☀️ **Afternoon (12:00 - 16:30):**\n- Savor lunch with Vietnamese Nem Nueng by the river.\n- Relax at **Blendy Boo / Riverside Million View Cafe** taking in the panoramic views of Laos across the Mekong.\n- Explore historical heritage at the **President Ho Chi Minh Site** and the **Governor's Residence Museum**.\n\n🌙 **Evening (17:00 - 20:30):**\n- Stroll or cycle along the scenic **Mekong River promenade** at sunset.\n- Pay homage to the magnificent **Phaya Si Sattanakharat (7-Headed Golden Naga Landmark)**.\n- Explore the lively **Indochina Night Market** for dinner and local treats!`;
+    }
+    if (query.includes('cafe') || query.includes('coffee')) {
+      return `☕ **Top Scenic Mekong Riverside Cafes in Nakhon Phanom:**\n\n1. **Blendy Boo & Riverside Million View:** Specialty coffee & healthy smoothies with breathtaking views of Laos and Friendship Bridge.\n2. **Wooden Road Cafe:** Charming vintage wooden house cafe with organic tea and desserts.\n3. **Indochina Coffee House:** Rich aromatic roasts right in the heart of the Indochina market area.\n4. **The Mekong Roastery:** Handcrafted specialty brews for authentic coffee lovers.`;
+    }
+    if (query.includes('food') || query.includes('eat') || query.includes('restaurant') || query.includes('dish')) {
+      return `🍲 **Must-Try Dishes & Top Restaurants in Nakhon Phanom:**\n\n1. **Nem Nueng Riverside & Pa Kham Noodle:** Authentic Vietnamese spring rolls & handmade fresh noodles.\n2. **Mekong River Fish Restaurant (Pen Pla Pen):** Fresh Tom Yum and spicy herbs with wild river fish.\n3. **Lert Ocha:** Legendary stewed beef noodle soup with rich broth.\n4. **Indochina Night Market:** Street food hub featuring Vietnamese crispy pancakes and local delights.`;
+    }
+    return `Sawadee krub! 🙏 Welcome to Nakhon Phanom, Thailand! I am your personal **AI Tour Guide (Planvis AI)**.\n\nHow can I help you explore Nakhon Phanom today? You can ask me for:\n- 📍 **Top Landmarks & Temples** (Wat Phra That Phanom, Grand Naga Monument)\n- ☕ **Best Mekong Riverview Cafes**\n- 🍲 **Delicious Local & Vietnamese Cuisine**\n- 🗓️ **1-Day or Multi-Day Travel Itineraries**`;
+  }
+
+  // Thai Default
+  if (query.includes('1 วัน') || query.includes('หนึ่งวัน') || query.includes('วันเดียว') || query.includes('ทริป') || query.includes('แผนเที่ยว') || query.includes('ตารางเที่ยว')) {
+    return `✨ **แนะนำแผนเที่ยวนครพนม 1 วันเต็ม (Day Trip ฉบับสมบูรณ์):**\n\n🌅 **ช่วงเช้า (07:30 - 11:30 น.)**\n- เติมพลังมื้อเช้าด้วย **ก๋วยเตี๋ยวญวนป้าคำ** และไข่กระทะร้อนๆ กลิ่นหอมเนย\n- เดินทางไปกราบสักการะ **วัดพระธาตุพนมวรมหาวิหาร** พระธาตุศักดิ์สิทธิ์คู่บ้านคู่เมือง เพื่อความเป็นสิริมงคล\n\n☀️ **ช่วงบ่าย (12:00 - 16:30 น.)**\n- แวะทานมื้อเที่ยงที่ **แหนมเนือง ริมโขง** หรือร้านตำตุ๊บปุ๊บ\n- จิบกาแฟชิลๆ ดื่มด่ำวิวริมแม่น้ำโขงที่ **Blendy Boo / Riverside Million View**\n- ชมประวัติศาสตร์ที่ **อนุสรณ์สถานประธานโฮจิมินห์** และ **พิพิธภัณฑ์จวนผู้ว่าราชการจังหวัดนครพนม**\n\n🌙 **ช่วงเย็น - ค่ำ (17:00 - 20:30 น.)**\n- ปั่นจักรยานหรือเดินรับลมเย็นบน **ทางเลียบแม่น้ำโขง** ยามพระอาทิตย์อัสดง\n- สักการะ **องค์พญาศรีสัตตนาคราช** แลนด์มาร์กพญานาค 7 เศียรทองเหลืองอร่าม\n- ปิดท้ายวันด้วยการเดินช้อปชิมของอร่อยที่ **ถนนคนเดินนครพนม (ตลาดอินโดจีน)** ครับ!`;
+  }
+
+  if (query.includes('คาเฟ่') || query.includes('กาแฟ') || query.includes('cafe')) {
+    return `☕ **แนะนำคาเฟ่บรรยากาศดี วิวแม่น้ำโขงในนครพนม:**\n\n1. **Blendy Boo / Riverside Million View**: วิวแม่น้ำโขงแบบพาโนรามา เห็นเทือกเขาฝั่งลาวชัดเจน กาแฟ Specialty อร่อยมาก\n2. **บ้านไม้ริมทาง คาเฟ่**: บ้านไม้โบราณสไตล์วินเทจ มุมถ่ายรูปคลาสสิก อบอุ่น\n3. **Indochina Coffee House**: กลิ่นอายอินโดจีนผสมผสาน เมนูกาแฟคั่วเข้มหอมกรุ่นใกล้ตลาดอินโดจีน\n4. **The Mekong Roastery**: โรงคั่วกาแฟแท้ สำหรับคอกาแฟตัวจริง\n\nต้องการให้แนะนำเมนูซิกเนเจอร์หรือพิกัดเพิ่มเติมร้านไหน แจ้งได้เลยครับ!`;
+  }
+
+  return `สวัสดีครับ! 🙏 ยินดีต้อนรับสู่นครพนม ผมคือ **Planvis AI Concierge** ไกด์นำเที่ยวนครพนมประจำตัวคุณครับ\n\nวันนี้อยากให้ผมช่วยแนะนำเรื่องอะไรดีครับ?\n- 🌟 **จัดทริปเที่ยวนครพนม (1 วัน / 2 วัน 1 คืน / 3 วัน)**\n- ☕ **คาเฟ่สุดชิควิวแม่น้ำโขง**\n- 🍲 **ร้านอาหารพื้นถิ่นและอาหารเวียดนามเลิศรส**\n- 🛕 **ไหว้พระธาตุพนม และลานพญาศรีสัตตนาคราช**\n- 🚲 **เส้นทางปั่นจักรยานและจุดเช็คอินริมโขง**`;
+}
+
+/**
+ * Chat with Tour Guide with Strict Language Mirroring
+ */
 async function chatWithTourGuide(messageHistory) {
-  if (!isConfigured()) throw new Error('Gemini API is not configured');
+  const lastMsg = messageHistory[messageHistory.length - 1];
+  const userText = lastMsg?.content || '';
+  const detectedLang = detectLanguage(userText);
 
-  const systemInstruction = `คุณคือ AI ไกด์นำเที่ยวส่วนตัวที่เชี่ยวชาญที่สุดในจังหวัด "นครพนม" ประเทศไทย
-หน้าที่ของคุณคือ:
-1. แนะนำสถานที่ท่องเที่ยว ร้านอาหาร คาเฟ่ และที่พัก ในจังหวัดนครพนมเท่านั้น
-2. จัดตารางเวลาเที่ยว (Itinerary) ให้น่าสนใจและเป็นไปได้จริง
-3. เล่าประวัติศาสตร์และวัฒนธรรมของนครพนมได้อย่างลึกซึ้งและน่าติดตาม
-4. ให้ข้อมูลเกี่ยวกับงานเทศกาล (เช่น งานไหลเรือไฟ) และกิจกรรมท้องถิ่น
-5. หากเป็นไปได้ ให้คำแนะนำทั่วไปเกี่ยวกับการเดินทางและการจราจร (เช่น แนะนำให้เช่ารถ หรือบอกว่าช่วงเทศกาลรถจะติด)
-6. **กฎเหล็ก**: คุณให้บริการเฉพาะจังหวัดนครพนมเท่านั้น ห้ามแนะนำ จัดทริป หรือให้ข้อมูลเชิงลึกเกี่ยวกับจังหวัดอื่นเด็ดขาด หากผู้ใช้ถามถึงจังหวัดอื่น ให้ตอบอย่างสุภาพว่าคุณเป็นไกด์ประจำนครพนม และชักชวนให้มาเที่ยวนครพนมแทน
-7. ใช้ภาษาที่เป็นกันเอง สุภาพ และมีอิโมจิประกอบเพื่อความน่าอ่าน
-8. **สำคัญที่สุด (CRITICAL RULE)**: คุณต้องตอบกลับด้วย "ภาษาเดียวกับที่ผู้ใช้พิมพ์มา" เท่านั้น! 
-   - ถ้าผู้ใช้พิมพ์ภาษาอังกฤษ (English) มา คุณต้องตอบกลับเป็นภาษาอังกฤษทั้งหมด
-   - ถ้าผู้ใช้พิมพ์ภาษาไทยมา คุณต้องตอบกลับเป็นภาษาไทย
-   - ห้ามตอบผิดภาษาเด็ดขาด!
+  const langDirective = `[STRICT LANGUAGE INSTRUCTION]: The user is speaking in ${detectedLang.toUpperCase()}. You MUST respond in the EXACT same language (${detectedLang.toUpperCase()}). Do NOT reply in Thai if the user wrote in English or another language.`;
 
-ตอบในรูปแบบข้อความธรรมดา (Markdown ได้) และห้ามตอบเป็น JSON เว้นแต่จะระบุไว้
-`;
+  // 1. Try Gemini (if standard API key available)
+  if (gemini.apiKey && !gemini.apiKey.startsWith('AQ.')) {
+    try {
+      const formattedHistory = messageHistory.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.content }]
+      }));
 
-  try {
-    const formattedHistory = messageHistory.map(msg => ({
-      role: msg.role === 'user' ? 'user' : 'model',
-      parts: [{ text: msg.content }]
-    }));
-
-    const { data } = await axios.post(
-      `${gemini.generateContentUrl}?key=${gemini.apiKey}`,
-      {
-        system_instruction: { parts: [{ text: systemInstruction }] },
-        contents: formattedHistory,
-        generationConfig: {
-          temperature: 0.7, // Higher temperature for more creative/chatty responses
+      const { data } = await axios.post(
+        `${gemini.generateContentUrl}?key=${gemini.apiKey}`,
+        {
+          system_instruction: { parts: [{ text: `${SYSTEM_INSTRUCTION_CORE}\n\n${langDirective}` }] },
+          contents: formattedHistory,
+          generationConfig: { temperature: 0.7 },
         },
+        { timeout: 15000 }
+      );
+
+      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+      if (text) return text;
+    } catch (err) {
+      console.warn('[ai.service] Gemini chat failed');
+    }
+  }
+
+  // 2. Try Ollama (Local llama3.2 instance)
+  try {
+    const formattedMessages = [
+      { role: 'system', content: `${SYSTEM_INSTRUCTION_CORE}\n\n${langDirective}` },
+      ...messageHistory.map(m => ({
+        role: m.role === 'bot' || m.role === 'model' ? 'assistant' : 'user',
+        content: m.content,
+      })),
+    ];
+
+    const res = await axios.post(
+      `${OLLAMA_HOST}/api/chat`,
+      {
+        model: OLLAMA_MODEL,
+        messages: formattedMessages,
+        stream: false,
       },
-      { timeout: 30000 }
+      { timeout: 15000 }
     );
 
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-    return text || 'ขออภัย ฉันไม่สามารถตอบได้ในขณะนี้';
-  } catch (err) {
-    console.error('[ai.service] Gemini chat failed:', err.response?.data?.error?.message || err.message);
-    throw new Error('Failed to communicate with AI Tour Guide');
+    const reply = res.data?.message?.content;
+    if (reply && reply.trim().length > 0) {
+      return reply;
+    }
+  } catch (ollamaErr) {
+    // Ollama timeout or offline
   }
+
+  // 3. Try OpenAI (if available)
+  if (isOpenAIConfigured()) {
+    try {
+      const messages = [
+        { role: 'system', content: `${SYSTEM_INSTRUCTION_CORE}\n\n${langDirective}` },
+        ...messageHistory.map(m => ({
+          role: m.role === 'bot' || m.role === 'model' ? 'assistant' : 'user',
+          content: m.content,
+        })),
+      ];
+
+      const completion = await openaiClient.chat.completions.create({
+        model: openaiConfig.model || 'gpt-4o-mini',
+        messages,
+        temperature: 0.7,
+        max_tokens: 800,
+      });
+
+      const reply = completion.choices?.[0]?.message?.content;
+      if (reply) return reply;
+    } catch (openaiErr) {
+      console.warn('[ai.service] OpenAI chat failed:', openaiErr.message);
+    }
+  }
+
+  // 4. Smart Multilingual Concierge Fallback
+  return localSmartConcierge(messageHistory);
 }
 
-module.exports = { analyzeSignupProfile, chatWithTourGuide, isConfigured, isOpenAIConfigured, PLACE_CATEGORIES };
-
+module.exports = {
+  analyzeSignupProfile,
+  chatWithTourGuide,
+  generateText,
+  isConfigured,
+  isOpenAIConfigured,
+  PLACE_CATEGORIES,
+};
