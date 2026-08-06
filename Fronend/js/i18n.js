@@ -138,7 +138,10 @@
       'contact.form_topic': 'หัวข้อที่ต้องการติดต่อ *',
       'contact.form_msg': 'รายละเอียดข้อความ *',
       'contact.form_submit': 'ส่งข้อความ',
-      'contact.success_msg': '✓ ส่งข้อความเรียบร้อยแล้ว ทีมงานจะดำเนินการตรวจสอบและติดต่อกลับโดยเร็วที่สุด'
+      'contact.success_msg': '✓ ส่งข้อความเรียบร้อยแล้ว ทีมงานจะดำเนินการตรวจสอบและติดต่อกลับโดยเร็วที่สุด',
+
+      // Profile
+      'profile.joined_date': 'สมัครสมาชิก',
     },
 
     EN: {
@@ -274,7 +277,10 @@
       'contact.form_topic': 'Inquiry Topic *',
       'contact.form_msg': 'Message Details *',
       'contact.form_submit': 'Send Message',
-      'contact.success_msg': '✓ Message sent successfully! Our team will review and get back to you shortly.'
+      'contact.success_msg': '✓ Message sent successfully! Our team will review and get back to you shortly.',
+
+      // Profile
+      'profile.joined_date': 'Member Since',
     }
   };
 
@@ -353,6 +359,7 @@
     { th: 'ภาษา', en: 'Language' },
     { th: 'สำรวจ', en: 'Explore' },
     { th: 'บัญชีผู้ใช้', en: 'Account' },
+    { th: 'สมัครสมาชิก', en: 'Member Since' },
     { th: 'ข้อมูลเรียลไทม์', en: 'Real-Time Insights' },
     { th: 'พยากรณ์อากาศ', en: 'Weather Forecast' },
     { th: 'สภาพแวดล้อม PM2.5', en: 'PM2.5 Environment' },

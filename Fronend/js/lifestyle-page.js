@@ -43,33 +43,49 @@ async function renderLifestyleStats() {
 async function renderLifestylePopular() {
   const section = document.getElementById('lifestyle-popular');
   const grid = document.getElementById('lifestyle-popular-grid');
-  if (!section || !grid || !window.mnxGetMostPopularByLifestyle) return;
+  if (!section || !grid || !window.mnxGetPlacesByLifestyle) return;
 
   const myGeneration = ++mnxLifestylePopularGeneration;
   const slug = mnxLifestyleSlug();
-  const top = window.mnxGetMostPopularByLifestyle(slug, 3);
+  const allPlaces = window.mnxGetPlacesByLifestyle(slug);
 
-  if (!top.length) {
+  if (!allPlaces.length) {
     section.style.display = 'none';
     return;
   }
   section.style.display = '';
 
-  await Promise.all(top.map((p) => window.MNX_REVIEWS?.fetch(p.id)));
+  // Fetch reviews for all places to get real ratings
+  await Promise.all(allPlaces.map((p) => window.MNX_REVIEWS?.fetch(p.id)));
   if (myGeneration !== mnxLifestylePopularGeneration) return;
+
+  // Sort by real review rating desc, fallback to seed rating, then popularity
+  const sorted = allPlaces.slice().sort((a, b) => {
+    const ra = window.MNX_REVIEWS?.stats(a.id)?.avg ?? a.rating ?? 0;
+    const rb = window.MNX_REVIEWS?.stats(b.id)?.avg ?? b.rating ?? 0;
+    if (rb !== ra) return rb - ra;
+    return (b.popularity || 0) - (a.popularity || 0);
+  });
+  const top = sorted.slice(0, 3);
 
   const rankLabels = ['อันดับ 1', 'อันดับ 2', 'อันดับ 3'];
 
   grid.innerHTML = top.map((p, i) => {
     const stats = window.MNX_REVIEWS?.stats(p.id);
-    const ratingHtml = stats ? `<span class="stars">★</span> ${stats.avg.toFixed(1)} <span class="lifestyle-popular-card__review-count">(${stats.count})</span>` : 'ยังไม่มีคะแนน';
-    const visits = p.popularity >= 1000 ? `${(p.popularity / 1000).toFixed(1)}K` : `${p.popularity}`;
+    const ratingVal = stats ? stats.avg.toFixed(1) : (p.rating ? p.rating.toFixed(1) : null);
+    const ratingHtml = stats
+      ? `<span class="stars">★</span> ${ratingVal} <span class="lifestyle-popular-card__review-count">(${stats.count} รีวิว)</span>`
+      : ratingVal
+        ? `<span class="stars">★</span> ${ratingVal} <span class="lifestyle-popular-card__review-count" style="opacity:0.6">(คะแนนเริ่มต้น)</span>`
+        : 'ยังไม่มีคะแนน';
+    const visits = p.popularity >= 1000 ? `${(p.popularity / 1000).toFixed(1)}K` : `${p.popularity || 0}`;
+    const imgSrc = typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(p.img) : p.img;
     return `
       <article class="lifestyle-popular-card lifestyle-popular-card--rank-${i + 1}" data-place-open="${p.id}" style="cursor: pointer;">
         <div class="lifestyle-popular-card__img-wrap">
-          <img src="${p.img}" alt="${p.name}" draggable="false" />
+          <img src="${imgSrc}" alt="${p.name}" draggable="false" loading="lazy" />
           <span class="lifestyle-popular-card__rank">${rankLabels[i]}</span>
-          <span class="lifestyle-popular-card__visits">${visits} คน/เดือน</span>
+          ${p.popularity ? `<span class="lifestyle-popular-card__visits">${visits} คน/เดือน</span>` : ''}
         </div>
         <div class="lifestyle-popular-card__body">
           <div class="lifestyle-popular-card__rating">${ratingHtml}</div>
@@ -96,31 +112,60 @@ async function renderLifestylePlaceGrid() {
 
   const myGeneration = ++mnxLifestyleGridGeneration;
   const slug = mnxLifestyleSlug();
-  const places = window.mnxGetPlacesByLifestyle(slug);
+  const rawPlaces = window.mnxGetPlacesByLifestyle(slug);
+
+  // If no places at all for this category — hide the grid section silently
+  if (!rawPlaces.length) {
+    grid.closest('section')?.style.setProperty('display', 'none');
+    const countEl = document.getElementById('lifestyle-place-count');
+    if (countEl) countEl.textContent = '0 สถานที่';
+    return;
+  }
+
+  // Show loading state
+  grid.innerHTML = `<p class="lifestyle-grid-empty" style="opacity:0.5;"><span class="loader"></span> กำลังโหลดข้อมูล...</p>`;
+
+  // Fetch reviews for all places in parallel
+  await Promise.all(rawPlaces.map((p) => window.MNX_REVIEWS?.fetch(p.id)));
+  if (myGeneration !== mnxLifestyleGridGeneration) return;
+
+  // Sort: places with real reviews → by avg rating desc; then places without reviews → by seed rating desc
+  const places = rawPlaces.slice().sort((a, b) => {
+    const sa = window.MNX_REVIEWS?.stats(a.id);
+    const sb = window.MNX_REVIEWS?.stats(b.id);
+    const hasA = sa && sa.count > 0;
+    const hasB = sb && sb.count > 0;
+    // Both have real reviews — sort by avg desc
+    if (hasA && hasB) return (sb.avg || 0) - (sa.avg || 0);
+    // One has real reviews — it goes first
+    if (hasA) return -1;
+    if (hasB) return 1;
+    // Neither has real reviews — sort by seed rating desc
+    return (b.rating || 0) - (a.rating || 0);
+  });
 
   const countEl = document.getElementById('lifestyle-place-count');
   if (countEl) countEl.textContent = `${places.length} สถานที่`;
 
-  if (!places.length) {
-    grid.innerHTML = `<p class="lifestyle-grid-empty">ยังไม่มีสถานที่ในสายนี้ ติดตามเร็วๆนี้</p>`;
-    return;
-  }
-
-  await Promise.all(places.map((p) => window.MNX_REVIEWS?.fetch(p.id)));
-  if (myGeneration !== mnxLifestyleGridGeneration) return;
-
   grid.innerHTML = places.map((p) => {
     const stats = window.MNX_REVIEWS?.stats(p.id);
-    const ratingHtml = stats ? `<span class="stars">★</span> ${stats.avg.toFixed(1)}` : 'ยังไม่มีคะแนน';
+    const hasRealRating = stats && stats.count > 0;
+    const ratingVal = hasRealRating ? stats.avg.toFixed(1) : (p.rating ? p.rating.toFixed(1) : null);
+    const ratingHtml = hasRealRating
+      ? `<span class="stars">★</span> ${ratingVal} <span style="font-size:0.78em; opacity:0.7">(${stats.count})</span>`
+      : ratingVal
+        ? `<span class="stars" style="opacity:0.6">★</span> <span style="opacity:0.75">${ratingVal}</span>`
+        : '';
+    const imgSrc = typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(p.img) : p.img;
     return `
     <article class="lifestyle-card" data-place-open="${p.id}" style="cursor: pointer;">
       <div class="lifestyle-card__img-wrap" data-place-open="${p.id}">
-        <img src="${p.img}" alt="${p.name}" draggable="false" />
-        <span class="lifestyle-card__gallery-hint">${p.images.length} รูป · ดูรายละเอียด</span>
+        <img src="${imgSrc}" alt="${p.name}" draggable="false" loading="lazy" />
+        <span class="lifestyle-card__gallery-hint">${p.images?.length || 1} รูป · ดูรายละเอียด</span>
         <button class="lifestyle-card__favorite" data-favorite-id="${p.id}" aria-label="บันทึกเป็นรายการที่ชอบ">♡</button>
       </div>
       <div class="lifestyle-card__body" data-place-open="${p.id}">
-        <div class="lifestyle-card__rating">${ratingHtml}</div>
+        ${ratingHtml ? `<div class="lifestyle-card__rating">${ratingHtml}</div>` : ''}
         <h4 class="lifestyle-card__title">${p.name}</h4>
         <p class="lifestyle-card__desc">${p.desc}</p>
         <div class="lifestyle-card__meta">
@@ -301,8 +346,12 @@ async function renderLifestylePage() {
   document.dispatchEvent(new CustomEvent('app:content-updated'));
 }
 
-document.addEventListener('includes:loaded', () => {
+document.addEventListener('includes:loaded', async () => {
   initLifestyleInterestButton();
+  // Try to sync from API first (places-data.js also listens, this ensures we wait for it)
+  if (window.mnxSyncPlacesFromApi) {
+    await window.mnxSyncPlacesFromApi().catch(() => null);
+  }
   renderLifestylePage();
 });
 

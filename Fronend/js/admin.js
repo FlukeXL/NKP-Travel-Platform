@@ -1036,8 +1036,11 @@ function openAdminAdModal(id = '', title = '', isActive = true, imageUrl = '', p
 }
 
 function closeAdminAdModal() {
-  document.getElementById('admin-ad-modal').classList.remove('is-open');
+  document.getElementById('admin-ad-modal')?.classList.remove('is-open');
 }
+
+window.openAdminAdModal = openAdminAdModal;
+window.closeAdminAdModal = closeAdminAdModal;
 
 document.getElementById('admin-add-ad-btn')?.addEventListener('click', () => {
   openAdminAdModal();

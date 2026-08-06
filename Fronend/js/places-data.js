@@ -1,11 +1,5 @@
 const MNX_MAX_PLACE_PHOTOS = 10;
 
-/** Builds a gallery of up to MAX_PLACE_PHOTOS images from a single
- * base filename (e.g. "cafe-1.jpg" -> cafe-1.jpg, cafe-1-2.jpg, ...
- * cafe-1-10.jpg) — used as a fallback only when a place has no real
- * `images[]` array of its own (legacy seed-data places). Missing
- * files just render broken silently via onerror handlers elsewhere;
- * this never blocks anything if fewer than 10 actually exist on disk. */
 function mnxBuildGallery(baseImg) {
   const dot = baseImg.lastIndexOf('.');
   const stem = baseImg.slice(0, dot);
@@ -86,10 +80,15 @@ const MNX_LIFESTYLE_CATEGORY_SOURCES = {
 };
 
 function mnxGetPlacesByLifestyle(slug) {
-  if (slug === 'all') return MNX_PLACES;
+  if (slug === 'all') return MNX_PLACES.slice().sort((a, b) => (b.rating || 0) - (a.rating || 0));
   const sourceCategories = MNX_LIFESTYLE_CATEGORY_SOURCES[slug];
   if (!sourceCategories) return [];
-  return MNX_PLACES.filter((p) => sourceCategories.includes(p.category));
+  return MNX_PLACES.filter((p) => {
+    if (p.lifestyle) {
+      return Array.isArray(p.lifestyle) ? p.lifestyle.includes(slug) : p.lifestyle === slug;
+    }
+    return sourceCategories.includes(p.category);
+  });
 }
 
 const MNX_PLACE_POPULARITY = {
@@ -168,7 +167,7 @@ function mnxGetPlace(id) {
         price: ev.dates || (ev.startDate ? `เริ่ม: ${ev.startDate}` : 'ไม่มีกำหนดการ'),
         lat: 17.3948,
         lng: 104.7997,
-        images: [mnxResolveUploadUrl(ev.banner) || '/assets/images/events/fire-boat-festival.jpg']
+        images: [mnxResolveUploadUrl(ev.banner) || '/assets/images/placeholder.jpg']
       };
     }
   }

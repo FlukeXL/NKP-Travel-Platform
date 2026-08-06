@@ -26,7 +26,7 @@ function mnxRenderEventCards() {
   grid.innerHTML = MNX_EVENTS.map((ev) => `
     <article class="widget-card widget-card--festival fade-in" style="cursor: pointer;" onclick="window.mnxOpenPlaceModal('${ev.id}')">
       <div class="widget-card__img-wrap">
-        <img src="${(typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(ev.banner) : ev.banner) || '/assets/images/events/fire-boat-festival.jpg'}" alt="${ev.title}" onerror="this.src='/assets/images/events/fire-boat-festival.jpg'" />
+        <img src="${(typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(ev.banner) : ev.banner) || '/assets/images/placeholder.jpg'}" alt="${ev.title}" onerror="this.src='/assets/images/placeholder.jpg'" />
         <span class="widget-card__badge">${ev.badge || ev.tag || 'กิจกรรม'}</span>
       </div>
       <div class="widget-card__body">
@@ -58,7 +58,7 @@ function mnxRenderEventPopup() {
       ? `${formatThaiDate(popupEvent.startDate)}${popupEvent.endDate ? ` – ${formatThaiDate(popupEvent.endDate)}` : ''}`
       : '');
   popup.querySelector('[data-field="event-location"]').textContent = popupEvent.location || '';
-  popup.querySelector('[data-field="event-countdown"]').textContent = buildCountdownLabel(popupEvent.startDate, popupEvent.endDate);
+  popup.querySelector('[data-field="event-countdown"]').textContent = buildCountdownLabel(popupEvent.startDate, popupEvent.endDate, popupEvent.dates);
   const cta = popup.querySelector('[data-field="event-cta"]');
   cta.href = '#';
   cta.onclick = (e) => {
@@ -92,23 +92,106 @@ function mnxRenderEventPopup() {
 }
 
 function formatThaiDate(dateStr) {
-  const d = new Date(dateStr);
-  return d.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+  if (!dateStr) return '';
+  const d = parseSafeDate(dateStr);
+  if (!d || isNaN(d.getTime())) return dateStr;
+  const day = d.getDate();
+  const monthTH = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+  const yearBE = d.getFullYear() + 543;
+  return `${day} ${monthTH[d.getMonth()]} ${yearBE}`;
 }
 
-function buildCountdownLabel(startDate, endDate) {
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+function mnxParseThaiDateText(text) {
+  if (!text || typeof text !== 'string') return null;
+  const thMonths = {
+    'มกราคม': 0, 'ม.ค.': 0, 'ม.ค': 0,
+    'กุมภาพันธ์': 1, 'ก.พ.': 1, 'ก.พ': 1,
+    'มีนาคม': 2, 'มี.ค.': 2, 'มี.ค': 2,
+    'เมษายน': 3, 'เม.ย.': 3, 'เม.ย': 3,
+    'พฤษภาคม': 4, 'พ.ค.': 4, 'พ.ค': 4,
+    'มิถุนายน': 5, 'มิ.ย.': 5, 'มิ.ย': 5,
+    'กรกฎาคม': 6, 'ก.ค.': 6, 'ก.ค': 6,
+    'สิงหาคม': 7, 'ส.ค.': 7, 'ส.ค': 7,
+    'กันยายน': 8, 'ก.ย.': 8, 'ก.ย': 8,
+    'ตุลาคม': 9, 'ต.ค.': 9, 'ต.ค': 9,
+    'พฤศจิกายน': 10, 'พ.ย.': 10, 'พ.ย': 10,
+    'ธันวาคม': 11, 'ธ.ค.': 11, 'ธ.ค': 11,
+  };
+
+  const m = text.match(/(\d{1,2})\s*(?:[-–—ถึง]+\s*(\d{1,2}))?\s*([ก-๙\.]+)(?:\s+(\d{4}))?/);
+  if (m) {
+    const startDay = parseInt(m[1], 10);
+    const endDay = m[2] ? parseInt(m[2], 10) : startDay;
+    const monthKey = m[3].trim();
+    let monthIdx = -1;
+    for (const [k, v] of Object.entries(thMonths)) {
+      if (monthKey.startsWith(k) || k.startsWith(monthKey)) {
+        monthIdx = v;
+        break;
+      }
+    }
+    if (monthIdx !== -1) {
+      let year = m[4] ? parseInt(m[4], 10) : new Date().getFullYear();
+      if (year > 2400) year -= 543;
+      const startDate = new Date(year, monthIdx, startDay);
+      const endDate = new Date(year, monthIdx, endDay, 23, 59, 59);
+      return { startDate, endDate };
+    }
+  }
+  return null;
+}
+
+function parseSafeDate(dateStr) {
+  if (!dateStr) return null;
+  if (dateStr instanceof Date) {
+    const d = new Date(dateStr.getTime());
+    if (d.getFullYear() > 2400) d.setFullYear(d.getFullYear() - 543);
+    return d;
+  }
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) {
+    if (d.getFullYear() > 2400) {
+      d.setFullYear(d.getFullYear() - 543);
+    }
+    return d;
+  }
+  const parsed = mnxParseThaiDateText(dateStr);
+  return parsed ? parsed.startDate : null;
+}
+
+function buildCountdownLabel(startDate, endDate, datesText) {
+  let start = parseSafeDate(startDate);
+  let end = parseSafeDate(endDate);
+
+  if (datesText) {
+    const fromText = mnxParseThaiDateText(datesText);
+    if (fromText) {
+      if (!start || isNaN(start.getTime()) || (fromText.startDate && fromText.startDate > start)) {
+        start = fromText.startDate;
+      }
+      if (!end || isNaN(end.getTime())) {
+        end = fromText.endDate;
+      }
+    }
+  }
+
+  if (!start || isNaN(start.getTime())) return '';
+
   const today = new Date();
   const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const daysUntilStart = Math.round((startOfDay(start) - startOfDay(today)) / 86400000);
-  const daysUntilEnd = Math.round((startOfDay(end) - startOfDay(today)) / 86400000);
 
-  if (daysUntilEnd < 0) return 'จบงานแล้ว';
-  if (daysUntilStart <= 0) return 'กำลังจัดงานอยู่ตอนนี้';
-  if (daysUntilStart === 1) return 'เริ่มพรุ่งนี้';
-  return `อีก ${daysUntilStart} วันจะเริ่มงาน`;
+  const daysUntilStart = Math.round((startOfDay(start) - startOfDay(today)) / 86400000);
+  const daysUntilEnd = end && !isNaN(end.getTime())
+    ? Math.round((startOfDay(end) - startOfDay(today)) / 86400000)
+    : daysUntilStart;
+
+  const isEn = window.MNX_I18N && window.MNX_I18N.getLang() === 'EN';
+  if (daysUntilEnd < 0) return isEn ? 'Event Ended' : 'จบงานแล้ว';
+  if (daysUntilStart <= 0) return isEn ? 'Happening Now' : 'กำลังจัดงานอยู่ตอนนี้';
+  if (daysUntilStart === 1) return isEn ? 'Starts Tomorrow' : 'เริ่มพรุ่งนี้';
+  return isEn ? `Starts in ${daysUntilStart} days` : `อีก ${daysUntilStart} วันจะเริ่มงาน`;
 }
+
 
 async function loadWeeklyShowcase() {
   try {
@@ -125,7 +208,7 @@ async function loadVideoReviews() {
   try {
     const container = document.getElementById('home-videos-grid');
     if (!container || !window.MNX_REVIEWS?.getAllVideos) return;
-    
+
     const videos = await window.MNX_REVIEWS.getAllVideos();
     if (window.mnxRenderVideoCards) {
       // Show up to 4 videos on the home page
@@ -280,14 +363,14 @@ async function renderRecommendSection() {
 
 document.addEventListener('DOMContentLoaded', async () => {
   if (typeof mnxCheckAuth === 'function') mnxCheckAuth();
-  
+
   await mnxLoadAndRenderEvents(); // Wait for events before potentially using them in modals
-  
+
   loadActivePromo();
 
   // Load weekly places
   loadWeeklyShowcase();
-  
+
   // Load Video Reviews
   loadVideoReviews();
 
@@ -369,7 +452,7 @@ async function loadActivePromo() {
 async function loadPersonalizedPlaces() {
   const foodGrid = document.getElementById('home-food-culture-grid');
   const cafeGrid = document.getElementById('home-cafe-grid');
-  
+
   if (foodGrid) foodGrid.innerHTML = '<p style="text-align:center; width:100%;"><span class="loader"></span> กำลังวิเคราะห์ข้อมูลด้วย AI...</p>';
   if (cafeGrid) cafeGrid.innerHTML = '<p style="text-align:center; width:100%;"><span class="loader"></span> กำลังวิเคราะห์ข้อมูลด้วย AI...</p>';
 

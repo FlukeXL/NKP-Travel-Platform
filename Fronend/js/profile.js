@@ -1,10 +1,3 @@
-/* ----------------------------------------------------------
-   Profile page — Modern Luxury Premium
-   Shows name, avatar, AI persona, stats, travel preferences
-   (editable inline), recent reviews, and recent check-ins.
-   All data pulled from the real backend/session.
----------------------------------------------------------- */
-
 const INTEREST_LABELS = {
   cafe: 'คาเฟ่', restaurant: 'ร้านอาหาร', temple: 'วัด/ศักดิ์สิทธิ์',
   nature: 'ธรรมชาติ', fitness: 'ออกกำลังกาย', culture: 'วัฒนธรรม', landmark: 'แลนด์มาร์ก',
@@ -95,11 +88,17 @@ async function mnxRenderProfile() {
     personaEl.style.display = 'inline-flex';
   }
 
-  // Member since (stat)
+  // Member since (stat) — show join date (month + year), not duration
   const joinedEl = document.getElementById('stat-joined');
-  if (joinedEl) {
-    const months = Math.round((Date.now() - new Date(session.joinedAt).getTime()) / (30 * 24 * 3600000));
-    joinedEl.textContent = months < 1 ? '< 1 เดือน' : `${months} เดือน`;
+  if (joinedEl && session.joinedAt) {
+    const joinDate = new Date(session.joinedAt);
+    const lang = window.MNX_I18N?.getLang?.() || 'TH';
+    if (lang === 'EN') {
+      joinedEl.textContent = joinDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    } else {
+      // Thai Buddhist calendar year
+      joinedEl.textContent = joinDate.toLocaleDateString('th-TH', { month: 'long', year: 'numeric' });
+    }
   }
 
   // Load stats + content in parallel
@@ -133,7 +132,7 @@ async function mnxLoadProfileStats(session) {
     const myCheckins = feed.filter((p) => p.uid === session.uid);
     const myCheckinsEl = document.getElementById('stat-checkins');
     if (myCheckinsEl) myCheckinsEl.textContent = myCheckins.length;
-  } catch (_) {}
+  } catch (_) { }
 }
 
 /* ----------------------------------------------------------
@@ -306,10 +305,6 @@ async function mnxRenderRecentReviews(session) {
   if (!list) return;
 
   try {
-    // Fetch all video reviews (those are the ones that show as a feed
-    // and belong to specific users). Text-only reviews (no video) are
-    // per-place and would require listing every place — use video feed
-    // as a representative "my content" showcase.
     const feed = await window.MNX_API.get('/reviews/videos').catch(() => ({ videos: [] }));
     const myVideos = (feed.videos || []).filter((v) => v.uid === session.uid).slice(0, 5);
 
@@ -399,7 +394,7 @@ async function mnxLoadFavCount() {
     const ids = window.MNX_FAVORITES?.getIds ? window.MNX_FAVORITES.getIds() : [];
     const el = document.getElementById('stat-favorites');
     if (el) el.textContent = ids.length;
-  } catch (_) {}
+  } catch (_) { }
 }
 
 /* ----------------------------------------------------------

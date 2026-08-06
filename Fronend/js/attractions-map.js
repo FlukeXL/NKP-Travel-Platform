@@ -1,8 +1,3 @@
-/* Inline-SVG line icons (no fill on the outer wrapper needed since
-   the map pin marker itself already carries the category color as
-   its background) replace the old emoji glyphs used inside each
-   map pin/popover. stroke="#fff" so each icon reads clearly against
-   the colored pin background. */
 const MNX_MAP_ICON_SVG = {
   temple: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M6 3h12l3 5-9 13L3 8Z"/><path d="M3 8h18M9 3l3 5 3-5M6 8l6 13 6-13"/></svg>',
   cafe: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M5 9h12v4a5 5 0 0 1-5 5h-2a5 5 0 0 1-5-5V9Z"/><path d="M17 10h1.5a2 2 0 0 1 0 4H17"/><path d="M8 4c0 1-1 1-1 2M12 4c0 1-1 1-1 2"/></svg>',
@@ -117,12 +112,6 @@ document.addEventListener('includes:loaded', () => {
 
   initAttractionsMap();
 });
-
-// Leaflet map is only built once (no cheap "re-render" hook), and
-// MNX_PLACES may still be seed data at the moment initAttractionsMap()
-// first runs (places:updated fires moments later once the API sync
-// resolves) — simplest correct fix is to just rebuild the whole map
-// once real data arrives, since this only happens once per page load.
 document.addEventListener('places:updated', () => {
   const container = document.getElementById('site-map-leaflet');
   if (container && container._leaflet_id) {

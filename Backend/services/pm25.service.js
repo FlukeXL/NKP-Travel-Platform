@@ -50,14 +50,20 @@ async function getCurrentPm25Detail() {
 
 async function getCurrentPm25() {
   let value;
-  if (waqi.apiKey) {
+  try {
+    // ดึงค่า PM2.5 ตามพิกัดตัวเมืองนครพนมโดยเฉพาะ (lat: 17.4107, lng: 104.7791)
+    value = await fetchCurrentPm25FromOpenMeteo(PROVINCE_CENTER.lat, PROVINCE_CENTER.lng);
+  } catch (err) {
+    console.error('[pm25.service] Open-Meteo request failed, trying WAQI fallback:', err.message);
+  }
+
+  if (value == null && waqi.apiKey) {
     try {
       value = await fetchCurrentPm25FromWaqi(PROVINCE_CENTER.lat, PROVINCE_CENTER.lng);
     } catch (err) {
-      console.error('[pm25.service] WAQI request failed, falling back to Open-Meteo:', err.message);
+      console.error('[pm25.service] WAQI request failed:', err.message);
     }
   }
-  if (value == null) value = await fetchCurrentPm25FromOpenMeteo(PROVINCE_CENTER.lat, PROVINCE_CENTER.lng);
 
   let detail = {};
   try {
@@ -66,7 +72,7 @@ async function getCurrentPm25() {
     console.error('[pm25.service] Failed to fetch extra pollutant detail:', err.message);
   }
 
-  return { value, unit: 'µg/m³', percent: pm25ToPercent(value), ...detail };
+  return { value, unit: 'µg/m³', percent: pm25ToPercent(value), location: 'ตัวเมืองนครพนม', ...detail };
 }
 
 async function getCurrentPm25ByDistrict() {
