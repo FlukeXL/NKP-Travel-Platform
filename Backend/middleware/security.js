@@ -18,15 +18,31 @@ const helmetMiddleware = helmet({
 });
 
 /**
+ * Check if request originates from local development, loopback, or private LAN
+ */
+function isLocalOrDevRequest(req) {
+  const ip = req.ip || req.connection?.remoteAddress || req.socket?.remoteAddress || '';
+  const host = req.headers?.host || req.hostname || '';
+  const isLoopback = ip === '127.0.0.1' || ip === '::1' || ip === '::ffff:127.0.0.1' || ip.startsWith('127.');
+  const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1');
+  const isLan = ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.');
+  return isLoopback || isLocalhost || isLan || process.env.NODE_ENV !== 'production' || process.env.DISABLE_RATE_LIMIT === 'true';
+}
+
+/**
  * Standard JSON response generator for Rate Limit violations
  */
-function createRateLimiter(windowMs, max, message) {
+function createRateLimiter(windowMs, max, message, allowPass = false) {
+  if (allowPass) {
+    return (req, res, next) => next();
+  }
   return rateLimit({
     windowMs,
     max,
     standardHeaders: true, // Return rate limit info in `RateLimit-*` headers
     legacyHeaders: false, // Disable `X-RateLimit-*` headers
     statusCode: 429,
+    skip: (req) => isLocalOrDevRequest(req),
     message: {
       success: false,
       error: message || 'คุณส่งคำขอมากเกินไป กรุณารอสักครู่แล้วลองใหม่อีกครั้ง (Rate limit exceeded)',
@@ -36,31 +52,27 @@ function createRateLimiter(windowMs, max, message) {
   });
 }
 
-// 1. Global API rate limit: 1000 requests per 15 minutes per IP
+// 1. Global API rate limit: very high threshold (100,000 requests) & skipped for local/LAN/dev
 const globalLimiter = createRateLimiter(
   15 * 60 * 1000,
-  1000,
-  'คำขอใช้งาน API ถี่เกินไป กรุณารอ 15 นาทีแล้วลองใหม่'
+  100000,
+  'คำขอใช้งาน API ถี่เกินไป กรุณารอสักครู่แล้วลองใหม่'
 );
 
-// 2. Strict Auth rate limit: 50 login/register attempts per 15 minutes per IP (Anti Brute-Force)
-const authLimiter = createRateLimiter(
-  15 * 60 * 1000,
-  50,
-  'มีการพยายามเข้าสู่ระบบหรือสมัครสมาชิกบ่อยเกินไป เพื่อความปลอดภัยกรุณารอ 15 นาที'
-);
+// 2. Auth rate limit: No lockout - allow users to log in / switch accounts continuously
+const authLimiter = (req, res, next) => next();
 
-// 3. AI Tour Guide chat rate limit: 30 messages per 15 minutes per IP (Anti AI Spam)
+// 3. AI Tour Guide chat rate limit: 200 messages per 15 minutes per IP & skipped for local/LAN/dev
 const aiLimiter = createRateLimiter(
   15 * 60 * 1000,
-  30,
+  200,
   'ใช้งานระบบ AI ไกด์เกินจำนวนที่กำหนดชั่วคราว กรุณารอสักครู่แล้วลองใหม่'
 );
 
-// 4. File Upload rate limit: 30 upload actions per 15 minutes per IP (Anti Storage Flooding)
+// 4. File Upload rate limit: 200 upload actions per 15 minutes per IP & skipped for local/LAN/dev
 const uploadLimiter = createRateLimiter(
   15 * 60 * 1000,
-  30,
+  200,
   'อัปโหลดไฟล์บ่อยเกินไป กรุณารอสักครู่แล้วลองใหม่'
 );
 
