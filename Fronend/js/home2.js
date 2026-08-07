@@ -388,15 +388,28 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 document.addEventListener('auth:changed', () => {
   renderRecommendSection();
+  loadVideoReviews();
   document.dispatchEvent(new CustomEvent('app:content-updated'));
 });
 
 document.addEventListener('places:updated', () => {
   renderRecommendSection();
   loadPersonalizedPlaces();
+  loadVideoReviews();
   renderHomePlaceGrid('home-fitness-grid', [
     'mekong-marathon', 'mekong-cycling-route', 'mekong-aerobic-park', 'phanom-trail-run',
   ]);
+  document.dispatchEvent(new CustomEvent('app:content-updated'));
+});
+
+document.addEventListener('reviews:updated', () => {
+  loadVideoReviews();
+  loadPersonalizedPlaces();
+  document.dispatchEvent(new CustomEvent('app:content-updated'));
+});
+
+document.addEventListener('videos:updated', () => {
+  loadVideoReviews();
   document.dispatchEvent(new CustomEvent('app:content-updated'));
 });
 

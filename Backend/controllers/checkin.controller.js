@@ -20,6 +20,32 @@ const MAX_PHOTOS = 5;
 const MAX_VIDEO_SECONDS = 61;
 const MAX_PHOTO_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB per photo
 
+function inferPlaceCategory(placeName, placeId) {
+  if (placeId) {
+    const id = String(placeId).toLowerCase();
+    if (id.includes('cafe') || id.includes('coffee') || id.includes('roastery')) return 'cafe';
+    if (id.includes('restaurant') || id.includes('food') || id.includes('nem-nueang') || id.includes('cuisine')) return 'restaurant';
+    if (id.includes('temple') || id.includes('that-phanom') || id.includes('wat-')) return 'temple';
+    if (id.includes('naga') || id.includes('mutelu') || id.includes('sacred')) return 'mutelu';
+    if (id.includes('market') || id.includes('shopping') || id.includes('walking-street') || id.includes('plaza')) return 'shopping';
+    if (id.includes('nature') || id.includes('sunset') || id.includes('park') || id.includes('mekong')) return 'nature';
+    if (id.includes('fitness') || id.includes('marathon') || id.includes('bike') || id.includes('run')) return 'fitness';
+    if (id.includes('culture') || id.includes('museum') || id.includes('heritage') || id.includes('house')) return 'culture';
+  }
+  if (placeName) {
+    const name = String(placeName).toLowerCase();
+    if (name.includes('คาเฟ่') || name.includes('กาแฟ') || name.includes('cafe') || name.includes('coffee') || name.includes('ชา')) return 'cafe';
+    if (name.includes('ร้านอาหาร') || name.includes('แหนมเนือง') || name.includes('ก๋วยเตี๋ยว') || name.includes('ส้มตำ') || name.includes('ปลาเผา') || name.includes('ของกิน') || name.includes('อาหาร')) return 'restaurant';
+    if (name.includes('วัด') || name.includes('พระธาตุ') || name.includes('โบสถ์') || name.includes('เจดีย์')) return 'temple';
+    if (name.includes('พญาศรีสัตตนาคราช') || name.includes('พญานาค') || name.includes('สายมู') || name.includes('มูเตลู') || name.includes('ขอพร') || name.includes('สิ่งศักดิ์สิทธิ์')) return 'mutelu';
+    if (name.includes('ตลาด') || name.includes('ถนนคนเดิน') || name.includes('ช้อป') || name.includes('ของฝาก') || name.includes('ผ้าคราม')) return 'shopping';
+    if (name.includes('ริมโขง') || name.includes('หาด') || name.includes('น้ำตก') || name.includes('อุทยาน') || name.includes('สวน') || name.includes('เกาะ') || name.includes('ธรรมชาติ')) return 'nature';
+    if (name.includes('ปั่นจักรยาน') || name.includes('วิ่ง') || name.includes('ออกกำลังกาย') || name.includes('มาราธอน') || name.includes('ฟิตเนส') || name.includes('สปอร์ต')) return 'fitness';
+    if (name.includes('พิพิธภัณฑ์') || name.includes('หอสมุด') || name.includes('บ้านลุงโฮ') || name.includes('โบราณ') || name.includes('วัฒนธรรม')) return 'culture';
+  }
+  return 'culture';
+}
+
 async function resolveAuthorInfo(req) {
   let author = req.user.email;
   let avatar = null;
@@ -115,10 +141,11 @@ const addPost = asyncHandler(async (req, res) => {
 
     const photoUrls = photoFiles.map((f) => `/uploads/${f.filename}`);
     const { author, avatar } = await resolveAuthorInfo(req);
+    const category = inferPlaceCategory(place, placeId);
 
     if (isFirebaseReady()) {
       const doc = await checkinModel.addPost({
-        uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, video: videoPayload, hashtags, rating, visibility,
+        uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, video: videoPayload, hashtags, rating, visibility, category,
       });
       return ok(res, { post: doc }, 201);
     }
@@ -126,7 +153,7 @@ const addPost = asyncHandler(async (req, res) => {
     const id = `ci_${Date.now()}`;
     const doc = {
       id, uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, video: videoPayload, hashtags,
-      rating, visibility, likeCount: 0, commentCount: 0, createdAt: new Date().toISOString(),
+      rating, visibility, category, likeCount: 0, commentCount: 0, createdAt: new Date().toISOString(),
     };
     devStore.set(DEV_POSTS, id, doc);
     return ok(res, { post: doc }, 201);

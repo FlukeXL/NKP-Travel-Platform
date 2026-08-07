@@ -45,6 +45,10 @@ async function mnxAddCheckinPost({ place, placeId, photos, video, hashtags, rati
   try {
     const data = await window.MNX_API.postForm('/checkin', form);
     mnxInvalidateCheckinFeed();
+    if (window.MNX_REVIEWS?.invalidateVideoFeed) {
+      window.MNX_REVIEWS.invalidateVideoFeed();
+    }
+    document.dispatchEvent(new CustomEvent('videos:updated'));
     return { ok: true, post: data.post };
   } catch (err) {
     return { ok: false, reason: 'api-error', message: err.message };
@@ -55,6 +59,10 @@ async function mnxDeleteCheckinPost(postId) {
   try {
     await window.MNX_API.delete(`/checkin/${encodeURIComponent(postId)}`);
     mnxInvalidateCheckinFeed();
+    if (window.MNX_REVIEWS?.invalidateVideoFeed) {
+      window.MNX_REVIEWS.invalidateVideoFeed();
+    }
+    document.dispatchEvent(new CustomEvent('videos:updated'));
     return { ok: true };
   } catch (err) {
     return { ok: false, message: err.message };

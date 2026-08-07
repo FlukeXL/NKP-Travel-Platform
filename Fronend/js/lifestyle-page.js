@@ -355,11 +355,17 @@ document.addEventListener('includes:loaded', async () => {
   renderLifestylePage();
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  initLifestyleInterestButton();
+  renderLifestylePage();
+});
+
 document.addEventListener('auth:changed', async () => {
   await window.MNX_FAVORITES?.load();
   await renderLifestylePlaceGrid();
   await renderLifestylePopular();
   await renderLifestyleInterestBanner();
+  await renderLifestyleVideoRail();
   document.dispatchEvent(new CustomEvent('app:content-updated'));
 });
 
@@ -367,6 +373,19 @@ document.addEventListener('places:updated', async () => {
   await renderLifestyleStats();
   await renderLifestylePopular();
   await renderLifestylePlaceGrid();
+  await renderLifestyleVideoRail();
+  document.dispatchEvent(new CustomEvent('app:content-updated'));
+});
+
+document.addEventListener('reviews:updated', async () => {
+  await renderLifestyleStats();
+  await renderLifestylePopular();
+  await renderLifestylePlaceGrid();
+  await renderLifestyleVideoRail();
+  document.dispatchEvent(new CustomEvent('app:content-updated'));
+});
+
+document.addEventListener('videos:updated', async () => {
   await renderLifestyleVideoRail();
   document.dispatchEvent(new CustomEvent('app:content-updated'));
 });

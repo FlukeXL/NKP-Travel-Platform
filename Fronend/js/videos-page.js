@@ -35,4 +35,11 @@ document.addEventListener('includes:loaded', () => {
   renderVideosGrid();
 });
 
+document.addEventListener('DOMContentLoaded', () => {
+  initVideosFilters();
+  renderVideosGrid();
+});
+
 document.addEventListener('places:updated', renderVideosGrid);
+document.addEventListener('reviews:updated', renderVideosGrid);
+document.addEventListener('videos:updated', renderVideosGrid);

@@ -47,9 +47,10 @@ async function mnxOpenVideoModal(video) {
   mnxVideoModalReturnFocusEl = document.activeElement;
 
   const place = window.mnxGetPlace?.(video.placeId);
+  const placeName = place ? place.name : (video.placeName || video.placeId || 'นครพนม');
   els.video.src = mnxAbsoluteUploadUrl(video.video.url);
   els.video.poster = mnxAbsoluteUploadUrl(video.video.posterUrl);
-  els.placeName.textContent = place ? place.name : '';
+  els.placeName.textContent = placeName;
   els.author.textContent = video.author;
   els.avatar.src = video.avatar || '/assets/images/avatar-placeholder.png';
   els.stars.innerHTML = mnxStarSvgRow(video.rating);
@@ -57,11 +58,15 @@ async function mnxOpenVideoModal(video) {
   els.likeCount.textContent = video.likeCount || 0;
   els.commentCount.textContent = video.commentCount || 0;
   els.likeBtn.classList.toggle('is-liked', !!video.likedByMe);
-  els.viewPlaceBtn.href = place ? '#' : '#';
-  els.viewPlaceBtn.dataset.placeOpen = video.placeId;
+  if (video.placeId && window.mnxGetPlace?.(video.placeId)) {
+    els.viewPlaceBtn.style.display = '';
+    els.viewPlaceBtn.dataset.placeOpen = video.placeId;
+  } else {
+    els.viewPlaceBtn.style.display = 'none';
+  }
 
   mnxRenderVideoComments([]);
-  window.MNX_REVIEWS?.getComments(video.placeId, video.id).then((comments) => {
+  window.MNX_REVIEWS?.getComments(video.placeId || 'nakhon-phanom', video.id).then((comments) => {
     if (mnxVideoModalCurrent?.id === video.id) mnxRenderVideoComments(comments);
   });
 
@@ -228,7 +233,7 @@ function mnxRenderVideoCards(container, videos) {
   const esc = window.mnxEscapeHtml || ((s) => s || '');
   container.innerHTML = videos.map((v) => {
     const place = window.mnxGetPlace?.(v.placeId);
-    const placeNameSafe = esc(place?.name || '');
+    const placeNameSafe = esc(place?.name || v.placeName || v.place || 'นครพนม');
     const authorSafe = esc(v.author);
     const textSafe = esc(v.text);
     const avatarSafe = v.avatar ? (window.mnxSanitizeUrl ? window.mnxSanitizeUrl(v.avatar) : v.avatar) : '/assets/images/avatar-placeholder.png';
@@ -284,6 +289,7 @@ function mnxRenderVideoCards(container, videos) {
 }
 
 document.addEventListener('includes:loaded', initVideoModal);
+document.addEventListener('DOMContentLoaded', initVideoModal);
 
 window.mnxOpenVideoModal = mnxOpenVideoModal;
 window.mnxRenderVideoCards = mnxRenderVideoCards;
