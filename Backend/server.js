@@ -122,14 +122,11 @@ if (isAppwriteReady()) {
   );
 }
 
-// Only start the server if not running on Vercel's serverless environment
-if (!process.env.VERCEL) {
-  app.listen(env.PORT, () => {
-    console.log(`\n============================================================`);
-    console.log(`🌟 MapNexus API Server running on http://localhost:${env.PORT}`);
-    console.log(`Database Backend: ${isAppwriteReady() ? 'Appwrite (Connected 🚀)' : 'Local Dev-Mode Fallback (Ready for Appwrite keys)'}`);
-    console.log(`============================================================\n`);
-  });
-}
+app.listen(env.PORT, () => {
+  console.log(`\n============================================================`);
+  console.log(`🌟 MapNexus API Server running on http://localhost:${env.PORT}`);
+  console.log(`Database Backend: ${isAppwriteReady() ? 'Appwrite (Connected 🚀)' : 'Local Dev-Mode Fallback (Ready for Appwrite keys)'}`);
+  console.log(`============================================================\n`);
+});
 
 module.exports = app;
