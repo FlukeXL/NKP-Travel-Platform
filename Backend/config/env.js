@@ -11,6 +11,12 @@ const env = {
     .map((s) => s.trim())
     .filter(Boolean),
 
+  APPWRITE_ENDPOINT: process.env.APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1',
+  APPWRITE_PROJECT_ID: process.env.APPWRITE_PROJECT_ID || '',
+  APPWRITE_API_KEY: process.env.APPWRITE_API_KEY || '',
+  APPWRITE_DATABASE_ID: process.env.APPWRITE_DATABASE_ID || 'mapnexus_db',
+  APPWRITE_STORAGE_BUCKET_ID: process.env.APPWRITE_STORAGE_BUCKET_ID || 'mapnexus_storage',
+
   FIREBASE_SERVICE_ACCOUNT_PATH: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
   FIREBASE_PROJECT_ID: process.env.FIREBASE_PROJECT_ID || '',
   FIREBASE_CLIENT_EMAIL: process.env.FIREBASE_CLIENT_EMAIL || '',
@@ -30,6 +36,10 @@ const env = {
   GEMINI_API_KEY: process.env.GEMINI_API_KEY || '',
   OPENAI_API_KEY: process.env.OPENAI_API_KEY || '',
 };
+
+env.APPWRITE_CONFIGURED = Boolean(
+  env.APPWRITE_PROJECT_ID && env.APPWRITE_API_KEY
+);
 
 env.FIREBASE_CONFIGURED = Boolean(
   env.FIREBASE_SERVICE_ACCOUNT_PATH || (env.FIREBASE_PROJECT_ID && env.FIREBASE_CLIENT_EMAIL && env.FIREBASE_PRIVATE_KEY)

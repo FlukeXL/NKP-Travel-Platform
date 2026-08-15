@@ -73,8 +73,8 @@ function mnxOpenPlaceModal(placeId) {
     const resolvedSrc = typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(src) : src;
     return `
     <div class="place-modal__gallery-slide">
-      <img src="${resolvedSrc}" class="place-modal__gallery-bg" aria-hidden="true" draggable="false" onerror="this.src='/Fronend/assets/images/Blendy Boo.jpg'" />
-      <img src="${resolvedSrc}" class="place-modal__gallery-fg" alt="${place.name} — รูปที่ ${i + 1}" draggable="false" onerror="this.src='/Fronend/assets/images/Blendy Boo.jpg'" />
+      <img src="${resolvedSrc}" class="place-modal__gallery-bg" aria-hidden="true" draggable="false" onerror="this.src='/assets/images/placeholder.jpg'" />
+      <img src="${resolvedSrc}" class="place-modal__gallery-fg" alt="${place.name} — รูปที่ ${i + 1}" draggable="false" onerror="this.src='/assets/images/placeholder.jpg'" />
     </div>
   `;
   }).join('');

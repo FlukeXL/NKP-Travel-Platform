@@ -65,6 +65,68 @@
   display: block;
 }
 
+.profile-cover__avatar-spinner {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 15;
+  backdrop-filter: blur(2px);
+}
+
+.profile-spinner-icon {
+  width: 32px;
+  height: 32px;
+  color: var(--color-gold);
+  animation: mnx-avatar-spin 0.9s linear infinite;
+}
+
+@keyframes mnx-avatar-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.profile-avatar-toast {
+  position: absolute;
+  bottom: 16px;
+  right: 24px;
+  z-index: 20;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(26, 26, 26, 0.88);
+  border: 1px solid rgba(201, 162, 39, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: none;
+}
+
+.profile-avatar-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.profile-avatar-toast.is-success {
+  border-color: rgba(74, 222, 128, 0.5);
+  color: #86efac;
+}
+
+.profile-avatar-toast.is-error {
+  border-color: rgba(248, 113, 113, 0.5);
+  color: #fca5a5;
+}
+
 .profile-cover__avatar-edit {
   position: absolute;
   bottom: 2px;
@@ -78,12 +140,15 @@
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  transition: transform var(--dur-fast) var(--ease-luxury);
+  transition: transform var(--dur-fast) var(--ease-luxury), opacity var(--dur-fast);
+  cursor: pointer;
+  z-index: 12;
 }
 
 .profile-cover__avatar-edit:hover {
-  transform: scale(1.1);
+  transform: scale(1.12);
 }
+
 
 /* ---- Main container ---- */
 .profile-container {

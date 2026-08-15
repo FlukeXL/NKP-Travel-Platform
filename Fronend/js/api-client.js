@@ -77,6 +77,19 @@ async function mnxApiRequestForm(method, path, formData) {
   return json.data;
 }
 
+function mnxResolveUrl(url, fallback = '') {
+  if (!url) return fallback;
+  if (/^https?:\/\//.test(url) || url.startsWith('data:')) return url;
+  if (url.startsWith('/uploads/')) {
+    const apiOrigin = MNX_API_BASE.replace(/\/api\/?$/, '');
+    return `${apiOrigin}${url}`;
+  }
+  if (url.startsWith('/assets/')) {
+    return `/Fronend${url}`;
+  }
+  return url;
+}
+
 window.MNX_API = {
   baseUrl: MNX_API_BASE,
   getToken: mnxGetToken,
@@ -87,4 +100,6 @@ window.MNX_API = {
   delete: (path) => mnxApiRequest('DELETE', path),
   postForm: (path, formData) => mnxApiRequestForm('POST', path, formData),
   putForm: (path, formData) => mnxApiRequestForm('PUT', path, formData),
+  resolveUrl: mnxResolveUrl,
 };
+

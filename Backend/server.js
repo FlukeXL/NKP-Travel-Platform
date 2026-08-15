@@ -5,7 +5,7 @@ const cron = require('node-cron');
 const env = require('./config/env');
 const logger = require('./middleware/logger');
 const { notFoundHandler, errorHandler } = require('./middleware/errorHandler');
-const { isFirebaseReady } = require('./config/firebase');
+const { isAppwriteReady } = require('./config/appwrite');
 const {
   helmetMiddleware,
   globalLimiter,
@@ -73,7 +73,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     status: 'ok',
-    firebase: isFirebaseReady() ? 'connected' : 'dev-fallback (see Backend/.env.example)',
+    appwrite: isAppwriteReady() ? 'connected' : 'dev-fallback (ready for Appwrite keys in .env)',
     time: new Date().toISOString(),
   });
 });
@@ -103,34 +103,9 @@ app.use('/api/promos', require('./routes/ad.routes')); // AdBlocker-safe alias
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-if (isFirebaseReady()) {
-  const { getDb, COLLECTIONS } = require('./config/database');
-  const pm25Service = require('./services/pm25.service');
-  const weatherService = require('./services/weather.service');
-  const mekongService = require('./services/mekong.service');
+if (isAppwriteReady()) {
   const auditLogModel = require('./models/auditLog.model');
 
-  cron.schedule(
-    '5 0 * * *',
-    async () => {
-      try {
-        const [pm25, weather, mekong] = await Promise.all([
-          pm25Service.getCurrentPm25(),
-          weatherService.getCurrentWeather(),
-          mekongService.getCurrentMekongLevel(),
-        ]);
-        const today = new Date().toISOString().slice(0, 10);
-        await getDb().collection(COLLECTIONS.ENVIRONMENT_HISTORY).doc(today).set(
-          { date: today, pm25, weather, mekong, recordedAt: new Date().toISOString() },
-          { merge: true }
-        );
-        console.log(`[cron] Saved environment snapshot for ${today}`);
-      } catch (err) {
-        console.error('[cron] Failed to save daily environment snapshot:', err.message);
-      }
-    },
-    { timezone: 'Asia/Bangkok' }
-  );
   cron.schedule(
     '15 0 * * *',
     async () => {
@@ -148,8 +123,10 @@ if (isFirebaseReady()) {
 }
 
 app.listen(env.PORT, () => {
-  console.log(`Nakhon Phanom Lifestyle Travel Platform Backend listening on http://localhost:${env.PORT}`);
-  console.log(`Firebase: ${isFirebaseReady() ? 'connected' : 'NOT configured — using local dev-mode fallback (see .env.example)'}`);
+  console.log(`\n============================================================`);
+  console.log(`🌟 MapNexus API Server running on http://localhost:${env.PORT}`);
+  console.log(`Database Backend: ${isAppwriteReady() ? 'Appwrite (Connected 🚀)' : 'Local Dev-Mode Fallback (Ready for Appwrite keys)'}`);
+  console.log(`============================================================\n`);
 });
 
 module.exports = app;

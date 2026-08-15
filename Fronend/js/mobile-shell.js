@@ -3,11 +3,6 @@
     return document.documentElement.classList.contains('mnx-is-mobile');
   }
 
-  /* ----------------------------------------------------------
-     Overlay helper — shared dim backdrop behind any open dropdown
-     (nav dropdowns from the tab bar, or the env dropdown from the
-     Info Bar).
-   ---------------------------------------------------------- */
   const overlay = () => document.getElementById('mnx-m-overlay');
   const envSheet = () => document.getElementById('mnx-m-env-sheet');
 
@@ -95,15 +90,6 @@
     hideOverlay();
   }
 
-  /* Positions a dropdown card so it visually grows out of the
-     SPECIFIC trigger element that was tapped (its horizontal
-     center) instead of always centering under/over the whole
-     screen — this is what makes it read as connected to the
-     header/tab-bar rather than a disconnected floating card.
-     Clamped so the card never runs off either screen edge. Works
-     for both tab-bar dropdowns (anchored up) and Info Bar
-     dropdowns (anchored down) since both just read the same
-     --mnx-m-dd-left custom property. */
   function anchorDropdownToTrigger(trigger, dropdown, maxWidth) {
     const triggerRect = trigger.getBoundingClientRect();
     const dropdownWidth = Math.min(maxWidth, window.innerWidth - 28);
@@ -163,9 +149,6 @@
     dropdownEl.addEventListener('touchstart', (e) => { startY = e.touches[0].clientY; }, { passive: true });
     dropdownEl.addEventListener('touchend', (e) => {
       const dy = e.changedTouches[0].clientY - startY;
-      // Swipe up closes a top-anchored dropdown; swipe down closes
-      // a bottom-anchored one — direction matches which edge it's
-      // docked against.
       const isTopAnchored = dropdownEl.classList.contains('mnx-m-dropdown--from-header');
       if ((isTopAnchored && dy < -70) || (!isTopAnchored && dy > 70)) closeAllDropdowns();
     }, { passive: true });
@@ -296,12 +279,6 @@
     });
   }
 
-  /* ----------------------------------------------------------
-     Check-in dropdown — live place search (mirrors the desktop's
-     .checkin-menu__search exactly) + auth-aware account block
-     (mirrors where .navbar__mobile places its auth buttons: right
-     after the เช็คอิน section).
-   ---------------------------------------------------------- */
   function renderSearchResults(container, query) {
     const q = query.trim().toLowerCase();
     if (!q || !window.MNX_PLACES) {
@@ -369,14 +346,17 @@
       ? `<a href="/Fronend/pages/admin.html" class="mnx-m-menu-item"><span class="mnx-m-menu-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0L3 12v3h3l8.7-8.7Z"/><path d="M13 5l3 3"/><path d="M3 21h18"/></svg></span>Admin Panel</a>`
       : '';
 
+    const avatarUrl = window.MNX_AUTH.getAvatarUrl ? window.MNX_AUTH.getAvatarUrl(session.avatar) : (session.avatar || '/Fronend/assets/images/avatar-placeholder.png');
+
     container.innerHTML = `
       <div class="mnx-m-menu-account-head">
-        <img src="${session.avatar || '/assets/images/avatar-placeholder.png'}" alt="${session.name}" />
+        <img src="${avatarUrl}" alt="${session.name}" />
         <div>
           <div class="mnx-m-menu-account-name">${session.name}</div>
           <div class="mnx-m-menu-account-email">${session.email || ''}</div>
         </div>
       </div>
+
       <a href="/Fronend/pages/profile.html" class="mnx-m-menu-item"><span class="mnx-m-menu-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg></span>โปรไฟล์ของฉัน</a>
       <a href="/Fronend/pages/review.html" class="mnx-m-menu-item"><span class="mnx-m-menu-item__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h11l3 3v13H5V4Z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg></span>บันทึกส่วนตัว</a>
       ${adminLink}

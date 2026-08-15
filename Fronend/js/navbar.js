@@ -30,7 +30,7 @@ function initAuthState() {
       <button class="btn btn-outline btn-sm" data-auth-open="login">เข้าสู่ระบบ</button>
       <button class="btn btn-gold btn-sm" data-auth-open="register">สมัครสมาชิก</button>
     `;
-    if (menu) menu.innerHTML = ''; // signed out — no account panel to show
+    if (menu) menu.innerHTML = '';
     return;
   }
 
@@ -38,13 +38,10 @@ function initAuthState() {
     ? `<a href="/Fronend/pages/admin.html" class="account-menu__admin-link"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M14.7 6.3a1 1 0 0 0 0-1.4l-1.6-1.6a1 1 0 0 0-1.4 0L3 12v3h3l8.7-8.7Z"/><path d="M13 5l3 3"/><path d="M3 21h18"/></svg> Admin Panel</a>`
     : '';
 
-  // Trigger chip stays inside .navbar__auth (next to lang switch); the
-  // PANEL itself is #account-menu, a sibling card between the navbar
-  // and infobar — same layout trick as .lifestyle-menu/.checkin-menu
-  // so opening it pushes the infobar down instead of floating over it.
+  const avatarUrl = window.MNX_AUTH.getAvatarUrl ? window.MNX_AUTH.getAvatarUrl(session.avatar) : (session.avatar || '/Fronend/assets/images/avatar-placeholder.png');
   container.innerHTML = `
     <button class="navbar__profile-chip" id="account-menu-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="account-menu">
-      <img src="${session.avatar}" alt="${session.name}" />
+      <img src="${avatarUrl}" alt="${session.name}" />
       <span>${session.name}</span>
     </button>
   `;
@@ -52,12 +49,13 @@ function initAuthState() {
   if (menu) {
     menu.innerHTML = `
       <div class="account-menu__head">
-        <img src="${session.avatar}" alt="${session.name}" />
+        <img src="${avatarUrl}" alt="${session.name}" />
         <div>
           <div class="account-menu__name">${session.name}</div>
           <div class="account-menu__provider">${session.provider === 'google' ? 'เข้าสู่ระบบด้วย Google' : 'สมาชิกทั่วไป'}</div>
         </div>
       </div>
+
       <div class="account-menu__links">
         <a href="/Fronend/pages/profile.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-3.5 3.1-6 7-6s7 2.5 7 6"/></svg> โปรไฟล์ของฉัน</a>
         <a href="/Fronend/pages/review.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="16" height="16"><path d="M5 4h11l3 3v13H5V4Z"/><path d="M9 9h6M9 13h6M9 17h4"/></svg> บันทึกส่วนตัว</a>

@@ -312,6 +312,59 @@ function mnxAdminClosePlaceModal() {
 
 const MNX_ADMIN_MAX_PLACE_PHOTOS = 10;
 
+function mnxAdminDebounce(fn, delay = 250) {
+  let timer;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.apply(this, args), delay);
+  };
+}
+
+async function mnxAdminCompressImage(file, maxDimension = 1600, quality = 0.85) {
+  if (!file || !file.type || !file.type.startsWith('image/')) return file;
+  if (file.size < 300 * 1024) return file; // under 300KB don't compress
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      img.onload = () => {
+        let { width, height } = img;
+        if (width > maxDimension || height > maxDimension) {
+          if (width > height) {
+            height = Math.round((height * maxDimension) / width);
+            width = maxDimension;
+          } else {
+            width = Math.round((width * maxDimension) / height);
+            height = maxDimension;
+          }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob || blob.size >= file.size) {
+              resolve(file);
+            } else {
+              const compressed = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), { type: 'image/jpeg' });
+              resolve(compressed);
+            }
+          },
+          'image/jpeg',
+          quality
+        );
+      };
+      img.onerror = () => resolve(file);
+      img.src = e.target.result;
+    };
+    reader.onerror = () => resolve(file);
+    reader.readAsDataURL(file);
+  });
+}
+
 function mnxAdminRenderPhotoSlots() {
   const wrap = document.getElementById('admin-place-photo-slots');
   if (!wrap) return;
@@ -358,8 +411,9 @@ async function mnxAdminHandlePhotoInputChange(e) {
   if (slots[placeholderIndex]) slots[placeholderIndex].innerHTML = `<span class="admin-photo-slot__uploading">กำลังอัปโหลด...</span>`;
 
   try {
+    const compressedFiles = await Promise.all(toUpload.map((f) => mnxAdminCompressImage(f)));
     const form = new FormData();
-    toUpload.forEach((file) => form.append('photos', file));
+    compressedFiles.forEach((file) => form.append('photos', file));
     const data = await window.MNX_API.postForm('/places/photos', form);
     mnxAdminPlacePhotos.push(...data.urls);
   } catch (err) {
@@ -398,7 +452,9 @@ async function mnxAdminSubmitPlaceForm(e) {
   };
 
   const submitBtn = form.querySelector('[type="submit"]');
+  const originalBtnText = submitBtn.textContent;
   submitBtn.disabled = true;
+  submitBtn.textContent = 'กำลังบันทึก...';
   try {
     if (mnxAdminEditingPlaceId) {
       await window.MNX_API.patch(`/places/${encodeURIComponent(mnxAdminEditingPlaceId)}`, payload);
@@ -415,6 +471,7 @@ async function mnxAdminSubmitPlaceForm(e) {
     errorBanner.classList.add('is-active');
   } finally {
     submitBtn.disabled = false;
+    submitBtn.textContent = originalBtnText;
   }
 }
 
@@ -1166,7 +1223,7 @@ async function mnxAdminRefreshLiveSiteData() {
 ----------------------------------------------------------- */
 function mnxAdminInitEvents() {
   // Places toolbar
-  document.getElementById('admin-places-search')?.addEventListener('input', mnxAdminRenderPlacesTable);
+  document.getElementById('admin-places-search')?.addEventListener('input', mnxAdminDebounce(mnxAdminRenderPlacesTable));
   document.querySelectorAll('#admin-places-filters .admin-toolbar__filter').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#admin-places-filters .admin-toolbar__filter').forEach((b) => b.classList.toggle('is-active', b === btn));
@@ -1194,7 +1251,7 @@ function mnxAdminInitEvents() {
   document.getElementById('admin-place-photo-input')?.addEventListener('change', mnxAdminHandlePhotoInputChange);
 
   // Reviews toolbar
-  document.getElementById('admin-reviews-search')?.addEventListener('input', mnxAdminRenderReviewsTable);
+  document.getElementById('admin-reviews-search')?.addEventListener('input', mnxAdminDebounce(mnxAdminRenderReviewsTable));
   document.getElementById('admin-reviews-tbody')?.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action="delete-review"]');
     if (!btn) return;
@@ -1202,7 +1259,7 @@ function mnxAdminInitEvents() {
   });
 
   // Media toolbar
-  document.getElementById('admin-media-search')?.addEventListener('input', mnxAdminRenderMediaGrid);
+  document.getElementById('admin-media-search')?.addEventListener('input', mnxAdminDebounce(mnxAdminRenderMediaGrid));
   document.querySelectorAll('#admin-media-filters .admin-toolbar__filter').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#admin-media-filters .admin-toolbar__filter').forEach((b) => b.classList.toggle('is-active', b === btn));
@@ -1216,7 +1273,7 @@ function mnxAdminInitEvents() {
   });
 
   // Events toolbar
-  document.getElementById('admin-events-search')?.addEventListener('input', mnxAdminRenderEventsTable);
+  document.getElementById('admin-events-search')?.addEventListener('input', mnxAdminDebounce(mnxAdminRenderEventsTable));
   document.querySelectorAll('#admin-events-filters .admin-toolbar__filter').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#admin-events-filters .admin-toolbar__filter').forEach((b) => b.classList.toggle('is-active', b === btn));
@@ -1261,10 +1318,11 @@ function mnxAdminInitEvents() {
       bannerSlot.innerHTML = `<span class="admin-photo-slot__uploading">กำลังอัปโหลด...</span>`;
     }
 
-    const formData = new FormData();
-    formData.append('banner', file);
-
     try {
+      const compressed = await mnxAdminCompressImage(file);
+      const formData = new FormData();
+      formData.append('banner', compressed);
+
       const data = await window.MNX_API.postForm('/events/upload-banner', formData);
       if (data && data.url) {
         document.getElementById('admin-event-banner-hidden').value = data.url;
@@ -1287,7 +1345,7 @@ function mnxAdminInitEvents() {
   });
 
   // Check-ins toolbar
-  document.getElementById('admin-checkins-search')?.addEventListener('input', mnxAdminRenderCheckinsGrid);
+  document.getElementById('admin-checkins-search')?.addEventListener('input', mnxAdminDebounce(mnxAdminRenderCheckinsGrid));
   document.querySelectorAll('#admin-checkins-filters .admin-toolbar__filter').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#admin-checkins-filters .admin-toolbar__filter').forEach((b) => b.classList.toggle('is-active', b === btn));
@@ -1301,7 +1359,7 @@ function mnxAdminInitEvents() {
   });
 
   // Audit log toolbar
-  document.getElementById('admin-audit-search')?.addEventListener('input', mnxAdminRenderAuditTable);
+  document.getElementById('admin-audit-search')?.addEventListener('input', mnxAdminDebounce(mnxAdminRenderAuditTable));
   document.querySelectorAll('#admin-audit-filters .admin-toolbar__filter').forEach((btn) => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('#admin-audit-filters .admin-toolbar__filter').forEach((b) => b.classList.toggle('is-active', b === btn));
@@ -1317,7 +1375,7 @@ function mnxAdminInitEvents() {
   document.getElementById('admin-audit-clear-all-btn')?.addEventListener('click', mnxAdminClearAllAuditLogs);
 
   // Users toolbar
-  document.getElementById('admin-users-search')?.addEventListener('input', mnxAdminRenderUsersTable);
+  document.getElementById('admin-users-search')?.addEventListener('input', mnxAdminDebounce(mnxAdminRenderUsersTable));
   document.getElementById('admin-users-tbody')?.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-action]');
     if (!btn || btn.disabled) return;

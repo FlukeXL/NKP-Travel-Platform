@@ -1,12 +1,10 @@
 const fs = require('fs');
 const path = require('path');
-const { isFirebaseReady } = require('../config/firebase');
 const placeModel = require('../models/place.model');
 const userModel = require('../models/user.model');
 const reviewModel = require('../models/review.model');
 const aiService = require('../services/ai.service');
 const { asyncHandler, ok } = require('../utils/helper');
-const { ApiError } = require('../middleware/errorHandler');
 
 const MOCK_PLACES = [
   { id: 'cafe-riverside-million-view', name: 'จิบกาแฟชิลๆ เติมพลังให้ชีวิต', category: 'cafe', desc: 'จิบกาแฟพร้อมวิวแม่น้ำโขงและสะพานมิตรภาพ บรรยากาศชิลสไตล์โมเดิร์น', img: '/assets/images/Blendy Boo.jpg', area: 'ริมโขง', price: '฿฿' },
@@ -42,20 +40,25 @@ function saveHistory(history) {
 }
 
 exports.getPersonalizedPlaces = asyncHandler(async (req, res) => {
-  const places = isFirebaseReady() ? await placeModel.getAllPlaces() : MOCK_PLACES;
+  let places = await placeModel.getAllPlaces();
+  if (!places || places.length === 0) places = MOCK_PLACES;
+
+  const allFood = places.filter(p => ['restaurant'].includes(p.category) || ['restaurant'].includes(p.category2));
+  const allCafe = places.filter(p => ['cafe'].includes(p.category) || ['cafe'].includes(p.category2));
 
   if (!req.user || !aiService.isConfigured()) {
     return ok(res, {
-      food: places.filter(p => ['restaurant'].includes(p.category) || ['restaurant'].includes(p.category2)).slice(0, 4),
-      cafe: places.filter(p => ['cafe'].includes(p.category) || ['cafe'].includes(p.category2)).slice(0, 4),
+      food: allFood.slice(0, 4),
+      cafe: allCafe.slice(0, 4),
     });
   }
 
   const user = await userModel.getUserById(req.user.uid);
+
   if (!user || !user.profile) {
     return ok(res, {
-      food: places.filter(p => ['restaurant'].includes(p.category) || ['restaurant'].includes(p.category2)).slice(0, 4),
-      cafe: places.filter(p => ['cafe'].includes(p.category) || ['cafe'].includes(p.category2)).slice(0, 4),
+      food: allFood.slice(0, 4),
+      cafe: allCafe.slice(0, 4),
     });
   }
 
@@ -66,10 +69,13 @@ Interests: ${user.profile.interests.join(', ')}
 Environment Preference: ${user.profile.envPref}
 Pace Preference: ${user.profile.pacePref}
 
-Here are the available places:
-${JSON.stringify(places.map(p => ({ id: p.id, name: p.name, category: p.category, desc: p.desc })))}
+Here are the available restaurants:
+${JSON.stringify(allFood.map(p => ({ id: p.id, name: p.name, desc: p.desc })))}
 
-Return exactly 4 food/restaurant place IDs and 4 cafe place IDs that best fit this user in JSON format like this:
+Here are the available cafes:
+${JSON.stringify(allCafe.map(p => ({ id: p.id, name: p.name, desc: p.desc })))}
+
+Return exactly 4 restaurant IDs and 4 cafe IDs that best fit this user in JSON format like this:
 { "food": ["id1", "id2", "id3", "id4"], "cafe": ["id5", "id6", "id7", "id8"] }
 Do not return any markdown or other text. Only JSON.`;
 
@@ -77,24 +83,37 @@ Do not return any markdown or other text. Only JSON.`;
     const aiResponse = await aiService.generateText(prompt);
     const parsed = JSON.parse(aiResponse.replace(/```json/g, '').replace(/```/g, '').trim());
 
-    const foodPlaces = (parsed.food || []).map(id => places.find(p => p.id === id)).filter(Boolean);
-    const cafePlaces = (parsed.cafe || []).map(id => places.find(p => p.id === id)).filter(Boolean);
+    let foodPlaces = (parsed.food || []).map(id => allFood.find(p => p.id === id)).filter(Boolean);
+    let cafePlaces = (parsed.cafe || []).map(id => allCafe.find(p => p.id === id)).filter(Boolean);
+
+    // Fill with fallback places if AI didn't return enough valid ones
+    if (foodPlaces.length < 4) {
+      const needed = 4 - foodPlaces.length;
+      const fallbacks = allFood.filter(p => !foodPlaces.find(fp => fp.id === p.id)).slice(0, needed);
+      foodPlaces = [...foodPlaces, ...fallbacks];
+    }
+    if (cafePlaces.length < 4) {
+      const needed = 4 - cafePlaces.length;
+      const fallbacks = allCafe.filter(p => !cafePlaces.find(cp => cp.id === p.id)).slice(0, needed);
+      cafePlaces = [...cafePlaces, ...fallbacks];
+    }
 
     return ok(res, {
-      food: foodPlaces.length > 0 ? foodPlaces : places.filter(p => ['restaurant'].includes(p.category) || ['restaurant'].includes(p.category2)).slice(0, 4),
-      cafe: cafePlaces.length > 0 ? cafePlaces : places.filter(p => ['cafe'].includes(p.category) || ['cafe'].includes(p.category2)).slice(0, 4),
+      food: foodPlaces,
+      cafe: cafePlaces,
     });
   } catch (err) {
     console.error('AI Recommendation failed, falling back:', err);
     return ok(res, {
-      food: places.filter(p => ['restaurant'].includes(p.category) || ['restaurant'].includes(p.category2)).slice(0, 4),
-      cafe: places.filter(p => ['cafe'].includes(p.category) || ['cafe'].includes(p.category2)).slice(0, 4),
+      food: allFood.slice(0, 4),
+      cafe: allCafe.slice(0, 4),
     });
   }
 });
 
 exports.getWeeklyPlaces = asyncHandler(async (req, res) => {
-  const allPlaces = isFirebaseReady() ? await placeModel.getAllPlaces() : MOCK_PLACES;
+  let allPlaces = await placeModel.getAllPlaces();
+  if (!allPlaces || allPlaces.length === 0) allPlaces = MOCK_PLACES;
   
   if (allPlaces.length === 0) {
     return ok(res, { places: [] });
@@ -102,41 +121,35 @@ exports.getWeeklyPlaces = asyncHandler(async (req, res) => {
 
   let history = getHistory();
   
-  // If all places have been shown, reset history
-  const allPlaceIds = allPlaces.map(p => p.id);
   const unshownPlaces = allPlaces.filter(p => !history.includes(p.id));
   
   let availablePlaces = unshownPlaces;
   if (availablePlaces.length < 4) {
-    // Reset history if we don't have enough places for a full 4-item showcase
     history = [];
     availablePlaces = allPlaces;
   }
 
   // 1. Get Top Rated Places
   let topRatedPlaces = [];
-  if (isFirebaseReady()) {
-    const reviews = await reviewModel.getAllReviews();
-    const ratings = {};
-    reviews.forEach(r => {
-      if (!ratings[r.placeId]) ratings[r.placeId] = { total: 0, count: 0 };
-      ratings[r.placeId].total += r.rating;
-      ratings[r.placeId].count += 1;
-    });
+  const reviews = await reviewModel.getAllReviews();
+  const ratings = {};
+  reviews.forEach(r => {
+    if (!ratings[r.placeId]) ratings[r.placeId] = { total: 0, count: 0 };
+    ratings[r.placeId].total += r.rating;
+    ratings[r.placeId].count += 1;
+  });
 
-    const rankedIds = Object.keys(ratings)
-      .map(id => ({ id, avg: ratings[id].total / ratings[id].count, count: ratings[id].count }))
-      .filter(x => x.avg >= 4.0 && x.count >= 1) // High rating threshold
-      .sort((a, b) => b.avg - a.avg)
-      .map(x => x.id);
+  const rankedIds = Object.keys(ratings)
+    .map(id => ({ id, avg: ratings[id].total / ratings[id].count, count: ratings[id].count }))
+    .filter(x => x.avg >= 4.0 && x.count >= 1)
+    .sort((a, b) => b.avg - a.avg)
+    .map(x => x.id);
 
-    // Pick top rated that haven't been shown
-    topRatedPlaces = rankedIds
-      .filter(id => !history.includes(id))
-      .map(id => availablePlaces.find(p => p.id === id))
-      .filter(Boolean)
-      .slice(0, 2); // Take up to 2 top-rated places
-  }
+  topRatedPlaces = rankedIds
+    .filter(id => !history.includes(id))
+    .map(id => availablePlaces.find(p => p.id === id))
+    .filter(Boolean)
+    .slice(0, 2);
 
   const selectedPlaces = [...topRatedPlaces];
   const selectedIds = selectedPlaces.map(p => p.id);
@@ -183,7 +196,6 @@ Do not return any markdown or other text. Only JSON.`;
     fallbackPlaces.forEach(p => selectedIds.push(p.id));
   }
 
-  // Save to history
   const newHistory = [...history, ...selectedPlaces.map(p => p.id)];
   saveHistory(newHistory);
 

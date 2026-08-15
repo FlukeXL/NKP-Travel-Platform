@@ -693,20 +693,32 @@ function initAvatarSwap() {
   const img = document.getElementById('profile-avatar-img');
   if (!editBtn || !input || !img) return;
 
-  editBtn.addEventListener('click', () => input.click());
-  input.addEventListener('change', (e) => {
+  editBtn.addEventListener('click', () => {
+    if (editBtn.disabled) return;
+    input.click();
+  });
+
+  input.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      img.src = reader.result;
-      try {
-        await window.MNX_AUTH?.updateProfile({ avatar: reader.result });
-      } catch (err) {
-        alert(err.message || 'ไม่สามารถอัปเดตรูปโปรไฟล์ได้');
+
+    const prevSrc = img.src;
+    img.style.opacity = '0.5';
+    editBtn.disabled = true;
+
+    try {
+      const user = await window.MNX_AUTH?.updateAvatar(file);
+      if (user && user.avatar) {
+        img.src = window.MNX_AUTH.getAvatarUrl(user.avatar);
       }
-    };
-    reader.readAsDataURL(file);
+    } catch (err) {
+      img.src = prevSrc;
+      alert(err.message || 'ไม่สามารถอัปเดตรูปโปรไฟล์ได้');
+    } finally {
+      img.style.opacity = '';
+      editBtn.disabled = false;
+      input.value = '';
+    }
   });
 }
 
@@ -723,11 +735,13 @@ function renderProfileCard() {
     return;
   }
   card.style.display = '';
-  document.getElementById('profile-avatar-img').src = session.avatar || '/assets/images/avatar-placeholder.png';
+  const avatarUrl = window.MNX_AUTH?.getAvatarUrl ? window.MNX_AUTH.getAvatarUrl(session.avatar) : (session.avatar || '/Fronend/assets/images/avatar-placeholder.png');
+  document.getElementById('profile-avatar-img').src = avatarUrl;
   document.getElementById('profile-name').textContent = session.name;
   const googleNote = document.getElementById('profile-google-note');
   if (googleNote) googleNote.style.display = session.provider === 'google' ? 'inline-flex' : 'none';
 }
+
 
 /* ----------------------------------------------------------
    Boot

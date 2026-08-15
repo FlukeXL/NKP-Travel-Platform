@@ -10,10 +10,14 @@ function mnxBuildGallery(baseImg) {
 }
 
 function mnxResolveUploadUrl(url) {
-  if (!url) return '/assets/images/Blendy Boo.jpg';
+  if (!url) return '/assets/images/placeholder.jpg';
   if (url.startsWith('/uploads/')) {
     const apiOrigin = window.MNX_API?.baseUrl.replace(/\/api\/?$/, '') || '';
     return `${apiOrigin}${url}`;
+  }
+  const isUnderFronend = window.location.pathname.includes('/Fronend/');
+  if (isUnderFronend && url.startsWith('/assets/')) {
+    return `/Fronend${url}`;
   }
   return url;
 }

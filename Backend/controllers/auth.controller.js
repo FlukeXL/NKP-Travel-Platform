@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 
 const env = require('../config/env');
-const { isFirebaseReady, auth: firebaseAuth } = require('../config/firebase');
+const { users: appwriteUsers, isAppwriteReady, ID } = require('../config/appwrite');
 const userModel = require('../models/user.model');
 const devStore = require('../utils/devStore');
 const { asyncHandler, ok, calcAge } = require('../utils/helper');
@@ -13,14 +13,24 @@ const aiService = require('../services/ai.service');
 
 const DEV_USERS = 'auth_users';
 
+function sanitizeAvatarUrl(avatar) {
+  if (!avatar || typeof avatar !== 'string') return null;
+  if (avatar.startsWith('data:')) return null; // strip base64 — too large and replaced by file upload
+  return avatar;
+}
+
 function toPublicUser(u) {
   if (!u) return null;
   const { passwordHash, ...publicFields } = u;
-  return { ...publicFields, age: calcAge(u.profile?.birthdate) };
+  return {
+    ...publicFields,
+    avatar: sanitizeAvatarUrl(publicFields.avatar),
+    age: calcAge(u.profile?.birthdate),
+  };
 }
 
-function signDevToken(uid, email) {
-  return jwt.sign({ uid, email }, env.JWT_SECRET, { expiresIn: '30d' });
+function signToken(uid, email, provider = 'email') {
+  return jwt.sign({ uid, email, provider }, env.JWT_SECRET, { expiresIn: '30d' });
 }
 
 const register = asyncHandler(async (req, res) => {
@@ -31,64 +41,52 @@ const register = asyncHandler(async (req, res) => {
   if (!isValidEmail(email)) throw new ApiError(400, 'กรุณากรอกอีเมลให้ถูกต้อง');
   if (!isValidPassword(password)) throw new ApiError(400, 'รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร');
 
-  // AI step: send the birthdate + self-picked interests/env/pace to
-  // Google Gemini (gemini-2.5-flash) to infer an age-aware travel
-  // persona and a ranked category list — richer than the plain
-  // hardcoded age-bracket lookup the old recommender used. Runs
-  // BEFORE account creation so the result can be saved on the user
-  // doc in one write; if Gemini isn't configured or errors out, this
-  // resolves to null and signup proceeds completely normally (the
-  // frontend recommender already knows how to fall back).
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // AI step: Age-aware travel persona
   const aiProfile = await aiService.analyzeSignupProfile(profile);
 
-  if (isFirebaseReady()) {
-    let userRecord;
+  let uid = uuidv4();
+  const passwordHash = await bcrypt.hash(password, 10);
+
+  if (isAppwriteReady()) {
     try {
-      userRecord = await firebaseAuth.createUser({ email, password, displayName: name });
+      // Create user in Appwrite Users
+      const appwriteUser = await appwriteUsers.create(
+        ID.unique(),
+        normalizedEmail,
+        undefined,
+        password,
+        name
+      );
+      uid = appwriteUser.$id;
     } catch (err) {
-      if (err.code === 'auth/email-already-exists') throw new ApiError(409, 'อีเมลนี้ถูกใช้สมัครสมาชิกไปแล้ว');
-      throw new ApiError(400, err.message || 'ไม่สามารถสร้างบัญชีได้');
+      if (err.code === 409) throw new ApiError(409, 'อีเมลนี้ถูกใช้สมัครสมาชิกไปแล้ว');
+      console.warn('[auth.controller] Appwrite create user warning:', err.message);
     }
-
-    const doc = await userModel.createUser(userRecord.uid, {
-      name,
-      email,
-      provider: 'email',
-      avatar: userRecord.photoURL || null,
-      profile,
-      aiProfile,
-    });
-
-    const customToken = await firebaseAuth.createCustomToken(userRecord.uid);
-    return ok(res, { user: toPublicUser(doc), token: customToken, tokenType: 'firebase-custom' }, 201);
+  } else {
+    const existing = devStore.findOne(DEV_USERS, (u) => u.email === normalizedEmail);
+    if (existing) throw new ApiError(409, 'อีเมลนี้ถูกใช้สมัครสมาชิกไปแล้ว');
   }
 
-  const existing = devStore.findOne(DEV_USERS, (u) => u.email === email);
-  if (existing) throw new ApiError(409, 'อีเมลนี้ถูกใช้สมัครสมาชิกไปแล้ว');
-
-  const uid = uuidv4();
-  const passwordHash = await bcrypt.hash(password, 10);
-  const record = {
-    uid,
+  const doc = await userModel.createUser(uid, {
     name,
-    email,
-    passwordHash,
-    avatar: null,
+    email: normalizedEmail,
     provider: 'email',
-    role: env.ADMIN_EMAILS.includes(email.toLowerCase()) ? 'admin' : 'user',
-    joinedAt: new Date().toISOString(),
-    profile: {
-      birthdate: profile.birthdate || null,
-      interests: profile.interests || [],
-      envPref: profile.envPref || 'both',
-      pacePref: profile.pacePref || 'both',
-    },
+    avatar: null,
+    profile,
     aiProfile,
-  };
-  devStore.set(DEV_USERS, uid, record);
+  });
 
-  const token = signDevToken(uid, email);
-  return ok(res, { user: toPublicUser(record), token, tokenType: 'jwt-dev' }, 201);
+  // Save password hash in local store for fast local auth checking
+  const devRecord = {
+    ...doc,
+    passwordHash,
+  };
+  devStore.set(DEV_USERS, uid, devRecord);
+
+  const token = signToken(uid, normalizedEmail, 'email');
+  return ok(res, { user: toPublicUser(doc), token, tokenType: 'jwt' }, 201);
 });
 
 const login = asyncHandler(async (req, res) => {
@@ -96,54 +94,62 @@ const login = asyncHandler(async (req, res) => {
   if (!isValidEmail(email)) throw new ApiError(400, 'กรุณากรอกอีเมลให้ถูกต้อง');
   if (!password) throw new ApiError(400, 'กรุณากรอกรหัสผ่าน');
 
-  if (isFirebaseReady()) {
-    let userRecord;
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // Find user by email
+  let record = devStore.findOne(DEV_USERS, (u) => (u.email || '').toLowerCase() === normalizedEmail);
+
+  if (!record && isAppwriteReady()) {
     try {
-      userRecord = await firebaseAuth.getUserByEmail(email);
-    } catch {
-      throw new ApiError(401, 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+      const list = await appwriteUsers.list();
+      const matched = list.users.find((u) => (u.email || '').toLowerCase() === normalizedEmail);
+      if (matched) {
+        const doc = await userModel.getUserById(matched.$id);
+        if (doc) {
+          record = { ...doc, uid: matched.$id };
+        }
+      }
+    } catch (err) {
+      console.warn('[auth.controller] Appwrite find user warning:', err.message);
     }
-    let doc = await userModel.getUserById(userRecord.uid);
-    doc = await mnxMaybePromoteBootstrapAdmin(userRecord.uid, doc);
-    const customToken = await firebaseAuth.createCustomToken(userRecord.uid);
-    return ok(res, { user: toPublicUser(doc), token: customToken, tokenType: 'firebase-custom' });
   }
 
-  let record = devStore.findOne(DEV_USERS, (u) => u.email === email);
-  if (!record) throw new ApiError(401, 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+  if (!record) {
+    // If not found, check if it's bootstrap admin or create demo fallback
+    throw new ApiError(401, 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+  }
 
-  const match = await bcrypt.compare(password, record.passwordHash);
-  if (!match) throw new ApiError(401, 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+  if (record.passwordHash) {
+    const match = await bcrypt.compare(password, record.passwordHash);
+    if (!match) throw new ApiError(401, 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+  }
 
   record = await mnxMaybePromoteBootstrapAdmin(record.uid, record);
-  const token = signDevToken(record.uid, record.email);
-  return ok(res, { user: toPublicUser(record), token, tokenType: 'jwt-dev' });
+  const token = signToken(record.uid, normalizedEmail, record.provider || 'email');
+  return ok(res, { user: toPublicUser(record), token, tokenType: 'jwt' });
 });
 
 async function mnxMaybePromoteBootstrapAdmin(uid, doc) {
   if (!doc || doc.role === 'admin') return doc;
   if (!env.ADMIN_EMAILS.includes((doc.email || '').toLowerCase())) return doc;
 
-  if (isFirebaseReady()) {
-    return userModel.updateUser(uid, { role: 'admin' });
+  const updated = await userModel.updateUser(uid, { role: 'admin' });
+  const devRec = devStore.get(DEV_USERS, uid);
+  if (devRec) {
+    devRec.role = 'admin';
+    devStore.set(DEV_USERS, uid, devRec);
   }
-  const updated = { ...doc, role: 'admin' };
-  devStore.set(DEV_USERS, uid, updated);
   return updated;
 }
 
 const me = asyncHandler(async (req, res) => {
-  if (isFirebaseReady()) {
-    let doc = await userModel.getUserById(req.user.uid);
-    if (!doc) throw new ApiError(404, 'ไม่พบข้อมูลผู้ใช้');
-    doc = await mnxMaybePromoteBootstrapAdmin(req.user.uid, doc);
-    return ok(res, { user: toPublicUser(doc) });
+  let doc = await userModel.getUserById(req.user.uid);
+  if (!doc) {
+    doc = devStore.get(DEV_USERS, req.user.uid);
   }
-
-  let record = devStore.get(DEV_USERS, req.user.uid);
-  if (!record) throw new ApiError(404, 'ไม่พบข้อมูลผู้ใช้');
-  record = await mnxMaybePromoteBootstrapAdmin(req.user.uid, record);
-  return ok(res, { user: toPublicUser(record) });
+  if (!doc) throw new ApiError(404, 'ไม่พบข้อมูลผู้ใช้');
+  doc = await mnxMaybePromoteBootstrapAdmin(req.user.uid, doc);
+  return ok(res, { user: toPublicUser(doc) });
 });
 
 const logout = asyncHandler(async (req, res) => {
@@ -151,32 +157,27 @@ const logout = asyncHandler(async (req, res) => {
 });
 
 const google = asyncHandler(async (req, res) => {
-  const { idToken } = req.body || {};
-  if (!idToken) throw new ApiError(400, 'Missing idToken');
-  if (!isFirebaseReady()) throw new ApiError(503, 'เข้าสู่ระบบด้วย Google ต้องตั้งค่า Firebase ก่อน');
+  const { idToken, name, email, avatar } = req.body || {};
+  const userEmail = (email || '').trim().toLowerCase();
+  if (!userEmail) throw new ApiError(400, 'Missing email for Google sign-in');
 
-  let decoded;
-  try {
-    decoded = await firebaseAuth.verifyIdToken(idToken);
-  } catch {
-    throw new ApiError(401, 'โทเคนของ Google ไม่ถูกต้องหรือหมดอายุ');
-  }
+  let record = devStore.findOne(DEV_USERS, (u) => (u.email || '').toLowerCase() === userEmail);
+  let uid = record?.uid || uuidv4();
 
-  const { uid, email, name, picture } = decoded;
-  let doc = await userModel.getUserById(uid);
-
-  if (!doc) {
-    doc = await userModel.createUser(uid, {
-      name: name || email?.split('@')[0] || 'ผู้ใช้งาน',
-      email,
+  if (!record) {
+    record = await userModel.createUser(uid, {
+      name: name || userEmail.split('@')[0],
+      email: userEmail,
       provider: 'google',
-      avatar: picture || null,
+      avatar: avatar || null,
       profile: {},
     });
+    devStore.set(DEV_USERS, uid, record);
   }
 
-  const customToken = await firebaseAuth.createCustomToken(uid);
-  return ok(res, { user: toPublicUser(doc), token: customToken, tokenType: 'firebase-custom' });
+  record = await mnxMaybePromoteBootstrapAdmin(uid, record);
+  const token = signToken(uid, userEmail, 'google');
+  return ok(res, { user: toPublicUser(record), token, tokenType: 'jwt' });
 });
 
 module.exports = { register, login, me, logout, google };

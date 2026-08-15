@@ -72,7 +72,7 @@ function mnxRenderEventPopup() {
     bannerImgs.forEach(img => {
       img.addEventListener('load', () => img.classList.add('is-loaded'));
       img.addEventListener('error', () => img.remove());
-      img.src = mnxResolveUploadUrl(popupEvent.banner);
+      img.src = typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(popupEvent.banner) : popupEvent.banner;
     });
   }
 
@@ -234,7 +234,7 @@ function initShowcaseCarousel(places) {
 
   slidesWrap.innerHTML = places.map((item) => `
     <div class="showcase__slide" onclick="window.mnxOpenPlaceModal('${item.id}')" style="cursor: pointer;">
-      <img class="showcase__slide-img" src="${typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(item.img) : item.img}" alt="${item.name}" onerror="this.src='/assets/images/Blendy Boo.jpg'" />
+      <img class="showcase__slide-img" src="${typeof mnxResolveUploadUrl === 'function' ? mnxResolveUploadUrl(item.img) : item.img}" alt="${item.name}" onerror="this.src='/assets/images/placeholder.jpg'" />
       <div class="showcase__slide-info">
         <span class="showcase__slide-tag">${MNX_CATEGORY_BADGE[item.category] || item.category}</span>
         <h3 class="showcase__slide-title">${item.name}</h3>
@@ -402,15 +402,19 @@ document.addEventListener('places:updated', () => {
   document.dispatchEvent(new CustomEvent('app:content-updated'));
 });
 
+let mnxVideoReviewsDebounce = null;
 document.addEventListener('reviews:updated', () => {
-  loadVideoReviews();
-  loadPersonalizedPlaces();
-  document.dispatchEvent(new CustomEvent('app:content-updated'));
+  if (mnxVideoReviewsDebounce) clearTimeout(mnxVideoReviewsDebounce);
+  mnxVideoReviewsDebounce = setTimeout(() => {
+    loadVideoReviews();
+  }, 200);
 });
 
 document.addEventListener('videos:updated', () => {
-  loadVideoReviews();
-  document.dispatchEvent(new CustomEvent('app:content-updated'));
+  if (mnxVideoReviewsDebounce) clearTimeout(mnxVideoReviewsDebounce);
+  mnxVideoReviewsDebounce = setTimeout(() => {
+    loadVideoReviews();
+  }, 200);
 });
 
 document.addEventListener('events:updated', () => {
@@ -462,32 +466,50 @@ async function loadActivePromo() {
   if (window.MNX_I18N && window.MNX_I18N.getLang() !== 'TH') window.MNX_I18N.translateDom(window.MNX_I18N.getLang());
 }
 
+let mnxPersonalizedLoading = false;
+
 async function loadPersonalizedPlaces() {
+  if (mnxPersonalizedLoading) return;
+  mnxPersonalizedLoading = true;
+
   const foodGrid = document.getElementById('home-food-culture-grid');
   const cafeGrid = document.getElementById('home-cafe-grid');
 
-  if (foodGrid) foodGrid.innerHTML = '<p style="text-align:center; width:100%;"><span class="loader"></span> กำลังวิเคราะห์ข้อมูลด้วย AI...</p>';
-  if (cafeGrid) cafeGrid.innerHTML = '<p style="text-align:center; width:100%;"><span class="loader"></span> กำลังวิเคราะห์ข้อมูลด้วย AI...</p>';
+  if (foodGrid && !foodGrid.children.length) {
+    foodGrid.innerHTML = '<p style="text-align:center; width:100%; grid-column:1/-1;"><span class="loader"></span> กำลังโหลดข้อมูล...</p>';
+  }
+  if (cafeGrid && !cafeGrid.children.length) {
+    cafeGrid.innerHTML = '<p style="text-align:center; width:100%; grid-column:1/-1;"><span class="loader"></span> กำลังโหลดข้อมูล...</p>';
+  }
 
   try {
     const res = await window.MNX_API.get('/recommendations/personalized', true);
-    if (res.food && foodGrid) {
-      renderPlacesDirectly('home-food-culture-grid', res.food);
+    if (foodGrid) {
+      if (res?.food && res.food.length > 0) {
+        await renderPlacesDirectly('home-food-culture-grid', res.food);
+      } else {
+        foodGrid.innerHTML = '<p style="text-align:center; color:#888; grid-column:1/-1; padding:20px 0;">ยังไม่มีข้อมูลร้านอาหารในระบบ</p>';
+      }
     }
-    if (res.cafe && cafeGrid) {
-      renderPlacesDirectly('home-cafe-grid', res.cafe);
+    if (cafeGrid) {
+      if (res?.cafe && res.cafe.length > 0) {
+        await renderPlacesDirectly('home-cafe-grid', res.cafe);
+      } else {
+        cafeGrid.innerHTML = '<p style="text-align:center; color:#888; grid-column:1/-1; padding:20px 0;">ยังไม่มีข้อมูลคาเฟ่ในระบบ</p>';
+      }
     }
   } catch (err) {
     console.error('Failed to load personalized places:', err);
-    // Fallback to old behavior if API fails completely
-    renderHomePlaceGrid('home-food-culture-grid', ['nem-nueang-riverside', 'isan-mekong-cuisine', 'pa-kham-vietnamese-noodle', 'indochina-night-market']);
-    renderHomePlaceGrid('home-cafe-grid', ['cafe-riverside-million-view', 'wooden-road-cafe', 'indochina-coffee-house', 'garden-cafe']);
+    if (foodGrid) foodGrid.innerHTML = '<p style="text-align:center; color:#888; grid-column:1/-1; padding:20px 0;">ยังไม่มีข้อมูลร้านอาหารในระบบ</p>';
+    if (cafeGrid) cafeGrid.innerHTML = '<p style="text-align:center; color:#888; grid-column:1/-1; padding:20px 0;">ยังไม่มีข้อมูลคาเฟ่ในระบบ</p>';
+  } finally {
+    mnxPersonalizedLoading = false;
   }
 }
 
 async function renderPlacesDirectly(gridId, places) {
   const grid = document.getElementById(gridId);
-  if (!grid) return;
+  if (!grid || !Array.isArray(places)) return;
 
   await Promise.all(places.map((p) => window.MNX_REVIEWS?.fetch(p.id)));
 
@@ -503,9 +525,9 @@ async function renderPlacesDirectly(gridId, places) {
       <div class="widget-card__body" data-place-open="${p.id}">
         <h4 class="widget-card__title">${p.name}</h4>
         <div class="widget-card__rating">${ratingHtml}</div>
-        <p class="widget-card__desc">${p.desc}</p>
+        <p class="widget-card__desc">${p.desc || ''}</p>
         <div class="widget-card__coords">${mnxPinIcon()} <a href="https://maps.google.com/?q=${p.lat},${p.lng}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${p.lat}, ${p.lng}</a></div>
-        <div class="widget-card__footer"><span>${p.area}</span><span>${mnxArrowIcon()}</span></div>
+        <div class="widget-card__footer"><span>${p.area || 'นครพนม'}</span><span>${mnxArrowIcon()}</span></div>
       </div>
     </article>
   `;

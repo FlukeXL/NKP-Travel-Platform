@@ -1,27 +1,24 @@
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
-const { isFirebaseReady } = require('../config/firebase');
 const placeModel = require('../models/place.model');
-const devStore = require('../utils/devStore');
 const { asyncHandler, ok } = require('../utils/helper');
 const { ApiError } = require('../middleware/errorHandler');
 const { safeUnlink } = require('../utils/video');
 const { UPLOAD_DIR } = require('../middleware/upload');
 const { recordAuditLog } = require('../utils/auditLog');
-
-const DEV_PLACES = 'places';
+const { sanitizeAppwriteId } = require('../utils/sanitizeId');
 
 const VALID_CATEGORIES = ['cafe', 'restaurant', 'temple', 'fitness', 'nature', 'landmark', 'culture', 'mutelu', 'shopping'];
 
 function slugify(name) {
   return (
-    name
-      .toString()
+    String(name || '')
       .trim()
       .toLowerCase()
-      .replace(/[^\w\u0E00-\u0E7F\s-]/g, '')
+      .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
-      .slice(0, 60) || 'place'
+      .replace(/-+/g, '-')
+      .slice(0, 24)
   );
 }
 
@@ -90,13 +87,13 @@ function validatePlacePayload(body, { partial = false } = {}) {
 }
 
 const getAllPlaces = asyncHandler(async (req, res) => {
-  const rows = isFirebaseReady() ? await placeModel.getAllPlaces() : Object.values(devStore.readAll(DEV_PLACES));
-  const sorted = rows.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const rows = await placeModel.getAllPlaces();
+  const sorted = rows.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   return ok(res, { places: sorted });
 });
 
 const getPlace = asyncHandler(async (req, res) => {
-  const record = isFirebaseReady() ? await placeModel.getPlaceById(req.params.id) : devStore.get(DEV_PLACES, req.params.id);
+  const record = await placeModel.getPlaceById(req.params.id);
   if (!record) throw new ApiError(404, 'ไม่พบสถานที่นี้');
   return ok(res, { place: record });
 });
@@ -107,29 +104,32 @@ const createPlace = asyncHandler(async (req, res) => {
   data.popularity = data.popularity ?? 0;
   data.published = data.published !== undefined ? data.published : true;
 
-  const id = req.body?.id?.trim() || `${slugify(data.name)}-${uuidv4().slice(0, 6)}`;
-
-  if (isFirebaseReady()) {
-    const existing = await placeModel.getPlaceById(id);
-    if (existing) throw new ApiError(409, 'มีสถานที่ที่ใช้ id นี้อยู่แล้ว');
-    const doc = await placeModel.createPlace(id, data);
-    await recordAuditLog(req, { action: 'place.create', targetType: 'place', targetId: id, targetLabel: data.name, details: { category: data.category } });
-    return ok(res, { place: doc }, 201);
+  let rawSlug = slugify(data.name);
+  if (!rawSlug || !/^[a-z0-9]/.test(rawSlug)) {
+    rawSlug = `place-${uuidv4().slice(0, 8)}`;
+  } else {
+    rawSlug = `${rawSlug.slice(0, 20)}-${uuidv4().slice(0, 6)}`;
   }
 
-  if (devStore.get(DEV_PLACES, id)) throw new ApiError(409, 'มีสถานที่ที่ใช้ id นี้อยู่แล้ว');
-  const doc = { ...data, id, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-  devStore.set(DEV_PLACES, id, doc);
+  const rawId = req.body?.id?.trim() || rawSlug;
+  const id = sanitizeAppwriteId(rawId, 'place');
+
+  const existing = await placeModel.getPlaceById(id);
+  if (existing) throw new ApiError(409, 'มีสถานที่ที่ใช้ id นี้อยู่แล้ว');
+
+  const doc = await placeModel.createPlace(id, data);
   await recordAuditLog(req, { action: 'place.create', targetType: 'place', targetId: id, targetLabel: data.name, details: { category: data.category } });
   return ok(res, { place: doc }, 201);
 });
 
 function cleanupPlacePhotos(place) {
+  if (!place) return;
   const urls = [place.img, ...(place.images || [])].filter((u) => typeof u === 'string' && u.startsWith('/uploads/'));
   [...new Set(urls)].forEach((url) => safeUnlink(path.join(UPLOAD_DIR, path.basename(url))));
 }
 
 function cleanupRemovedPlacePhotos(before, after) {
+  if (!before || !after) return;
   const beforeUrls = [before.img, ...(before.images || [])].filter((u) => typeof u === 'string' && u.startsWith('/uploads/'));
   const afterUrls = new Set([after.img, ...(after.images || [])]);
   [...new Set(beforeUrls)].filter((u) => !afterUrls.has(u)).forEach((url) => safeUnlink(path.join(UPLOAD_DIR, path.basename(url))));
@@ -145,38 +145,20 @@ function placeUpdateAuditEntry(placeId, label, patch) {
 
 const updatePlace = asyncHandler(async (req, res) => {
   const patch = validatePlacePayload(req.body || {}, { partial: true });
-
-  if (isFirebaseReady()) {
-    const existing = await placeModel.getPlaceById(req.params.id);
-    if (!existing) throw new ApiError(404, 'ไม่พบสถานที่นี้');
-    const doc = await placeModel.updatePlace(req.params.id, patch);
-    if (patch.img !== undefined || patch.images !== undefined) cleanupRemovedPlacePhotos(existing, doc);
-    await recordAuditLog(req, placeUpdateAuditEntry(req.params.id, doc.name, patch));
-    return ok(res, { place: doc });
-  }
-
-  const existing = devStore.get(DEV_PLACES, req.params.id);
+  const existing = await placeModel.getPlaceById(req.params.id);
   if (!existing) throw new ApiError(404, 'ไม่พบสถานที่นี้');
-  const merged = { ...existing, ...patch, updatedAt: new Date().toISOString() };
-  devStore.set(DEV_PLACES, req.params.id, merged);
-  if (patch.img !== undefined || patch.images !== undefined) cleanupRemovedPlacePhotos(existing, merged);
-  await recordAuditLog(req, placeUpdateAuditEntry(req.params.id, merged.name, patch));
-  return ok(res, { place: merged });
+
+  const doc = await placeModel.updatePlace(req.params.id, patch);
+  if (patch.img !== undefined || patch.images !== undefined) cleanupRemovedPlacePhotos(existing, doc);
+  await recordAuditLog(req, placeUpdateAuditEntry(req.params.id, doc.name, patch));
+  return ok(res, { place: doc });
 });
 
 const deletePlace = asyncHandler(async (req, res) => {
-  if (isFirebaseReady()) {
-    const existing = await placeModel.getPlaceById(req.params.id);
-    if (!existing) throw new ApiError(404, 'ไม่พบสถานที่นี้');
-    await placeModel.deletePlace(req.params.id);
-    cleanupPlacePhotos(existing);
-    await recordAuditLog(req, { action: 'place.delete', targetType: 'place', targetId: req.params.id, targetLabel: existing.name });
-    return ok(res, { id: req.params.id, deleted: true });
-  }
-
-  const existing = devStore.get(DEV_PLACES, req.params.id);
+  const existing = await placeModel.getPlaceById(req.params.id);
   if (!existing) throw new ApiError(404, 'ไม่พบสถานที่นี้');
-  devStore.remove(DEV_PLACES, req.params.id);
+
+  await placeModel.deletePlace(req.params.id);
   cleanupPlacePhotos(existing);
   await recordAuditLog(req, { action: 'place.delete', targetType: 'place', targetId: req.params.id, targetLabel: existing.name });
   return ok(res, { id: req.params.id, deleted: true });

@@ -1,7 +1,5 @@
-const { isFirebaseReady } = require('../config/firebase');
 const checkinModel = require('../models/checkin.model');
 const userModel = require('../models/user.model');
-const devStore = require('../utils/devStore');
 const { asyncHandler, ok } = require('../utils/helper');
 const { ApiError } = require('../middleware/errorHandler');
 const { getVideoDurationSeconds, safeUnlink, generateVideoPoster } = require('../utils/video');
@@ -10,15 +8,10 @@ const path = require('path');
 const fs = require('fs');
 const { recordAuditLog } = require('../utils/auditLog');
 
-const DEV_POSTS = 'checkin_posts';
-const DEV_LIKES = 'checkin_likes';
-const DEV_COMMENTS = 'checkin_comments';
-const DEV_NOTES = 'checkin_notes';
-
 const MAX_HASHTAGS = 10;
 const MAX_PHOTOS = 5;
 const MAX_VIDEO_SECONDS = 61;
-const MAX_PHOTO_SIZE_BYTES = 8 * 1024 * 1024; // 8 MB per photo
+const MAX_PHOTO_SIZE_BYTES = 8 * 1024 * 1024;
 
 function inferPlaceCategory(placeName, placeId) {
   if (placeId) {
@@ -49,37 +42,22 @@ function inferPlaceCategory(placeName, placeId) {
 async function resolveAuthorInfo(req) {
   let author = req.user.email;
   let avatar = null;
-  if (isFirebaseReady()) {
-    const profile = await userModel.getUserById(req.user.uid);
-    author = profile?.name || author;
-    avatar = profile?.avatar || null;
-  } else {
-    const record = devStore.get('auth_users', req.user.uid);
-    author = record?.name || author;
-    avatar = record?.avatar || null;
+  const profile = await userModel.getUserById(req.user.uid);
+  if (profile) {
+    author = profile.name || author;
+    avatar = profile.avatar || null;
   }
   return { author, avatar };
 }
 
-function devFeedFor(uid) {
-  const all = Object.values(devStore.readAll(DEV_POSTS));
-  const visible = all.filter((p) => p.visibility === 'public' || (uid && p.uid === uid));
-  return visible.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-}
-
 const getFeed = asyncHandler(async (req, res) => {
   const uid = req.user?.uid || null;
-  const rows = isFirebaseReady() ? await checkinModel.getFeed(uid) : devFeedFor(uid);
+  const rows = await checkinModel.getFeed(uid);
 
   let likedIds = new Set();
   if (uid) {
-    if (isFirebaseReady()) {
-      const results = await Promise.all(rows.map((p) => checkinModel.isLikedByUser(uid, p.id)));
-      rows.forEach((p, i) => { if (results[i]) likedIds.add(p.id); });
-    } else {
-      const allLikes = devStore.readAll(DEV_LIKES);
-      likedIds = new Set(Object.values(allLikes).filter((l) => l.uid === uid).map((l) => l.postId));
-    }
+    const results = await Promise.all(rows.map((p) => checkinModel.isLikedByUser(uid, p.id)));
+    rows.forEach((p, i) => { if (results[i]) likedIds.add(p.id); });
   }
 
   const enriched = rows.map((p) => ({ ...p, likedByMe: likedIds.has(p.id) }));
@@ -143,19 +121,9 @@ const addPost = asyncHandler(async (req, res) => {
     const { author, avatar } = await resolveAuthorInfo(req);
     const category = inferPlaceCategory(place, placeId);
 
-    if (isFirebaseReady()) {
-      const doc = await checkinModel.addPost({
-        uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, video: videoPayload, hashtags, rating, visibility, category,
-      });
-      return ok(res, { post: doc }, 201);
-    }
-
-    const id = `ci_${Date.now()}`;
-    const doc = {
-      id, uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, video: videoPayload, hashtags,
-      rating, visibility, category, likeCount: 0, commentCount: 0, createdAt: new Date().toISOString(),
-    };
-    devStore.set(DEV_POSTS, id, doc);
+    const doc = await checkinModel.addPost({
+      uid: req.user.uid, author, avatar, place, placeId, photos: photoUrls, video: videoPayload, hashtags, rating, visibility, category,
+    });
     return ok(res, { post: doc }, 201);
   } catch (err) {
     photoFiles.forEach((f) => safeUnlink(f.path));
@@ -165,6 +133,7 @@ const addPost = asyncHandler(async (req, res) => {
 });
 
 function cleanupPostFiles(post) {
+  if (!post) return;
   (post.photos || []).forEach((url) => safeUnlink(path.join(UPLOAD_DIR, path.basename(url))));
   if (post.video?.url) safeUnlink(path.join(VIDEO_UPLOAD_DIR, path.basename(post.video.url)));
   if (post.video?.posterUrl) safeUnlink(path.join(VIDEO_UPLOAD_DIR, path.basename(post.video.posterUrl)));
@@ -172,96 +141,41 @@ function cleanupPostFiles(post) {
 
 const deletePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-
-  if (isFirebaseReady()) {
-    const post = await checkinModel.getPostById(postId);
-    if (!post) throw new ApiError(404, 'ไม่พบโพสต์นี้');
-    if (post.uid !== req.user.uid) throw new ApiError(403, 'ไม่มีสิทธิ์ลบโพสต์นี้');
-    await checkinModel.deletePost(postId);
-    cleanupPostFiles(post);
-    return ok(res, { message: 'ลบโพสต์สำเร็จ' });
-  }
-
-  const post = devStore.get(DEV_POSTS, postId);
+  const post = await checkinModel.getPostById(postId);
   if (!post) throw new ApiError(404, 'ไม่พบโพสต์นี้');
   if (post.uid !== req.user.uid) throw new ApiError(403, 'ไม่มีสิทธิ์ลบโพสต์นี้');
-  devStore.remove(DEV_POSTS, postId);
+  await checkinModel.deletePost(postId);
   cleanupPostFiles(post);
   return ok(res, { message: 'ลบโพสต์สำเร็จ' });
 });
 
 const adminDeletePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-
-  if (isFirebaseReady()) {
-    const post = await checkinModel.getPostById(postId);
-    if (!post) throw new ApiError(404, 'ไม่พบโพสต์นี้');
-    await checkinModel.deletePost(postId);
-    cleanupPostFiles(post);
-    await recordAuditLog(req, { action: 'checkin.delete', targetType: 'checkin', targetId: postId, targetLabel: `${post.author} · ${post.place}` });
-    return ok(res, { message: 'ลบโพสต์สำเร็จ (โดยผู้ดูแลระบบ)' });
-  }
-
-  const post = devStore.get(DEV_POSTS, postId);
+  const post = await checkinModel.getPostById(postId);
   if (!post) throw new ApiError(404, 'ไม่พบโพสต์นี้');
-  devStore.remove(DEV_POSTS, postId);
+  await checkinModel.deletePost(postId);
   cleanupPostFiles(post);
   await recordAuditLog(req, { action: 'checkin.delete', targetType: 'checkin', targetId: postId, targetLabel: `${post.author} · ${post.place}` });
   return ok(res, { message: 'ลบโพสต์สำเร็จ (โดยผู้ดูแลระบบ)' });
 });
 
-/* ----------------------------------------------------------
-   Likes
----------------------------------------------------------- */
 const likePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-
-  if (isFirebaseReady()) {
-    const post = await checkinModel.getPostById(postId);
-    if (!post) throw new ApiError(404, 'ไม่พบโพสต์นี้');
-    await checkinModel.addLike(req.user.uid, postId);
-    return ok(res, { postId, liked: true }, 201);
-  }
-
-  const post = devStore.get(DEV_POSTS, postId);
+  const post = await checkinModel.getPostById(postId);
   if (!post) throw new ApiError(404, 'ไม่พบโพสต์นี้');
-  const likeId = `${req.user.uid}_${postId}`;
-  if (!devStore.get(DEV_LIKES, likeId)) {
-    devStore.set(DEV_LIKES, likeId, { uid: req.user.uid, postId, createdAt: new Date().toISOString() });
-    post.likeCount = (post.likeCount || 0) + 1;
-    devStore.set(DEV_POSTS, postId, post);
-  }
+  await checkinModel.addLike(req.user.uid, postId);
   return ok(res, { postId, liked: true }, 201);
 });
 
 const unlikePost = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-
-  if (isFirebaseReady()) {
-    await checkinModel.removeLike(req.user.uid, postId);
-    return ok(res, { postId, liked: false });
-  }
-
-  const post = devStore.get(DEV_POSTS, postId);
-  const likeId = `${req.user.uid}_${postId}`;
-  if (devStore.get(DEV_LIKES, likeId)) {
-    devStore.remove(DEV_LIKES, likeId);
-    if (post) {
-      post.likeCount = Math.max(0, (post.likeCount || 0) - 1);
-      devStore.set(DEV_POSTS, postId, post);
-    }
-  }
+  await checkinModel.removeLike(req.user.uid, postId);
   return ok(res, { postId, liked: false });
 });
 
-/* ----------------------------------------------------------
-   Comments
----------------------------------------------------------- */
 const getComments = asyncHandler(async (req, res) => {
   const { postId } = req.params;
-  const rows = isFirebaseReady()
-    ? await checkinModel.getCommentsByPost(postId)
-    : Object.values(devStore.readAll(DEV_COMMENTS)).filter((c) => c.postId === postId).sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const rows = await checkinModel.getCommentsByPost(postId);
   return ok(res, { postId, comments: rows });
 });
 
@@ -272,77 +186,32 @@ const addComment = asyncHandler(async (req, res) => {
   if (text.length > 300) throw new ApiError(400, 'ความคิดเห็นต้องไม่เกิน 300 ตัวอักษร');
 
   const { author, avatar } = await resolveAuthorInfo(req);
-
-  if (isFirebaseReady()) {
-    const post = await checkinModel.getPostById(postId);
-    if (!post) throw new ApiError(404, 'ไม่พบโพสต์นี้');
-    const doc = await checkinModel.addComment(postId, { uid: req.user.uid, author, avatar, text });
-    return ok(res, { comment: doc }, 201);
-  }
-
-  const post = devStore.get(DEV_POSTS, postId);
+  const post = await checkinModel.getPostById(postId);
   if (!post) throw new ApiError(404, 'ไม่พบโพสต์นี้');
-  const id = `${postId}_${Date.now()}`;
-  const doc = { id, postId, uid: req.user.uid, author, avatar, text, createdAt: new Date().toISOString() };
-  devStore.set(DEV_COMMENTS, id, doc);
-  post.commentCount = (post.commentCount || 0) + 1;
-  devStore.set(DEV_POSTS, postId, post);
+  const doc = await checkinModel.addComment(postId, { uid: req.user.uid, author, avatar, text });
   return ok(res, { comment: doc }, 201);
 });
 
 const deleteComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
-
-  if (isFirebaseReady()) {
-    const comment = await checkinModel.getCommentById(commentId);
-    if (!comment) throw new ApiError(404, 'ไม่พบความคิดเห็นนี้');
-    if (comment.uid !== req.user.uid) throw new ApiError(403, 'ไม่มีสิทธิ์ลบความคิดเห็นนี้');
-    await checkinModel.deleteComment(commentId);
-    return ok(res, { message: 'ลบความคิดเห็นสำเร็จ' });
-  }
-
-  const comment = devStore.get(DEV_COMMENTS, commentId);
+  const comment = await checkinModel.getCommentById(commentId);
   if (!comment) throw new ApiError(404, 'ไม่พบความคิดเห็นนี้');
   if (comment.uid !== req.user.uid) throw new ApiError(403, 'ไม่มีสิทธิ์ลบความคิดเห็นนี้');
-  devStore.remove(DEV_COMMENTS, commentId);
-  const post = devStore.get(DEV_POSTS, comment.postId);
-  if (post) {
-    post.commentCount = Math.max(0, (post.commentCount || 0) - 1);
-    devStore.set(DEV_POSTS, comment.postId, post);
-  }
+  await checkinModel.deleteComment(commentId);
   return ok(res, { message: 'ลบความคิดเห็นสำเร็จ' });
 });
 
 const adminDeleteComment = asyncHandler(async (req, res) => {
   const { commentId } = req.params;
-
-  if (isFirebaseReady()) {
-    const comment = await checkinModel.getCommentById(commentId);
-    if (!comment) throw new ApiError(404, 'ไม่พบความคิดเห็นนี้');
-    await checkinModel.deleteComment(commentId);
-    await recordAuditLog(req, { action: 'comment.delete', targetType: 'comment', targetId: commentId, targetLabel: `${comment.author}: ${comment.text}`.slice(0, 80) });
-    return ok(res, { message: 'ลบความคิดเห็นสำเร็จ (โดยผู้ดูแลระบบ)' });
-  }
-
-  const comment = devStore.get(DEV_COMMENTS, commentId);
+  const comment = await checkinModel.getCommentById(commentId);
   if (!comment) throw new ApiError(404, 'ไม่พบความคิดเห็นนี้');
-  devStore.remove(DEV_COMMENTS, commentId);
-  const post = devStore.get(DEV_POSTS, comment.postId);
-  if (post) {
-    post.commentCount = Math.max(0, (post.commentCount || 0) - 1);
-    devStore.set(DEV_POSTS, comment.postId, post);
-  }
+  await checkinModel.deleteComment(commentId);
   await recordAuditLog(req, { action: 'comment.delete', targetType: 'comment', targetId: commentId, targetLabel: `${comment.author}: ${comment.text}`.slice(0, 80) });
   return ok(res, { message: 'ลบความคิดเห็นสำเร็จ (โดยผู้ดูแลระบบ)' });
 });
 
-/* ----------------------------------------------------------
-   Private notes — visible ONLY to the owner, never public.
----------------------------------------------------------- */
 const getMyNotes = asyncHandler(async (req, res) => {
-  const rows = isFirebaseReady()
-    ? await checkinModel.getNotesByUser(req.user.uid)
-    : Object.values(devStore.readAll(DEV_NOTES)).filter((n) => n.uid === req.user.uid).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const rows = await checkinModel.getNotesByUser(req.user.uid);
   return ok(res, { notes: rows });
 });
 
@@ -353,32 +222,16 @@ const addNote = asyncHandler(async (req, res) => {
   if (!place || !title || !body) throw new ApiError(400, 'กรุณากรอกสถานที่ ชื่อบันทึก และรายละเอียดให้ครบ');
   if (body.length > 600) throw new ApiError(400, 'รายละเอียดต้องไม่เกิน 600 ตัวอักษร');
 
-  if (isFirebaseReady()) {
-    const doc = await checkinModel.addNote(req.user.uid, { place, title, body });
-    return ok(res, { note: doc }, 201);
-  }
-
-  const id = `note_${Date.now()}`;
-  const doc = { id, uid: req.user.uid, place, title, body, createdAt: new Date().toISOString() };
-  devStore.set(DEV_NOTES, id, doc);
+  const doc = await checkinModel.addNote(req.user.uid, { place, title, body });
   return ok(res, { note: doc }, 201);
 });
 
 const deleteNote = asyncHandler(async (req, res) => {
   const { noteId } = req.params;
-
-  if (isFirebaseReady()) {
-    const note = await checkinModel.getNoteById(noteId);
-    if (!note) throw new ApiError(404, 'ไม่พบบันทึกนี้');
-    if (note.uid !== req.user.uid) throw new ApiError(403, 'ไม่มีสิทธิ์ลบบันทึกนี้');
-    await checkinModel.deleteNote(noteId);
-    return ok(res, { message: 'ลบบันทึกสำเร็จ' });
-  }
-
-  const note = devStore.get(DEV_NOTES, noteId);
+  const note = await checkinModel.getNoteById(noteId);
   if (!note) throw new ApiError(404, 'ไม่พบบันทึกนี้');
   if (note.uid !== req.user.uid) throw new ApiError(403, 'ไม่มีสิทธิ์ลบบันทึกนี้');
-  devStore.remove(DEV_NOTES, noteId);
+  await checkinModel.deleteNote(noteId);
   return ok(res, { message: 'ลบบันทึกสำเร็จ' });
 });
 

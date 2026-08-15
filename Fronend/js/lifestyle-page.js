@@ -377,15 +377,22 @@ document.addEventListener('places:updated', async () => {
   document.dispatchEvent(new CustomEvent('app:content-updated'));
 });
 
-document.addEventListener('reviews:updated', async () => {
-  await renderLifestyleStats();
-  await renderLifestylePopular();
-  await renderLifestylePlaceGrid();
-  await renderLifestyleVideoRail();
-  document.dispatchEvent(new CustomEvent('app:content-updated'));
+let mnxLifestyleDebounce = null;
+document.addEventListener('reviews:updated', () => {
+  if (mnxLifestyleDebounce) clearTimeout(mnxLifestyleDebounce);
+  mnxLifestyleDebounce = setTimeout(async () => {
+    await renderLifestyleStats();
+    await renderLifestylePopular();
+    await renderLifestylePlaceGrid();
+    await renderLifestyleVideoRail();
+    document.dispatchEvent(new CustomEvent('app:content-updated'));
+  }, 200);
 });
 
-document.addEventListener('videos:updated', async () => {
-  await renderLifestyleVideoRail();
-  document.dispatchEvent(new CustomEvent('app:content-updated'));
+document.addEventListener('videos:updated', () => {
+  if (mnxLifestyleDebounce) clearTimeout(mnxLifestyleDebounce);
+  mnxLifestyleDebounce = setTimeout(async () => {
+    await renderLifestyleVideoRail();
+    document.dispatchEvent(new CustomEvent('app:content-updated'));
+  }, 200);
 });

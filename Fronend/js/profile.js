@@ -6,14 +6,19 @@ const ENV_LABELS = { indoor: 'ในร่ม', outdoor: 'กลางแจ้�
 const PACE_LABELS = { comfort: 'สายชิล ผ่อนคลาย', adventure: 'สายผจญภัย', both: 'ทั้งสองแบบ' };
 
 function mnxProfileAbsoluteUrl(relativeUrl) {
-  if (!relativeUrl) return '/assets/images/avatar-placeholder.png';
-  if (/^https?:\/\//.test(relativeUrl)) return relativeUrl;
+  if (window.MNX_AUTH?.getAvatarUrl) return window.MNX_AUTH.getAvatarUrl(relativeUrl);
+  if (!relativeUrl) return '/Fronend/assets/images/avatar-placeholder.png';
+  if (/^https?:\/\//.test(relativeUrl) || relativeUrl.startsWith('data:')) return relativeUrl;
   if (relativeUrl.startsWith('/uploads/')) {
-    const apiOrigin = window.MNX_API.baseUrl.replace(/\/api\/?$/, '');
+    const apiOrigin = (window.MNX_API?.baseUrl || 'http://localhost:4000/api').replace(/\/api\/?$/, '');
     return `${apiOrigin}${relativeUrl}`;
+  }
+  if (relativeUrl.startsWith('/assets/')) {
+    return `/Fronend${relativeUrl}`;
   }
   return relativeUrl;
 }
+
 
 function mnxProfileTimeAgo(isoStr) {
   if (!isoStr) return '';
@@ -272,30 +277,76 @@ function mnxInitNameEdit() {
 }
 
 /* ----------------------------------------------------------
-   Avatar swap (base64 — same pattern as review.js)
+   Avatar upload & save
 ---------------------------------------------------------- */
+let mnxAvatarToastTimer = null;
+function mnxShowAvatarToast(message, isError = false) {
+  const toast = document.getElementById('profile-avatar-toast');
+  if (!toast) return;
+  if (mnxAvatarToastTimer) clearTimeout(mnxAvatarToastTimer);
+
+  toast.textContent = message;
+  toast.className = `profile-avatar-toast is-visible ${isError ? 'is-error' : 'is-success'}`;
+  toast.style.display = 'inline-flex';
+
+  mnxAvatarToastTimer = setTimeout(() => {
+    toast.classList.remove('is-visible');
+    setTimeout(() => {
+      if (!toast.classList.contains('is-visible')) toast.style.display = 'none';
+    }, 300);
+  }, 3500);
+}
+
 function mnxInitAvatarEdit() {
   const editBtn = document.getElementById('profile-avatar-edit-btn');
   const input = document.getElementById('profile-avatar-input');
   const img = document.getElementById('profile-avatar-img');
+  const spinner = document.getElementById('profile-avatar-spinner');
   if (!editBtn || !input || !img) return;
 
-  editBtn.addEventListener('click', () => input.click());
-  input.addEventListener('change', (e) => {
+  editBtn.addEventListener('click', () => {
+    if (editBtn.disabled) return;
+    input.click();
+  });
+
+  input.addEventListener('change', async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      img.src = reader.result;
-      try {
-        await window.MNX_AUTH.updateProfile({ avatar: reader.result });
-      } catch (err) {
-        alert(err.message || 'ไม่สามารถอัปเดตรูปโปรไฟล์ได้');
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      mnxShowAvatarToast('กรุณาเลือกไฟล์รูปภาพที่ถูกต้อง (JPEG, PNG, WebP)', true);
+      input.value = '';
+      return;
+    }
+
+    const previousSrc = img.src;
+    // Set UI to loading state
+    if (spinner) spinner.style.display = 'flex';
+    editBtn.disabled = true;
+    editBtn.style.opacity = '0.5';
+    editBtn.style.pointerEvents = 'none';
+
+    try {
+      mnxShowAvatarToast('กำลังบันทึกรูปโปรไฟล์...');
+      const user = await window.MNX_AUTH.updateAvatar(file);
+      if (user && user.avatar) {
+        img.src = mnxProfileAbsoluteUrl(user.avatar);
       }
-    };
-    reader.readAsDataURL(file);
+      mnxShowAvatarToast('✓ บันทึกรูปโปรไฟล์เรียบร้อยแล้ว');
+    } catch (err) {
+      img.src = previousSrc;
+      mnxShowAvatarToast(err.message || 'ไม่สามารถบันทึกรูปโปรไฟล์ได้ กรุณาลองใหม่อีกครั้ง', true);
+    } finally {
+      if (spinner) spinner.style.display = 'none';
+      editBtn.disabled = false;
+      editBtn.style.opacity = '';
+      editBtn.style.pointerEvents = '';
+      input.value = '';
+    }
   });
 }
+
 
 /* ----------------------------------------------------------
    Recent reviews

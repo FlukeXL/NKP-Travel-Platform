@@ -51,12 +51,17 @@
       <div class="profile-cover__gradient"></div>
       <div class="profile-cover__avatar-wrap">
         <img class="profile-cover__avatar" id="profile-avatar-img" src="" alt="รูปโปรไฟล์" />
+        <div class="profile-cover__avatar-spinner" id="profile-avatar-spinner" style="display:none;" aria-label="กำลังบันทึกรูปโปรไฟล์">
+          <svg class="profile-spinner-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-dasharray="32" stroke-dashoffset="10"/></svg>
+        </div>
         <button class="profile-cover__avatar-edit" id="profile-avatar-edit-btn" aria-label="เปลี่ยนรูปโปรไฟล์" title="เปลี่ยนรูปโปรไฟล์">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
         </button>
-        <input type="file" id="profile-avatar-input" accept="image/*" class="visually-hidden" />
+        <input type="file" id="profile-avatar-input" accept="image/jpeg,image/png,image/webp,image/jpg" class="visually-hidden" />
       </div>
+      <div class="profile-avatar-toast" id="profile-avatar-toast" style="display:none;" role="status"></div>
     </div>
+
 
     <div class="container profile-container">
 

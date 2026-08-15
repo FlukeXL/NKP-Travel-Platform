@@ -1,10 +1,6 @@
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-/**
- * Configure Helmet with appropriate policies for cross-origin assets
- * (allows Frontend on port 8000/LAN to load uploaded photos/videos seamlessly).
- */
 const helmetMiddleware = helmet({
   crossOriginResourcePolicy: { policy: 'cross-origin' },
   crossOriginEmbedderPolicy: false,

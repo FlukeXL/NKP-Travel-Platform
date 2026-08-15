@@ -1,4 +1,5 @@
 const MNX_REVIEWS_CACHE = {};
+const MNX_REVIEWS_INFLIGHT = {};
 let MNX_VIDEO_FEED_CACHE = null;
 
 function mnxGetReviews(placeId) {
@@ -9,19 +10,33 @@ function mnxGetReviewStats(placeId) {
   return MNX_REVIEWS_CACHE[placeId]?.stats || null;
 }
 
-async function mnxFetchReviews(placeId) {
-  try {
-    const data = await window.MNX_API.get(`/reviews/${encodeURIComponent(placeId)}`);
-    MNX_REVIEWS_CACHE[placeId] = {
-      reviews: data.reviews.map((r) => ({ ...r, createdAt: new Date(r.createdAt).getTime() })),
-      stats: data.stats,
-    };
-  } catch (err) {
-    console.error('[reviews-data.js] Failed to fetch reviews:', err.message);
-    MNX_REVIEWS_CACHE[placeId] = { reviews: [], stats: null };
+async function mnxFetchReviews(placeId, force = false) {
+  if (!placeId) return { reviews: [], stats: null };
+  if (!force && MNX_REVIEWS_CACHE[placeId]) {
+    return MNX_REVIEWS_CACHE[placeId];
   }
-  document.dispatchEvent(new CustomEvent('reviews:updated', { detail: { placeId } }));
-  return MNX_REVIEWS_CACHE[placeId];
+  if (!force && MNX_REVIEWS_INFLIGHT[placeId]) {
+    return MNX_REVIEWS_INFLIGHT[placeId];
+  }
+
+  const fetchPromise = (async () => {
+    try {
+      const data = await window.MNX_API.get(`/reviews/${encodeURIComponent(placeId)}`);
+      MNX_REVIEWS_CACHE[placeId] = {
+        reviews: (data.reviews || []).map((r) => ({ ...r, createdAt: new Date(r.createdAt).getTime() })),
+        stats: data.stats || null,
+      };
+    } catch (err) {
+      console.warn('[reviews-data.js] Failed to fetch reviews for', placeId, err.message);
+      MNX_REVIEWS_CACHE[placeId] = { reviews: [], stats: null };
+    } finally {
+      delete MNX_REVIEWS_INFLIGHT[placeId];
+    }
+    return MNX_REVIEWS_CACHE[placeId];
+  })();
+
+  MNX_REVIEWS_INFLIGHT[placeId] = fetchPromise;
+  return fetchPromise;
 }
 
 async function mnxAddReview(placeId, { rating, text, category, photos, video }) {
@@ -40,7 +55,8 @@ async function mnxAddReview(placeId, { rating, text, category, photos, video }) 
 
   try {
     await window.MNX_API.postForm(`/reviews/${encodeURIComponent(placeId)}`, form);
-    await mnxFetchReviews(placeId);
+    await mnxFetchReviews(placeId, true);
+    document.dispatchEvent(new CustomEvent('reviews:updated', { detail: { placeId } }));
     mnxInvalidateVideoFeed();
     return { ok: true };
   } catch (err) {
@@ -51,7 +67,8 @@ async function mnxAddReview(placeId, { rating, text, category, photos, video }) 
 async function mnxDeleteReview(placeId, reviewId) {
   try {
     await window.MNX_API.delete(`/reviews/${encodeURIComponent(placeId)}/${encodeURIComponent(reviewId)}`);
-    await mnxFetchReviews(placeId);
+    await mnxFetchReviews(placeId, true);
+    document.dispatchEvent(new CustomEvent('reviews:updated', { detail: { placeId } }));
     mnxInvalidateVideoFeed();
     return { ok: true };
   } catch (err) {

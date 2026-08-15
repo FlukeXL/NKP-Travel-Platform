@@ -1,55 +1,97 @@
-const { getDb, COLLECTIONS } = require('../config/database');
-const { ApiError } = require('../middleware/errorHandler');
+const { getDatabases, isAppwriteReady, databaseId, COLLECTIONS, Query, ID } = require('../config/database');
+const devStore = require('../utils/devStore');
+const { sanitizeAppwriteId } = require('../utils/sanitizeId');
 
-function logsCollection() {
-  const db = getDb();
-  if (!db) throw new ApiError(503, 'Firestore ยังไม่ได้ตั้งค่า (Firebase Admin credentials missing)');
-  return db.collection(COLLECTIONS.AUDIT_LOGS);
+const DEV_LOGS = 'audit_logs';
+
+function sanitizeId(id) {
+  return sanitizeAppwriteId(id, 'log');
+}
+
+function formatDoc(doc) {
+  if (!doc) return null;
+  const { $id, $createdAt, $updatedAt, $permissions, $databaseId, $collectionId, ...rest } = doc;
+  return {
+    id: rest.id || $id,
+    ...rest,
+    createdAt: rest.createdAt || $createdAt || new Date().toISOString(),
+  };
 }
 
 async function addLog(entry) {
-  const doc = { ...entry, createdAt: new Date().toISOString() };
-  const ref = await logsCollection().add(doc);
-  return { id: ref.id, ...doc };
+  const id = ID.unique();
+  const now = new Date().toISOString();
+  const payload = {
+    action: String(entry.action || ''),
+    actor: String(entry.actor || ''),
+    target: String(entry.target || ''),
+    details: typeof entry.details === 'object' ? JSON.stringify(entry.details) : String(entry.details || ''),
+    ip: String(entry.ip || ''),
+    createdAt: now,
+  };
+
+  if (isAppwriteReady()) {
+    try {
+      const doc = await getDatabases().createDocument(databaseId, COLLECTIONS.AUDIT_LOGS, id, payload);
+      return formatDoc(doc);
+    } catch (err) {
+      console.warn('[auditLog.model] Appwrite addLog failed:', err.message);
+    }
+  }
+
+  const record = { id, ...payload };
+  devStore.set(DEV_LOGS, id, record);
+  return record;
 }
 
 async function getRecentLogs(limit = 200) {
-  const snap = await logsCollection().orderBy('createdAt', 'desc').limit(limit).get();
-  return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  if (isAppwriteReady()) {
+    try {
+      const res = await getDatabases().listDocuments(databaseId, COLLECTIONS.AUDIT_LOGS, [
+        Query.limit(Math.min(100, limit)),
+        Query.orderDesc('createdAt'),
+      ]);
+      return res.documents.map(formatDoc);
+    } catch (err) {
+      console.warn('[auditLog.model] Appwrite getRecentLogs failed:', err.message);
+    }
+  }
+
+  const list = devStore.list(DEV_LOGS).map(formatDoc);
+  return list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, limit);
 }
 
 async function deleteLog(id) {
-  await logsCollection().doc(id).delete();
+  if (isAppwriteReady()) {
+    try {
+      await getDatabases().deleteDocument(databaseId, COLLECTIONS.AUDIT_LOGS, sanitizeId(id));
+      return;
+    } catch (err) {
+      if (err.code !== 404) console.warn('[auditLog.model] Appwrite deleteLog failed:', err.message);
+    }
+  }
+
+  devStore.delete(DEV_LOGS, String(id));
 }
 
 async function deleteAllLogs() {
-  const snap = await logsCollection().get();
-  if (snap.empty) return 0;
-  const batches = [];
-  const db = getDb();
-  for (let i = 0; i < snap.docs.length; i += 450) {
-    const chunk = snap.docs.slice(i, i + 450);
-    const batch = db.batch();
-    chunk.forEach((d) => batch.delete(d.ref));
-    batches.push(batch.commit());
+  const logs = await getRecentLogs(500);
+  for (const log of logs) {
+    await deleteLog(log.id);
   }
-  await Promise.all(batches);
-  return snap.docs.length;
+  return logs.length;
 }
 
 async function deleteLogsOlderThan(cutoffIso) {
-  const snap = await logsCollection().where('createdAt', '<', cutoffIso).get();
-  if (snap.empty) return 0;
-  const db = getDb();
-  const batches = [];
-  for (let i = 0; i < snap.docs.length; i += 450) {
-    const chunk = snap.docs.slice(i, i + 450);
-    const batch = db.batch();
-    chunk.forEach((d) => batch.delete(d.ref));
-    batches.push(batch.commit());
+  const logs = await getRecentLogs(500);
+  let count = 0;
+  for (const log of logs) {
+    if (new Date(log.createdAt) < new Date(cutoffIso)) {
+      await deleteLog(log.id);
+      count++;
+    }
   }
-  await Promise.all(batches);
-  return snap.docs.length;
+  return count;
 }
 
 module.exports = { addLog, getRecentLogs, deleteLog, deleteAllLogs, deleteLogsOlderThan };
