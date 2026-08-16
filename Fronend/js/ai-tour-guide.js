@@ -20,9 +20,14 @@ document.addEventListener('click', (e) => {
     const chatWindow = document.getElementById('ai-guide-chat');
     const inputEl = document.getElementById('ai-guide-chat-input');
     if (chatWindow) {
-      chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
-      if (chatWindow.style.display === 'flex' && inputEl) {
-        inputEl.focus();
+      const isOpening = chatWindow.style.display === 'none';
+      chatWindow.style.display = isOpening ? 'flex' : 'none';
+      
+      if (isOpening) {
+        document.body.classList.add('ai-chat-open');
+        if (inputEl) inputEl.focus();
+      } else {
+        document.body.classList.remove('ai-chat-open');
       }
     }
     return;
@@ -34,6 +39,7 @@ document.addEventListener('click', (e) => {
     const chatWindow = document.getElementById('ai-guide-chat');
     if (chatWindow) {
       chatWindow.style.display = 'none';
+      document.body.classList.remove('ai-chat-open');
     }
     return;
   }
@@ -261,9 +267,14 @@ window.MapNexusAI = window.PlanvisAI = {
     const chatWindow = document.getElementById('ai-guide-chat');
     const inputEl = document.getElementById('ai-guide-chat-input');
     if (chatWindow) {
-      chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
-      if (chatWindow.style.display === 'flex' && inputEl) {
-        inputEl.focus();
+      const isOpening = chatWindow.style.display === 'none';
+      chatWindow.style.display = isOpening ? 'flex' : 'none';
+      
+      if (isOpening) {
+        document.body.classList.add('ai-chat-open');
+        if (inputEl) inputEl.focus();
+      } else {
+        document.body.classList.remove('ai-chat-open');
       }
     }
   }
