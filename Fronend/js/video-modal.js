@@ -294,24 +294,49 @@ function mnxRenderVideoCards(container, videos) {
     `;
   }).join('');
 
+  // Auto-play videos when they are in view (TikTok / Reels style)
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const card = entry.target;
+      const video = card.querySelector('video');
+      if (!video) return;
+
+      if (entry.isIntersecting) {
+        card.classList.add('is-playing');
+        video.play().catch(() => {});
+      } else {
+        card.classList.remove('is-playing');
+        video.pause();
+      }
+    });
+  }, { threshold: 0.6 });
+
   container.querySelectorAll('.video-card').forEach((card) => {
     const video = card.querySelector('video');
     const reviewId = card.dataset.reviewId;
+    
+    observer.observe(card);
 
-    card.addEventListener('mouseenter', () => {
-      card.classList.add('is-playing');
-      video.currentTime = 0;
-      video.play().catch(() => { });
-    });
-    card.addEventListener('mouseleave', () => {
-      card.classList.remove('is-playing');
-      video.pause();
-      video.currentTime = 0;
-    });
-    card.addEventListener('click', () => {
-      const full = videos.find((v) => v.id === reviewId);
-      if (full) mnxOpenVideoModal(full);
-    });
+    // Toggle play/pause when clicking the video itself (not the info panel)
+    const playIcon = card.querySelector('.video-card__play-icon');
+    if (playIcon && video) {
+      playIcon.parentElement.addEventListener('click', (e) => {
+        // Prevent opening modal if clicking directly on video to play/pause
+        if (e.target.closest('.video-card__glass-panel') || e.target.closest('.video-card__place-tag')) {
+          const full = videos.find((v) => v.id === reviewId);
+          if (full) mnxOpenVideoModal(full);
+          return;
+        }
+
+        if (video.paused) {
+          card.classList.add('is-playing');
+          video.play().catch(() => {});
+        } else {
+          card.classList.remove('is-playing');
+          video.pause();
+        }
+      });
+    }
   });
 }
 
