@@ -22,6 +22,19 @@ function mnxInitFirebaseApp() {
 }
 
 async function mnxSignInWithGoogle() {
+  const isLocalIp = window.location.hostname.match(/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[0-1])\.)/);
+  
+  if (isLocalIp) {
+    const mockEmail = prompt("⚠️ ระบบ Google Sign-In ไม่รองรับการใช้งานผ่าน IP Address (ข้อจำกัด Firebase)\n\nกรุณากรอกอีเมล Google เพื่อจำลองการล็อกอิน:", "user.google@gmail.com");
+    if (!mockEmail || !mockEmail.trim()) throw new Error('ยกเลิกการเข้าสู่ระบบ');
+    return {
+      idToken: 'mock_token_for_local_dev',
+      name: mockEmail.split('@')[0],
+      email: mockEmail,
+      avatar: '/Fronend/assets/images/avatar-placeholder.png',
+    };
+  }
+
   mnxInitFirebaseApp();
   if (!mnxFirebaseAuth) throw new Error('ไม่สามารถเชื่อมต่อ Firebase ได้ กรุณาลองใหม่');
 
@@ -36,9 +49,11 @@ async function mnxSignInWithGoogle() {
       avatar: result.user.photoURL,
     };
   } catch (err) {
+    if (err.code === 'auth/unauthorized-domain') throw new Error('โดเมนหรือ IP นี้ยังไม่ได้รับอนุญาตใน Firebase Console');
     if (err.code === 'auth/popup-closed-by-user') throw new Error('ปิดหน้าต่างเข้าสู่ระบบก่อนทำรายการเสร็จ กรุณาลองใหม่');
     if (err.code === 'auth/popup-blocked') throw new Error('เบราว์เซอร์บล็อกหน้าต่างป็อปอัพ กรุณาอนุญาตป็อปอัพแล้วลองใหม่');
-    throw new Error('เข้าสู่ระบบด้วย Google ไม่สำเร็จ กรุณาลองใหม่');
+    console.error(err);
+    throw new Error('เข้าสู่ระบบด้วย Google ไม่สำเร็จ: ' + err.message);
   }
 }
 
