@@ -52,7 +52,13 @@ async function mnxOpenVideoModal(video) {
   els.video.poster = mnxAbsoluteUploadUrl(video.video.posterUrl);
   els.placeName.textContent = placeName;
   els.author.textContent = video.author;
-  els.avatar.src = video.avatar || '/assets/images/avatar-placeholder.png';
+  let avatarUrl = video.avatar;
+  if (!avatarUrl) {
+    avatarUrl = '/Fronend/assets/images/avatar-placeholder.png';
+  } else if (avatarUrl.startsWith('/uploads/') && typeof window.mnxAbsoluteUploadUrl === 'function') {
+    avatarUrl = window.mnxAbsoluteUploadUrl(avatarUrl);
+  }
+  els.avatar.src = window.mnxSanitizeUrl ? window.mnxSanitizeUrl(avatarUrl) : avatarUrl;
   els.stars.innerHTML = mnxStarSvgRow(video.rating);
   els.caption.textContent = video.text;
   els.likeCount.textContent = video.likeCount || 0;
@@ -96,7 +102,13 @@ function mnxRenderVideoComments(comments) {
   commentList.innerHTML = comments.map((c) => {
     const authorSafe = esc(c.author);
     const textSafe = esc(c.text);
-    const avatarSafe = c.avatar ? (window.mnxSanitizeUrl ? window.mnxSanitizeUrl(c.avatar) : c.avatar) : '/assets/images/avatar-placeholder.png';
+    let avatarUrl = c.avatar;
+    if (!avatarUrl) {
+      avatarUrl = '/Fronend/assets/images/avatar-placeholder.png';
+    } else if (avatarUrl.startsWith('/uploads/') && typeof window.mnxAbsoluteUploadUrl === 'function') {
+      avatarUrl = window.mnxAbsoluteUploadUrl(avatarUrl);
+    }
+    const avatarSafe = window.mnxSanitizeUrl ? window.mnxSanitizeUrl(avatarUrl) : avatarUrl;
     return `
     <div class="video-modal__comment-item">
       <img src="${avatarSafe}" alt="${authorSafe}" />
@@ -236,30 +248,45 @@ function mnxRenderVideoCards(container, videos) {
     const placeNameSafe = esc(place?.name || v.placeName || v.place || 'นครพนม');
     const authorSafe = esc(v.author);
     const textSafe = esc(v.text);
-    const avatarSafe = v.avatar ? (window.mnxSanitizeUrl ? window.mnxSanitizeUrl(v.avatar) : v.avatar) : '/assets/images/avatar-placeholder.png';
-    const posterSafe = mnxAbsoluteUploadUrl(v.video.posterUrl);
-    const videoUrlSafe = mnxAbsoluteUploadUrl(v.video.url);
+    let avatarUrl = v.avatar;
+    if (!avatarUrl) {
+      avatarUrl = '/Fronend/assets/images/avatar-placeholder.png';
+    } else if (avatarUrl.startsWith('/uploads/') && typeof window.mnxAbsoluteUploadUrl === 'function') {
+      avatarUrl = window.mnxAbsoluteUploadUrl(avatarUrl);
+    }
+    const avatarSafe = window.mnxSanitizeUrl ? window.mnxSanitizeUrl(avatarUrl) : avatarUrl;
+    const posterSafe = typeof window.mnxAbsoluteUploadUrl === 'function' ? window.mnxAbsoluteUploadUrl(v.video.posterUrl) : v.video.posterUrl;
+    const videoUrlSafe = typeof window.mnxAbsoluteUploadUrl === 'function' ? window.mnxAbsoluteUploadUrl(v.video.url) : v.video.url;
 
     return `
       <div class="video-card" data-review-id="${v.id}">
         <div class="video-card__frame">
-          <img src="${posterSafe}" alt="รีวิว ${placeNameSafe}" data-role="poster" draggable="false" />
+          <img src="${posterSafe}" alt="รีวิว ${placeNameSafe}" data-role="poster" draggable="false" onerror="this.style.display='none'" />
           <video src="${videoUrlSafe}" muted loop playsinline preload="metadata" data-role="video"></video>
-          <div class="video-card__gradient"></div>
-          <span class="video-card__place-tag">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="11" height="11"><path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10Z"/><circle cx="12" cy="11" r="1.8"/></svg>
-            ${placeNameSafe}
-          </span>
-          <div class="video-card__info">
-            <div class="video-card__reviewer">
-              <img class="video-card__avatar" src="${avatarSafe}" alt="${authorSafe}" draggable="false" />
-              <span class="video-card__reviewer-name">${authorSafe}</span>
-              <span class="video-card__stars">${mnxStarSvgRow(v.rating)}</span>
-            </div>
-            <p class="video-card__caption">${textSafe}</p>
-            <div class="video-card__stats">
-              <span class="video-card__stat"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" width="12" height="12"><path d="M12 20s-7-4.5-9.3-8.8C1.4 8 2.6 4.6 6 4c2-.4 3.8.6 6 3 2.2-2.4 4-3.4 6-3 3.4.6 4.6 4 3.3 7.2C19 15.5 12 20 12 20Z"/></svg>${v.likeCount || 0}</span>
-              <span class="video-card__stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M4 5h16v11H8l-4 4V5Z"/></svg>${v.commentCount || 0}</span>
+          
+          <div class="video-card__play-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="32" height="32"><path d="M8 5.14v14l11-7-11-7z"/></svg>
+          </div>
+
+          <div class="video-card__content">
+            <span class="video-card__place-tag">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="12" height="12"><path d="M12 21s-6-5.5-6-10a6 6 0 1 1 12 0c0 4.5-6 10-6 10Z"/><circle cx="12" cy="11" r="2.5"/></svg>
+              ${placeNameSafe}
+            </span>
+            
+            <div class="video-card__glass-panel">
+              <div class="video-card__reviewer">
+                <img class="video-card__avatar" src="${avatarSafe}" alt="${authorSafe}" draggable="false" onerror="this.src='/Fronend/assets/images/avatar-placeholder.png'" />
+                <div class="video-card__reviewer-info">
+                  <span class="video-card__reviewer-name">${authorSafe}</span>
+                  <span class="video-card__stars">${mnxStarSvgRow(v.rating)}</span>
+                </div>
+              </div>
+              <p class="video-card__caption">${textSafe}</p>
+              <div class="video-card__stats">
+                <span class="video-card__stat"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none" width="14" height="14"><path d="M12 20s-7-4.5-9.3-8.8C1.4 8 2.6 4.6 6 4c2-.4 3.8.6 6 3 2.2-2.4 4-3.4 6-3 3.4.6 4.6 4 3.3 7.2C19 15.5 12 20 12 20Z"/></svg> ${v.likeCount || 0}</span>
+                <span class="video-card__stat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><path d="M4 5h16v11H8l-4 4V5Z"/></svg> ${v.commentCount || 0}</span>
+              </div>
             </div>
           </div>
         </div>
