@@ -2016,3 +2016,83 @@ html.mnx-is-mobile .admin-mobile-notice {
     -webkit-tap-highlight-color: transparent;
   }
 }
+/* ----------------------------------------------------------
+   Post Card Overlays (Mobile UI enhancements)
+---------------------------------------------------------- */
+html.mnx-is-mobile .post-card {
+  position: relative;
+  display: block;
+  aspect-ratio: 4 / 5;
+  border-radius: 20px;
+  background: #000;
+}
+
+html.mnx-is-mobile .post-card__gallery {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  border-radius: 20px;
+}
+
+html.mnx-is-mobile .post-card__body {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 30%, rgba(0,0,0,0) 100%);
+  color: var(--color-white);
+  padding: 20px;
+  pointer-events: none;
+}
+
+html.mnx-is-mobile .post-card__body > * {
+  pointer-events: auto;
+}
+
+html.mnx-is-mobile .post-card__author-name,
+html.mnx-is-mobile .post-card__place {
+  color: var(--color-white);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.6);
+}
+
+html.mnx-is-mobile .post-card__time {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+html.mnx-is-mobile .post-card__hashtags span {
+  color: var(--color-gold-light);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+}
+
+html.mnx-is-mobile .post-card__actions {
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+html.mnx-is-mobile .post-card__action-btn {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+html.mnx-is-mobile .post-card__action-btn:hover {
+  color: var(--color-white);
+}
+
+html.mnx-is-mobile .post-card__comments {
+  background: rgba(0,0,0,0.3);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-md);
+  padding: 10px;
+  margin-top: 10px;
+}
+
+html.mnx-is-mobile .post-card__comment-item strong {
+  color: var(--color-gold-light);
+}
+
+html.mnx-is-mobile .post-card__comment-item span {
+  color: var(--color-white);
+}
