@@ -417,7 +417,7 @@
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .ai-guide-chat__header {
-    padding: 16px;
+    padding: calc(16px + env(safe-area-inset-top, 0px)) 16px 16px 16px;
   }
 
   .ai-guide-chat__title {
@@ -435,7 +435,7 @@
   }
 
   .ai-guide-chat__input-area {
-    padding: 14px 16px;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)) 16px;
   }
 }
 
@@ -459,14 +459,24 @@ html.mnx-is-mobile body.page-checkin .ai-guide-chat {
 }
 
 html.mnx-is-mobile .ai-guide-chat {
-  bottom: auto;
-  top: 60px;
-  right: 12px;
-  left: 12px;
-  width: auto;
-  max-width: none;
-  height: calc(100dvh - 60px - 90px);
-  max-height: none;
-  border-radius: 20px;
-  z-index: 499;
+  bottom: 0;
+  top: 0;
+  right: 0;
+  left: 0;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  border-radius: 0;
+  z-index: 99999;
+}
+
+/* Ensure the glass overlay covers the whole screen properly */
+html.mnx-is-mobile .ai-guide-chat__glass-overlay {
+  border-radius: 0;
+}
+
+/* Adjust the messages area to allow smooth scrolling without being cut off by keyboard */
+html.mnx-is-mobile .ai-guide-chat__messages {
+  padding-bottom: 20px;
 }
