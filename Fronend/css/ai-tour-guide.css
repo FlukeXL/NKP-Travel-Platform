@@ -440,7 +440,7 @@
   }
 
   .ai-guide-chat__input-area {
-    padding: 14px 16px;
+    padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)) 16px;
   }
 }
 
@@ -473,22 +473,25 @@ body.ai-chat-open {
 
 html.mnx-is-mobile .ai-guide-chat {
   position: fixed;
-  top: env(safe-area-inset-top, 10px);
-  left: 10px;
-  right: 10px;
-  width: auto;
-  height: calc(100dvh - env(safe-area-inset-top, 10px) - env(safe-area-inset-bottom, 10px));
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: auto;
+  width: 100vw;
+  height: 55vh; /* Half screen when keyboard closed */
   max-width: none;
-  max-height: none;
-  border-radius: 24px;
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px)); /* Full available space when keyboard open */
+  border-radius: 32px 32px 0 0;
   z-index: 99999;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0,0,0,0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Ensure the glass overlay covers the whole screen properly */
 html.mnx-is-mobile .ai-guide-chat__glass-overlay {
-  border-radius: 24px;
+  border-radius: 32px 32px 0 0;
 }
 
 /* Adjust the messages area to allow smooth scrolling */
