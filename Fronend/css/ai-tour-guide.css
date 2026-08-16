@@ -473,9 +473,10 @@ body.ai-chat-open {
 
 html.mnx-is-mobile .ai-guide-chat {
   position: fixed;
-  top: env(safe-area-inset-top, 10px);
+  bottom: env(safe-area-inset-bottom, 10px); /* Anchor to bottom so iOS pushes it up with keyboard */
   left: 10px;
   right: 10px;
+  top: auto; /* Remove top anchor */
   width: auto;
   height: calc(100dvh - env(safe-area-inset-top, 10px) - env(safe-area-inset-bottom, 10px));
   max-width: none;
