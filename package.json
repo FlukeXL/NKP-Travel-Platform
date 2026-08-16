@@ -1,0 +1,10 @@
+{
+  "name": "mapnexus-deployment",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unified deploy for MapNexus Frontend & Backend",
+  "scripts": {
+    "install": "cd Backend && npm install",
+    "start": "node Backend/server.js"
+  }
+}
