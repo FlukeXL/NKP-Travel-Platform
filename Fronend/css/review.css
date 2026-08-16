@@ -138,8 +138,8 @@
 .upload-slot {
   aspect-ratio: 1;
   border-radius: var(--radius-md);
-  border: 1.5px dashed var(--color-border);
-  background: var(--color-ivory);
+  border: 2px dashed #c9a227;
+  background: rgba(201, 162, 39, 0.06);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,11 +147,12 @@
   position: relative;
   overflow: hidden;
   transition: all var(--dur-fast) var(--ease-luxury);
+  min-height: 64px;
 }
 
 .upload-slot:hover {
-  border-color: var(--color-gold);
-  background: var(--color-gold-soft);
+  border-color: #c9a227;
+  background: rgba(201, 162, 39, 0.14);
 }
 
 .upload-slot__icon {

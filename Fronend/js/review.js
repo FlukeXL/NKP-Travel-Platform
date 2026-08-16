@@ -34,7 +34,10 @@ function renderUploadSlots() {
     if (preview) {
       slot.innerHTML = `<img src="${preview}" alt="รูปที่ ${i + 1}" /><button type="button" class="upload-slot__remove" data-index="${i}" aria-label="ลบรูป">✕</button>`;
     } else {
-      slot.innerHTML = `<label for="upload-input" style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;cursor:pointer;"><span class="upload-slot__icon">＋</span></label>`;
+      slot.innerHTML = `<label for="upload-input" style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;cursor:pointer;gap:4px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#c9a227" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" width="22" height="22"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        <span style="font-size:0.65rem;color:#c9a227;font-weight:600;">เพิ่มรูป</span>
+      </label>`;
     }
     wrap.appendChild(slot);
   }
@@ -429,11 +432,16 @@ async function renderFeed() {
     return;
   }
 
+  grid.innerHTML = posts.map((p) => {
     let avatarUrl = p.avatar;
     if (!avatarUrl) {
       avatarUrl = '/Fronend/assets/images/avatar-placeholder.png';
     } else if (avatarUrl.startsWith('/uploads/')) {
       avatarUrl = mnxAbsoluteUploadUrl(avatarUrl);
+    } else if (/^https?:\/\//.test(avatarUrl)) {
+      // external URL (Google etc.) — use as-is
+    } else {
+      avatarUrl = '/Fronend/assets/images/avatar-placeholder.png';
     }
     const avatarSafe = window.mnxSanitizeUrl ? window.mnxSanitizeUrl(avatarUrl) : avatarUrl;
 
@@ -467,7 +475,9 @@ async function renderFeed() {
         </div>
       </div>
     </article>
-  `).join('');
+  `;
+  }).join('');
+
 
   wireFeedCardEvents(grid);
   document.dispatchEvent(new CustomEvent('app:content-updated'));
@@ -773,11 +783,23 @@ function renderProfileCard() {
     return;
   }
   card.style.display = '';
-  const avatarUrl = window.MNX_AUTH?.getAvatarUrl ? window.MNX_AUTH.getAvatarUrl(session.avatar) : (session.avatar || '/Fronend/assets/images/avatar-placeholder.png');
-  document.getElementById('profile-avatar-img').src = avatarUrl;
-  document.getElementById('profile-name').textContent = session.name;
+
+  const avatarImg = document.getElementById('profile-avatar-img');
+  const nameEl = document.getElementById('profile-name');
   const googleNote = document.getElementById('profile-google-note');
+
+  if (nameEl) nameEl.textContent = session.name || 'ผู้ใช้งาน';
   if (googleNote) googleNote.style.display = session.provider === 'google' ? 'inline-flex' : 'none';
+
+  // Always resolve avatar fresh from server URL
+  const avatarUrl = window.MNX_AUTH?.getAvatarUrl
+    ? window.MNX_AUTH.getAvatarUrl(session.avatar)
+    : '/Fronend/assets/images/avatar-placeholder.png';
+
+  if (avatarImg) {
+    avatarImg.src = avatarUrl;
+    avatarImg.onerror = () => { avatarImg.src = '/Fronend/assets/images/avatar-placeholder.png'; };
+  }
 }
 
 
