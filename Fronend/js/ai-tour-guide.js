@@ -225,6 +225,7 @@ async function sendMessage() {
   
   // UI Update - User message
   inputEl.value = '';
+  inputEl.style.height = 'auto'; // Reset height after send
   appendMessage(text, 'user');
   
   messageHistory.push({ role: 'user', content: text });
@@ -267,3 +268,19 @@ window.MapNexusAI = window.PlanvisAI = {
     }
   }
 };
+
+// Auto-resize input area
+document.addEventListener('input', (e) => {
+  if (e.target.id === 'ai-guide-chat-input') {
+    e.target.style.height = 'auto'; // Reset height to calculate scrollHeight
+    e.target.style.height = (e.target.scrollHeight) + 'px';
+  }
+});
+
+// Send on Enter (Shift+Enter for newline)
+document.addEventListener('keydown', (e) => {
+  if (e.target.id === 'ai-guide-chat-input' && e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
