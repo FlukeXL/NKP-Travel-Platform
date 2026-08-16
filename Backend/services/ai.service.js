@@ -6,8 +6,6 @@ const openaiClient = new OpenAI({
   apiKey: openaiConfig.apiKey || 'missing-key',
 });
 
-const OLLAMA_HOST = process.env.OLLAMA_HOST || 'http://127.0.0.1:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:latest';
 
 const PLACE_CATEGORIES = ['cafe', 'restaurant', 'temple', 'nature', 'fitness', 'culture', 'landmark'];
 
@@ -80,17 +78,6 @@ async function generateText(prompt) {
     }
   }
 
-  // 3. Try Ollama (local fallback)
-  try {
-    const res = await axios.post(
-      `${OLLAMA_HOST}/api/generate`,
-      { model: OLLAMA_MODEL, prompt, stream: false },
-      { timeout: 12000 }
-    );
-    if (res.data?.response) return res.data.response;
-  } catch (err) {
-    // Ollama offline
-  }
 
   return JSON.stringify({ places: ['cafe-riverside-million-view', 'that-phanom', 'nem-nueang-riverside'] });
 }
@@ -302,33 +289,6 @@ async function chatWithTourGuide(messageHistory) {
     }
   }
 
-  // 3. Try Ollama (Local llama3.2 instance - Fallback)
-  try {
-    const formattedMessages = [
-      { role: 'system', content: `${SYSTEM_INSTRUCTION_CORE}\n\n${langDirective}` },
-      ...messageHistory.map(m => ({
-        role: m.role === 'bot' || m.role === 'model' ? 'assistant' : 'user',
-        content: m.content,
-      })),
-    ];
-
-    const res = await axios.post(
-      `${OLLAMA_HOST}/api/chat`,
-      {
-        model: OLLAMA_MODEL,
-        messages: formattedMessages,
-        stream: false,
-      },
-      { timeout: 15000 }
-    );
-
-    const reply = res.data?.message?.content;
-    if (reply && reply.trim().length > 0) {
-      return reply;
-    }
-  } catch (ollamaErr) {
-    // Ollama timeout or offline
-  }
 
   // 4. Smart Multilingual Concierge Fallback
   return localSmartConcierge(messageHistory);
