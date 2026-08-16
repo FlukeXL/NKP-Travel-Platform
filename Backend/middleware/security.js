@@ -126,10 +126,22 @@ function sanitizeInputs(req, res, next) {
 /**
  * Security headers for static upload directories
  */
-function staticUploadHeaders(res, path, stat) {
+function staticUploadHeaders(res, filePath) {
   res.set('X-Content-Type-Options', 'nosniff');
-  res.set('Content-Security-Policy', "default-src 'none'; media-src 'self'; img-src 'self' data:; style-src 'none'; script-src 'none'");
+  // Allow cross-origin media playback
   res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  // Support HTTP byte-range requests for video seeking
+  res.set('Accept-Ranges', 'bytes');
+
+  const ext = filePath ? filePath.toLowerCase().split('.').pop() : '';
+  if (['mp4', 'webm', 'mov', 'ogg', 'm4v'].includes(ext)) {
+    // Relax CSP for video files so browsers can play them from any origin
+    res.set('Content-Security-Policy', "default-src 'none'; media-src *; img-src 'self' data:");
+  } else if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif'].includes(ext)) {
+    res.set('Content-Security-Policy', "default-src 'none'; img-src 'self' data:");
+  } else {
+    res.set('Content-Security-Policy', "default-src 'none'");
+  }
 }
 
 module.exports = {

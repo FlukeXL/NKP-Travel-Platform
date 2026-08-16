@@ -62,12 +62,61 @@ app.use('/api', globalLimiter);
 // 6. Request Logger
 app.use(logger);
 
-// 7. Secure static file serving for uploads
-app.use('/uploads', express.static(require('path').join(__dirname, 'uploads'), {
+// 7. Video streaming with byte-range support (critical for browser video playback)
+const fs = require('fs');
+const path = require('path');
+app.get('/uploads/videos/:filename', (req, res) => {
+  const filename = req.params.filename;
+  // Only allow safe filenames
+  if (!/^[\w\-\.]+$/.test(filename)) return res.status(400).end();
+  const videoPath = path.join(__dirname, 'uploads', 'videos', filename);
+  if (!fs.existsSync(videoPath)) return res.status(404).end();
+
+  const stat = fs.statSync(videoPath);
+  const fileSize = stat.size;
+  const rangeHeader = req.headers.range;
+
+  // Determine Content-Type from extension
+  const ext = filename.toLowerCase().split('.').pop();
+  const mimeTypes = {
+    mp4: 'video/mp4', webm: 'video/webm', mov: 'video/mp4',
+    ogg: 'video/ogg', m4v: 'video/mp4', jpg: 'image/jpeg', jpeg: 'image/jpeg',
+  };
+  const contentType = mimeTypes[ext] || 'application/octet-stream';
+
+  res.set('Cross-Origin-Resource-Policy', 'cross-origin');
+  res.set('Access-Control-Allow-Origin', '*');
+
+  if (rangeHeader) {
+    const parts = rangeHeader.replace(/bytes=/, '').split('-');
+    const start = parseInt(parts[0], 10);
+    const end = parts[1] ? parseInt(parts[1], 10) : Math.min(start + 10 * 1024 * 1024, fileSize - 1);
+    const chunkSize = end - start + 1;
+    const stream = fs.createReadStream(videoPath, { start, end });
+    res.writeHead(206, {
+      'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+      'Accept-Ranges': 'bytes',
+      'Content-Length': chunkSize,
+      'Content-Type': contentType,
+    });
+    stream.pipe(res);
+  } else {
+    res.writeHead(200, {
+      'Content-Length': fileSize,
+      'Content-Type': contentType,
+      'Accept-Ranges': 'bytes',
+    });
+    fs.createReadStream(videoPath).pipe(res);
+  }
+});
+
+// 7b. Secure static file serving for other uploads (photos etc.)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
   setHeaders: staticUploadHeaders,
   dotfiles: 'ignore',
   index: false,
 }));
+
 
 app.get('/api/health', (req, res) => {
   res.json({

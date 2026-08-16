@@ -11,6 +11,19 @@ function sanitizeId(id) {
   return sanitizeAppwriteId(id, 'chk');
 }
 
+function parseVideoField(v) {
+  if (!v) return null;
+  if (typeof v === 'object') return v;
+  if (typeof v === 'string') {
+    if (v === '' || v === '[object Object]') return null;
+    // It might be a JSON string
+    try { return JSON.parse(v); } catch {}
+    // Or a plain URL string (legacy)
+    if (v.startsWith('/uploads/') || v.startsWith('http')) return { url: v, posterUrl: null, durationSec: 0 };
+  }
+  return null;
+}
+
 function formatDoc(doc) {
   if (!doc) return null;
   const { $id, $createdAt, $updatedAt, $permissions, $databaseId, $collectionId, ...rest } = doc;
@@ -22,6 +35,7 @@ function formatDoc(doc) {
     commentCount: Number(rest.commentCount) || 0,
     photos: Array.isArray(rest.photos) ? rest.photos : [],
     hashtags: Array.isArray(rest.hashtags) ? rest.hashtags : [],
+    video: parseVideoField(rest.video),
     createdAt: rest.createdAt || $createdAt || new Date().toISOString(),
   };
 }
@@ -36,7 +50,7 @@ async function addPost({ uid, author, avatar, place, placeId, photos, video, has
     place: String(place || ''),
     placeId: String(placeId || ''),
     photos: Array.isArray(photos) ? photos : [],
-    video: String(video || ''),
+    video: video && typeof video === 'object' ? JSON.stringify(video) : (typeof video === 'string' && video !== '[object Object]' ? video : ''),
     hashtags: Array.isArray(hashtags) ? hashtags : [],
     rating: Number(rating) || 0,
     visibility: visibility === 'private' ? 'private' : 'public',
