@@ -54,9 +54,9 @@ async function mnxLogin(payload) {
 async function mnxLoginWithGoogle() {
   if (window.MNX_FIREBASE?.signInWithGoogle) {
     try {
-      const googleData = await window.MNX_FIREBASE.signInWithGoogle();
-      const data = await window.MNX_API.post('/auth/google', googleData);
-      return mnxFinalizeAuthResponse(data);
+      // This will redirect the page away to Appwrite -> Google
+      await window.MNX_FIREBASE.signInWithGoogle();
+      return; // Execution stops here because page redirects
     } catch (err) {
       throw err;
     }
@@ -202,7 +202,29 @@ window.MNX_AUTH = {
   compressAvatar: mnxCompressAvatar,
 };
 
-document.addEventListener('includes:loaded', () => {
+document.addEventListener('includes:loaded', async () => {
+  // Check if we just returned from Appwrite OAuth redirect
+  if (window.MNX_FIREBASE?.checkOAuthSession) {
+    try {
+      const googleData = await window.MNX_FIREBASE.checkOAuthSession();
+      if (googleData) {
+        // We have an active Appwrite session from OAuth
+        const data = await window.MNX_API.post('/auth/google', googleData);
+        mnxFinalizeAuthResponse(data);
+        
+        // Optionally show success message (we can trigger custom event or just alert if preferred)
+        console.log('[auth-state] Google OAuth finalized successfully');
+        
+        // Clean up Appwrite session to prevent double sessions, since we use our JWT backend
+        await window.MNX_FIREBASE.signOut();
+        return; // Session is already refreshed by mnxFinalizeAuthResponse
+      }
+    } catch (err) {
+      console.error('[auth-state] Failed to finalize Appwrite OAuth session:', err);
+    }
+  }
+
+  // Fallback to normal session refresh
   mnxRefreshSession();
 });
 
