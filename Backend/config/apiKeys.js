@@ -26,8 +26,8 @@ module.exports = {
 
   gemini: {
     apiKey: env.GEMINI_API_KEY,
-    model: 'gemini-3.1-flash-lite',
-    generateContentUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent',
+    model: 'gemini-1.5-flash',
+    generateContentUrl: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
   },
 
   openai: {

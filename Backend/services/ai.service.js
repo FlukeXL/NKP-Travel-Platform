@@ -48,7 +48,7 @@ function isOpenAIConfigured() {
  */
 async function generateText(prompt) {
   // 1. Try Gemini
-  if (gemini.apiKey && !gemini.apiKey.startsWith('AQ.')) {
+  if (gemini.apiKey) {
     try {
       const res = await axios.post(
         `${gemini.generateContentUrl}?key=${gemini.apiKey}`,
@@ -61,7 +61,7 @@ async function generateText(prompt) {
       const text = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (text) return text;
     } catch (err) {
-      console.warn('[ai.service] Gemini generateText failed');
+      console.warn('[ai.service] Gemini generateText failed:', err.message);
     }
   }
 
@@ -252,8 +252,8 @@ async function chatWithTourGuide(messageHistory) {
 
   const langDirective = `[STRICT LANGUAGE INSTRUCTION]: The user is speaking in ${detectedLang.toUpperCase()}. You MUST respond in the EXACT same language (${detectedLang.toUpperCase()}). Do NOT reply in Thai if the user wrote in English or another language.`;
 
-  // 1. Try Gemini (if standard API key available)
-  if (gemini.apiKey && !gemini.apiKey.startsWith('AQ.')) {
+  // 1. Try Gemini (Free tier Google API, usually reliable if OpenAI is out of credit)
+  if (gemini.apiKey) {
     try {
       const formattedHistory = messageHistory.map(msg => ({
         role: msg.role === 'user' ? 'user' : 'model',
@@ -273,7 +273,7 @@ async function chatWithTourGuide(messageHistory) {
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (text) return text;
     } catch (err) {
-      console.warn('[ai.service] Gemini chat failed');
+      console.warn('[ai.service] Gemini chat failed:', err.message);
     }
   }
 
