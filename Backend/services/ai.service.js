@@ -54,7 +54,7 @@ async function generateText(prompt) {
           contents: [{ parts: [{ text: prompt }] }],
           generationConfig: { temperature: 0.4 },
         },
-        { timeout: 10000 }
+        { timeout: 60000 }
       );
       const text = res.data?.candidates?.[0]?.content?.parts?.[0]?.text;
       if (text) return text;
@@ -254,7 +254,7 @@ async function chatWithTourGuide(messageHistory) {
           contents: formattedHistory,
           generationConfig: { temperature: 0.7 },
         },
-        { timeout: 15000 }
+        { timeout: 60000 }
       );
 
       const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
