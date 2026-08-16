@@ -23,19 +23,16 @@ const CATEGORY_LABELS_TH = {
 
 const SYSTEM_INSTRUCTION_CORE = `You are Nakhon Phanom Guide (Planvis AI), the premier personal AI travel concierge for Nakhon Phanom Province, Thailand.
 Your capabilities and guidelines:
-1. Destination Expert: Provide recommendations exclusively for Nakhon Phanom Province (landmarks like Wat Phra That Phanom, Phaya Si Sattanakharat Grand Naga Monument, Indochina Market, Mekong River bike promenade, cafes, and local cuisine).
-2. Itinerary Planner: Create detailed 1-day, 2-day, or 3-day travel itineraries.
-3. Culture & Heritage: Share fascinating stories about Mekong riverside life, Lan Xang culture, and annual festivals (e.g. Illuminated Boat Procession / Lai Ruea Fai).
-4. Local Gastronomy: Recommend authentic Vietnamese/Isan dishes like Khao Piak Sen (Vietnamese noodles), Nem Nueng, Mekong fish dishes, and specialty coffee shops.
-5. Scope Limit: You specialize strictly in Nakhon Phanom Province. If asked about other places, politely pivot back to Nakhon Phanom.
-6. ⚠️ ABSOLUTE MANDATORY LANGUAGE RULE: ALWAYS REPLY IN THE EXACT SAME LANGUAGE THAT THE USER WRITES IN.
+1. Destination Expert: Provide recommendations EXCLUSIVELY for real, existing places within Nakhon Phanom Province (e.g., Wat Phra That Phanom, Phaya Si Sattanakharat Grand Naga Monument, Indochina Market, Nakhon Phanom Walking Street, Mekong River bike promenade).
+2. Strict Geographic Scope: You MUST NOT recommend places, restaurants, or attractions that are in other provinces or countries. If asked about places outside Nakhon Phanom, politely decline and offer a Nakhon Phanom alternative.
+3. No Hallucinations: NEVER make up fake places, fake restaurants, or fake cafes. Only recommend actual, well-known, or verified locations in Nakhon Phanom. If you are unsure if a place exists in Nakhon Phanom, do not mention it.
+4. Itinerary Planner: Create detailed, realistic 1-day, 2-day, or 3-day travel itineraries based only on real locations. Ensure travel distances between places make sense.
+5. Culture & Heritage: Share factual stories about Mekong riverside life, Lan Xang culture, and local festivals (e.g. Illuminated Boat Procession / Lai Ruea Fai).
+6. Local Gastronomy: Recommend authentic local dishes like Khao Piak Sen (Vietnamese noodles), Nem Nueng, and Mekong fish, but only associate them with real restaurants if you are certain they exist in Nakhon Phanom.
+7. ⚠️ ABSOLUTE MANDATORY LANGUAGE RULE: ALWAYS REPLY IN THE EXACT SAME LANGUAGE THAT THE USER WRITES IN.
    - If the user writes in English -> Reply 100% in English.
    - If the user writes in Thai -> Reply in Thai.
    - If the user writes in Chinese -> Reply in Chinese.
-   - If the user writes in Japanese -> Reply in Japanese.
-   - If the user writes in Lao -> Reply in Lao.
-   - If the user writes in Vietnamese -> Reply in Vietnamese.
-   - If the user writes in French, German, Spanish, Korean, Russian, or ANY language worldwide -> Reply in that exact language.
    - NEVER mismatch languages. Always mirror the user's language naturally.`;
 
 function isConfigured() {
@@ -68,7 +65,22 @@ async function generateText(prompt) {
     }
   }
 
-  // 2. Try Ollama (local)
+  // 2. Try OpenAI (Smartest AI for factual text generation)
+  if (isOpenAIConfigured()) {
+    try {
+      const completion = await openaiClient.chat.completions.create({
+        model: 'gpt-4o', // Upgraded to gpt-4o
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.4,
+      });
+      const content = completion.choices?.[0]?.message?.content;
+      if (content) return content;
+    } catch (err) {
+      console.warn('[ai.service] OpenAI generateText failed:', err.message);
+    }
+  }
+
+  // 3. Try Ollama (local fallback)
   try {
     const res = await axios.post(
       `${OLLAMA_HOST}/api/generate`,
@@ -78,21 +90,6 @@ async function generateText(prompt) {
     if (res.data?.response) return res.data.response;
   } catch (err) {
     // Ollama offline
-  }
-
-  // 3. Try OpenAI
-  if (isOpenAIConfigured()) {
-    try {
-      const completion = await openaiClient.chat.completions.create({
-        model: openaiConfig.model || 'gpt-4o-mini',
-        messages: [{ role: 'user', content: prompt }],
-        temperature: 0.4,
-      });
-      const content = completion.choices?.[0]?.message?.content;
-      if (content) return content;
-    } catch (err) {
-      console.warn('[ai.service] OpenAI generateText failed:', err.message);
-    }
   }
 
   return JSON.stringify({ places: ['cafe-riverside-million-view', 'that-phanom', 'nem-nueang-riverside'] });
@@ -280,7 +277,32 @@ async function chatWithTourGuide(messageHistory) {
     }
   }
 
-  // 2. Try Ollama (Local llama3.2 instance)
+  // 2. Try OpenAI (Smartest AI for Thai language and factual context)
+  if (isOpenAIConfigured()) {
+    try {
+      const messages = [
+        { role: 'system', content: `${SYSTEM_INSTRUCTION_CORE}\n\n${langDirective}` },
+        ...messageHistory.map(m => ({
+          role: m.role === 'bot' || m.role === 'model' ? 'assistant' : 'user',
+          content: m.content,
+        })),
+      ];
+
+      const completion = await openaiClient.chat.completions.create({
+        model: 'gpt-4o', // Upgraded to gpt-4o for maximum intelligence and factual grounding
+        messages,
+        temperature: 0.7,
+        max_tokens: 800,
+      });
+
+      const reply = completion.choices?.[0]?.message?.content;
+      if (reply) return reply;
+    } catch (openaiErr) {
+      console.warn('[ai.service] OpenAI chat failed:', openaiErr.message);
+    }
+  }
+
+  // 3. Try Ollama (Local llama3.2 instance - Fallback)
   try {
     const formattedMessages = [
       { role: 'system', content: `${SYSTEM_INSTRUCTION_CORE}\n\n${langDirective}` },
@@ -306,31 +328,6 @@ async function chatWithTourGuide(messageHistory) {
     }
   } catch (ollamaErr) {
     // Ollama timeout or offline
-  }
-
-  // 3. Try OpenAI (if available)
-  if (isOpenAIConfigured()) {
-    try {
-      const messages = [
-        { role: 'system', content: `${SYSTEM_INSTRUCTION_CORE}\n\n${langDirective}` },
-        ...messageHistory.map(m => ({
-          role: m.role === 'bot' || m.role === 'model' ? 'assistant' : 'user',
-          content: m.content,
-        })),
-      ];
-
-      const completion = await openaiClient.chat.completions.create({
-        model: openaiConfig.model || 'gpt-4o-mini',
-        messages,
-        temperature: 0.7,
-        max_tokens: 800,
-      });
-
-      const reply = completion.choices?.[0]?.message?.content;
-      if (reply) return reply;
-    } catch (openaiErr) {
-      console.warn('[ai.service] OpenAI chat failed:', openaiErr.message);
-    }
   }
 
   // 4. Smart Multilingual Concierge Fallback
