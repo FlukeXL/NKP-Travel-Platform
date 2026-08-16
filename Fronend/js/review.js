@@ -429,12 +429,20 @@ async function renderFeed() {
     return;
   }
 
-  grid.innerHTML = posts.map((p) => `
+    let avatarUrl = p.avatar;
+    if (!avatarUrl) {
+      avatarUrl = '/Fronend/assets/images/avatar-placeholder.png';
+    } else if (avatarUrl.startsWith('/uploads/')) {
+      avatarUrl = mnxAbsoluteUploadUrl(avatarUrl);
+    }
+    const avatarSafe = window.mnxSanitizeUrl ? window.mnxSanitizeUrl(avatarUrl) : avatarUrl;
+
+    return `
     <article class="post-card" data-post-id="${p.id}">
       ${buildFeedCardMediaHtml(p)}
       <div class="post-card__body">
         <div class="post-card__author">
-          <img src="${p.avatar || '/assets/images/avatar-placeholder.png'}" alt="${p.author}" />
+          <img src="${avatarSafe}" alt="${p.author}" onerror="this.src='/Fronend/assets/images/avatar-placeholder.png'" />
           <div>
             <div class="post-card__author-name">${p.author}</div>
             <div class="post-card__time">${mnxTimeAgo(p.createdAt)}</div>
@@ -466,6 +474,28 @@ async function renderFeed() {
 }
 
 function wireFeedCardEvents(grid) {
+  // Observer for auto-playing post-card videos
+  const feedVideoObserver = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      const videoSlide = entry.target;
+      const video = videoSlide.querySelector('video');
+      const playBtn = videoSlide.querySelector('.post-card__video-play-btn');
+      if (!video) return;
+
+      if (entry.isIntersecting) {
+        // Only autoplay if it's the active slide
+        if (videoSlide.classList.contains('is-active')) {
+          video.play().then(() => {
+            playBtn?.classList.add('is-playing');
+          }).catch(() => {});
+        }
+      } else {
+        video.pause();
+        playBtn?.classList.remove('is-playing');
+      }
+    });
+  }, { threshold: 0.6 });
+
   grid.querySelectorAll('.post-card').forEach((card) => {
     const postId = card.dataset.postId;
     const gallery = card.querySelector('.post-card__gallery');
@@ -475,6 +505,7 @@ function wireFeedCardEvents(grid) {
     // Video playback controls inside post card
     const videoSlide = card.querySelector('.post-card__media-slide--video');
     if (videoSlide) {
+      feedVideoObserver.observe(videoSlide);
       const video = videoSlide.querySelector('video');
       const playBtn = videoSlide.querySelector('.post-card__video-play-btn');
 
@@ -515,6 +546,13 @@ function wireFeedCardEvents(grid) {
           const v = slide.querySelector('video');
           v?.pause();
           slide.querySelector('.post-card__video-play-btn')?.classList.remove('is-playing');
+        }
+        // If moving TO video, play it
+        if (i === clamped && slide.classList.contains('post-card__media-slide--video')) {
+          const v = slide.querySelector('video');
+          v?.play().then(() => {
+            slide.querySelector('.post-card__video-play-btn')?.classList.add('is-playing');
+          }).catch(() => {});
         }
       });
       dots.forEach((d, i) => d.classList.toggle('is-active', i === clamped));

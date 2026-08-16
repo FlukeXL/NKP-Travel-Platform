@@ -229,7 +229,13 @@ function mnxRenderReviewItem(r) {
   const esc = window.mnxEscapeHtml || ((s) => s || '');
   const authorSafe = esc(r.author);
   const textSafe = esc(r.text);
-  const avatarSafe = r.avatar ? esc(r.avatar) : '/assets/images/avatar-placeholder.png';
+  let avatarUrl = r.avatar;
+  if (!avatarUrl) {
+    avatarUrl = '/Fronend/assets/images/avatar-placeholder.png';
+  } else if (avatarUrl.startsWith('/uploads/') && typeof window.mnxAbsoluteUploadUrl === 'function') {
+    avatarUrl = window.mnxAbsoluteUploadUrl(avatarUrl);
+  }
+  const avatarSafe = window.mnxSanitizeUrl ? window.mnxSanitizeUrl(avatarUrl) : esc(avatarUrl);
 
   const photosHtml = (r.photos || []).length
     ? `<div class="place-review-item__media">${r.photos.map((src) => `<img src="${mnxAbsoluteUploadUrl(src)}" alt="รูปรีวิว" loading="lazy" />`).join('')}</div>`
