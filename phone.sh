@@ -41,13 +41,13 @@ fi
 
 echo ""
 echo "🌐 กำลังสร้าง Public Link ให้คนภายนอก (หรือเน็ตมือถือ) เข้าใช้งาน..."
-npx -y localtunnel --port 4000 > "$ROOT_DIR/.run/localtunnel.log" 2>&1 &
-sleep 3
-PUBLIC_URL=$(cat "$ROOT_DIR/.run/localtunnel.log" | grep -o 'https://[^ ]*')
+ssh -o StrictHostKeyChecking=no -p 443 -R 0:localhost:4000 a.pinggy.io < /dev/null > "$ROOT_DIR/.run/pinggy.log" 2>&1 &
+sleep 5
+PUBLIC_URL=$(cat "$ROOT_DIR/.run/pinggy.log" | grep -o 'https://[^ ]*\.pinggy\.net')
 
 if [ -n "$PUBLIC_URL" ]; then
   echo "============================================================"
-  echo "🌍 ลิ้งก์สำหรับส่งให้เพื่อน (เข้าได้ทั่วโลก):"
+  echo "🌍 ลิ้งก์สำหรับส่งให้เพื่อน (คลิกแล้วเข้าได้เลย ทั่วโลก!):"
   echo "   $PUBLIC_URL/Fronend/index.html"
   echo "============================================================"
 else
