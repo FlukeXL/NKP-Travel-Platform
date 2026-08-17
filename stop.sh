@@ -39,7 +39,4 @@ for port in 4000 8000; do
   fi
 done
 
-if pkill -f "pinggy.io" 2>/dev/null; then
-  echo "🛑 ปิดท่อ Public Link (Pinggy) แล้ว"
-fi
 
