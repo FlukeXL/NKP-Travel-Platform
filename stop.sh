@@ -38,3 +38,8 @@ for port in 4000 8000; do
     kill "$pid" 2>/dev/null && echo "🛑 หยุดโปรเซสที่ค้างอยู่บนพอร์ต $port (PID $pid) แล้ว"
   fi
 done
+
+if pkill -f "localtunnel" 2>/dev/null; then
+  echo "🛑 ปิดท่อ Public Link (localtunnel) แล้ว"
+fi
+

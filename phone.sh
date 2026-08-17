@@ -40,4 +40,19 @@ else
 fi
 
 echo ""
-echo "หยุดเซิร์ฟเวอร์ทั้งคู่ได้ด้วยคำสั่ง: ./stop.sh"
+echo "🌐 กำลังสร้าง Public Link ให้คนภายนอก (หรือเน็ตมือถือ) เข้าใช้งาน..."
+npx -y localtunnel --port 4000 > "$ROOT_DIR/.run/localtunnel.log" 2>&1 &
+sleep 3
+PUBLIC_URL=$(cat "$ROOT_DIR/.run/localtunnel.log" | grep -o 'https://[^ ]*')
+
+if [ -n "$PUBLIC_URL" ]; then
+  echo "============================================================"
+  echo "🌍 ลิ้งก์สำหรับส่งให้เพื่อน (เข้าได้ทั่วโลก):"
+  echo "   $PUBLIC_URL/Fronend/index.html"
+  echo "============================================================"
+else
+  echo "⚠️ สร้าง Public Link ไม่สำเร็จ กรุณาลองใหม่"
+fi
+
+echo ""
+echo "หยุดเซิร์ฟเวอร์ทั้งคู่และปิดท่อแชร์ได้ด้วยคำสั่ง: ./stop.sh"
