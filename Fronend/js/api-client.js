@@ -23,8 +23,46 @@ function mnxSetToken(token) {
   else localStorage.removeItem(MNX_TOKEN_KEY);
 }
 
+async function mnxFetch(path, options = {}) {
+  const { method = 'GET', body, token } = options;
+
+  const headers = {
+    'Content-Type': 'application/json',
+    'Bypass-Tunnel-Reminder': 'true'
+  };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  let res;
+  try {
+    res = await fetch(`${MNX_API_BASE}${path}`, {
+      method,
+      headers,
+      body: body ? JSON.stringify(body) : undefined,
+    });
+  } catch (networkErr) {
+    throw new Error('ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้ กรุณาตรวจสอบการเชื่อมต่ออินเทอร์เน็ต');
+  }
+
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    throw new Error('เซิร์ฟเวอร์ตอบกลับข้อมูลที่ไม่ถูกต้อง');
+  }
+
+  if (!res.ok || !json.success) {
+    throw new Error(json.error || `เกิดข้อผิดพลาด (HTTP ${res.status})`);
+  }
+  return json.data;
+}
+
 async function mnxApiRequest(method, path, body) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { 
+    'Content-Type': 'application/json',
+    'Bypass-Tunnel-Reminder': 'true'
+  };
   const token = mnxGetToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
@@ -53,7 +91,9 @@ async function mnxApiRequest(method, path, body) {
 }
 
 async function mnxApiRequestForm(method, path, formData) {
-  const headers = {};
+  const headers = {
+    'Bypass-Tunnel-Reminder': 'true'
+  };
   const token = mnxGetToken();
   if (token) headers.Authorization = `Bearer ${token}`;
 
