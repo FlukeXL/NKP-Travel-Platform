@@ -119,6 +119,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
 
 // 7c. Serve Frontend static files for unified deployment
 app.use('/Fronend', express.static(path.join(__dirname, '../Fronend')));
+app.use('/assets', express.static(path.join(__dirname, '../Fronend/assets')));
 
 // 7d. Redirect root to the main frontend entry point
 app.get('/', (req, res) => {
