@@ -95,6 +95,24 @@ const setUserRole = asyncHandler(async (req, res) => {
   return ok(res, { user: toPublicUser(updated) });
 });
 
+const deleteUser = asyncHandler(async (req, res) => {
+  if (req.params.uid === req.user.uid) {
+    throw new ApiError(400, 'ไม่สามารถลบบัญชีของตัวเองได้');
+  }
+
+  const existing = await userModel.getUserById(req.params.uid);
+  if (!existing) throw new ApiError(404, 'ไม่พบผู้ใช้นี้');
+
+  await userModel.deleteUser(req.params.uid);
+  await recordAuditLog(req, {
+    action: 'user.delete',
+    targetType: 'user',
+    targetId: req.params.uid,
+    targetLabel: existing.name || existing.email,
+  });
+  return ok(res, { deleted: true, uid: req.params.uid });
+});
+
 const getAllReviews = asyncHandler(async (req, res) => {
   const rows = await reviewModel.getAllReviews();
   const sorted = rows.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
@@ -138,6 +156,6 @@ const purgeOldAuditLogs = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  getDashboard, getAllUsers, setUserRole, getAllReviews, getAllVideos, getAllCheckins,
+  getDashboard, getAllUsers, setUserRole, deleteUser, getAllReviews, getAllVideos, getAllCheckins,
   getAuditLogs, deleteAuditLog, clearAuditLogs, purgeOldAuditLogs,
 };

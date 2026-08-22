@@ -8,6 +8,7 @@ router.use(requireAuth, requireAdmin);
 router.get('/dashboard', adminController.getDashboard);
 router.get('/users', adminController.getAllUsers);
 router.patch('/users/:uid/role', adminController.setUserRole);
+router.delete('/users/:uid', adminController.deleteUser);
 router.get('/reviews', adminController.getAllReviews);
 router.get('/videos', adminController.getAllVideos);
 router.get('/checkins', adminController.getAllCheckins);

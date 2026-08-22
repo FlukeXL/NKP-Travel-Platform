@@ -909,6 +909,9 @@ function mnxAdminRenderUsersTable() {
           ${u.role === 'admin'
             ? `<button class="admin-icon-btn admin-icon-btn--danger" data-action="demote-user" data-uid="${u.uid}" ${u.uid === currentUid ? 'disabled title="ถอดสิทธิ์ตัวเองไม่ได้"' : 'title="ถอดสิทธิ์แอดมิน"'}>⬇️</button>`
             : `<button class="admin-icon-btn" data-action="promote-user" data-uid="${u.uid}" title="ตั้งเป็นแอดมิน">⬆️</button>`}
+          <button class="admin-icon-btn admin-icon-btn--danger" data-action="delete-user" data-uid="${u.uid}" data-name="${u.name}" ${u.uid === currentUid ? 'disabled title="ไม่สามารถลบตัวเองได้"' : 'title="ลบบัญชีผู้ใช้"'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="14" height="14"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          </button>
         </div>
       </td>
     </tr>
@@ -925,6 +928,14 @@ async function mnxAdminSetUserRole(uid, role) {
   }
 }
 
+async function mnxAdminDeleteUser(uid, name) {
+  mnxAdminPendingDelete = { type: 'user', id: uid, label: name, extra: {} };
+  const banner = document.getElementById('admin-confirm-banner');
+  document.getElementById('admin-confirm-text').textContent = `ยืนยันลบบัญชี "${name}"? ข้อมูลทั้งหมดจะถูกลบและไม่สามารถกู้คืนได้`;
+  banner.classList.add('is-active');
+  banner.style.display = 'flex';
+}
+
 let mnxAdminAuditLogsCache = [];
 
 const MNX_ADMIN_AUDIT_ACTION_LABELS = {
@@ -939,6 +950,7 @@ const MNX_ADMIN_AUDIT_ACTION_LABELS = {
   'comment.delete': 'ลบความคิดเห็น',
   'user.promote': '⬆ตั้งเป็นแอดมิน',
   'user.demote': '⬇ถอดสิทธิ์แอดมิน',
+  'user.delete': '🗑 ลบบัญชีผู้ใช้',
   'event.create': '➕ เพิ่มกิจกรรม',
   'event.update': 'แก้ไขกิจกรรม',
   'event.delete': 'ลบกิจกรรม',
@@ -1192,7 +1204,7 @@ function mnxAdminCancelDelete() {
 
 async function mnxAdminExecuteConfirmedDelete() {
   if (!mnxAdminPendingDelete) return;
-  const { type, id, extra } = mnxAdminPendingDelete;
+  const { type, id, label, extra } = mnxAdminPendingDelete;
   document.getElementById('admin-confirm-banner').style.display = 'none';
 
   if (type === 'place') await mnxAdminDeletePlace(id);
@@ -1200,6 +1212,15 @@ async function mnxAdminExecuteConfirmedDelete() {
   if (type === 'media') await mnxAdminDeleteMedia(extra.placeId, id);
   if (type === 'checkin') await mnxAdminDeleteCheckin(id);
   if (type === 'event') await mnxAdminDeleteEvent(id);
+  if (type === 'user') {
+    try {
+      await window.MNX_API.delete(`/admin/users/${encodeURIComponent(id)}`);
+      mnxAdminToast(`ลบบัญชี "${label}" เรียบร้อยแล้ว`);
+      await mnxAdminLoadUsers();
+    } catch (err) {
+      mnxAdminToast(err.message || 'ลบบัญชีไม่สำเร็จ', 'error');
+    }
+  }
 
   mnxAdminPendingDelete = null;
 }
@@ -1381,6 +1402,7 @@ function mnxAdminInitEvents() {
     if (!btn || btn.disabled) return;
     if (btn.dataset.action === 'promote-user') mnxAdminSetUserRole(btn.dataset.uid, 'admin');
     if (btn.dataset.action === 'demote-user') mnxAdminSetUserRole(btn.dataset.uid, 'user');
+    if (btn.dataset.action === 'delete-user') mnxAdminDeleteUser(btn.dataset.uid, btn.dataset.name);
   });
 
   // Confirm-delete banner
