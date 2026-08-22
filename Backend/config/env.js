@@ -9,6 +9,7 @@ const env = {
   CORS_ORIGINS: (process.env.CORS_ORIGINS || 'http://localhost:8000,http://127.0.0.1:8000')
     .split(',')
     .map((s) => s.trim())
+    .concat(['https://map-nexus.com', 'https://www.map-nexus.com'])
     .filter(Boolean),
 
   APPWRITE_ENDPOINT: process.env.APPWRITE_ENDPOINT || 'https://cloud.appwrite.io/v1',

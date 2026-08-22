@@ -20,16 +20,26 @@ function initLangSwitch() {
 }
 
 function initAuthState() {
+  console.log('[navbar] initAuthState called');
   const container = document.getElementById('navbar-auth');
   const menu = document.getElementById('account-menu');
-  if (!container || !window.MNX_AUTH) return;
+  const mobileContainer = document.querySelector('.navbar__mobile-auth');
+  
+  if (!container || !window.MNX_AUTH) {
+    console.log('[navbar] Missing container or MNX_AUTH', { hasContainer: !!container, hasAuth: !!window.MNX_AUTH });
+    return;
+  }
 
   const session = window.MNX_AUTH.getSession();
+  console.log('[navbar] Current session:', session);
+  
   if (!session) {
-    container.innerHTML = `
-      <button class="btn btn-outline btn-sm" data-auth-open="login">เข้าสู่ระบบ</button>
-      <button class="btn btn-gold btn-sm" data-auth-open="register">สมัครสมาชิก</button>
+    const loginHtml = `
+      <button class="btn btn-outline btn-sm" data-auth-open="login" data-i18n="nav.login">เข้าสู่ระบบ</button>
+      <button class="btn btn-gold btn-sm" data-auth-open="register" data-i18n="nav.register">สมัครสมาชิก</button>
     `;
+    container.innerHTML = loginHtml;
+    if (mobileContainer) mobileContainer.innerHTML = loginHtml;
     if (menu) menu.innerHTML = '';
     return;
   }
@@ -39,12 +49,15 @@ function initAuthState() {
     : '';
 
   const avatarUrl = window.MNX_AUTH.getAvatarUrl ? window.MNX_AUTH.getAvatarUrl(session.avatar) : (session.avatar || '/Fronend/assets/images/avatar-placeholder.png');
-  container.innerHTML = `
+  const profileHtml = `
     <button class="navbar__profile-chip" id="account-menu-trigger" aria-haspopup="true" aria-expanded="false" aria-controls="account-menu">
       <img src="${avatarUrl}" alt="${session.name}" />
       <span>${session.name}</span>
     </button>
   `;
+  container.innerHTML = profileHtml;
+  if (mobileContainer) mobileContainer.innerHTML = profileHtml;
+  console.log('[navbar] Updated UI with profile chip');
 
   if (menu) {
     menu.innerHTML = `
