@@ -22,7 +22,6 @@ npm-debug.log*
 *firebase-adminsdk*.json
 
 # ---- Uploads (user-generated content ไม่อยู่ใน git) ----
-Backend/uploads/*
 !Backend/uploads/.gitkeep
 
 # ---- Dev Data (local dev store) ----
