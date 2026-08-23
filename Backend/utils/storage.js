@@ -9,7 +9,8 @@ async function uploadToAppwriteStorage(filePath, filename) {
   const result = await appwrite.storage.createFile(
     env.APPWRITE_STORAGE_BUCKET_ID,
     appwrite.ID.unique(),
-    InputFile.fromPath(filePath, filename)
+    InputFile.fromPath(filePath, filename),
+    [appwrite.Permission.read(appwrite.Role.any())]
   );
   
   // Return the public view URL
