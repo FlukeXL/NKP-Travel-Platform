@@ -31,7 +31,12 @@ Your capabilities and guidelines:
    - If the user writes in English -> Reply 100% in English.
    - If the user writes in Thai -> Reply in Thai.
    - If the user writes in Chinese -> Reply in Chinese.
-   - NEVER mismatch languages. Always mirror the user's language naturally.`;
+   - NEVER mismatch languages. Always mirror the user's language naturally.
+8. CRITICAL RULE - ALWAYS ANSWER THE USER'S SPECIFIC QUESTION DIRECTLY:
+   - If the user asks a specific question (trip planning, budget, food, accommodation, etc.) answer THAT question COMPLETELY and DIRECTLY. Do NOT respond with a generic welcome message or a bullet-point option menu.
+   - Only show a welcome/menu-style response if the user sends a completely empty or unintelligible message with NO question at all.
+   - If the user mentions a budget (e.g., 3,000 baht), duration (e.g., 3 days 2 nights), or group type (e.g., family with children), you MUST incorporate those specific details into your answer.
+   - Be like a knowledgeable local friend - direct, helpful, and specific. Never act like a robot showing a menu.`;
 
 function isConfigured() {
   return true;
@@ -201,24 +206,7 @@ function localSmartConcierge(messageHistory) {
   }
 
   if (lang === 'es') {
-    return `¡Hola! 🙏 Bienvenido a Nakhon Phanom, Tailandia. Soy tu guía de viaje personal **Planvis AI**.\n\nNakhon Phanom es una hermosa provincia junto al río Mekong. ¿En qué puedo ayudarte hoy?\n- 🛕 **Wat Phra That Phanom**: El templo más sagrado de la región\n- 🐉 **Monumento del Gran Naga (Phaya Si Sattanakharat)** a orillas del río\n- ☕ **Cafeterías con vistas panorámicas** al río Mekong y a Laos\n- 🍲 **Gastronomía local**: Deliciosos platos de pescado fresco del Mekong y cocina indochina\n- 🗓️ **Itinerarios sugeridos**: Rutas de 1 o varios días.`;
-  }
 
-  if (lang === 'en') {
-    if (query.includes('itinerary') || query.includes('plan') || query.includes('1 day') || query.includes('trip') || query.includes('day trip')) {
-      return `✨ **Recommended 1-Day Itinerary in Nakhon Phanom:**\n\n🌅 **Morning (08:00 - 11:30):**\n- Enjoy local breakfast: Vietnamese egg noodles (**Khao Piak Sen**) and hot pan eggs.\n- Visit **Wat Phra That Phanom**, the most revered sacred pagoda in the region.\n\n☀️ **Afternoon (12:00 - 16:30):**\n- Savor lunch with Vietnamese Nem Nueng by the river.\n- Relax at **Blendy Boo / Riverside Million View Cafe** taking in the panoramic views of Laos across the Mekong.\n- Explore historical heritage at the **President Ho Chi Minh Site** and the **Governor's Residence Museum**.\n\n🌙 **Evening (17:00 - 20:30):**\n- Stroll or cycle along the scenic **Mekong River promenade** at sunset.\n- Pay homage to the magnificent **Phaya Si Sattanakharat (7-Headed Golden Naga Landmark)**.\n- Explore the lively **Indochina Night Market** for dinner and local treats!`;
-    }
-    if (query.includes('cafe') || query.includes('coffee')) {
-      return `☕ **Top Scenic Mekong Riverside Cafes in Nakhon Phanom:**\n\n1. **Blendy Boo & Riverside Million View:** Specialty coffee & healthy smoothies with breathtaking views of Laos and Friendship Bridge.\n2. **Wooden Road Cafe:** Charming vintage wooden house cafe with organic tea and desserts.\n3. **Indochina Coffee House:** Rich aromatic roasts right in the heart of the Indochina market area.\n4. **The Mekong Roastery:** Handcrafted specialty brews for authentic coffee lovers.`;
-    }
-    if (query.includes('food') || query.includes('eat') || query.includes('restaurant') || query.includes('dish')) {
-      return `🍲 **Must-Try Dishes & Top Restaurants in Nakhon Phanom:**\n\n1. **Nem Nueng Riverside & Pa Kham Noodle:** Authentic Vietnamese spring rolls & handmade fresh noodles.\n2. **Mekong River Fish Restaurant (Pen Pla Pen):** Fresh Tom Yum and spicy herbs with wild river fish.\n3. **Lert Ocha:** Legendary stewed beef noodle soup with rich broth.\n4. **Indochina Night Market:** Street food hub featuring Vietnamese crispy pancakes and local delights.`;
-    }
-    return `Sawadee krub! 🙏 Welcome to Nakhon Phanom, Thailand! I am your personal **AI Tour Guide (Planvis AI)**.\n\nHow can I help you explore Nakhon Phanom today? You can ask me for:\n- 📍 **Top Landmarks & Temples** (Wat Phra That Phanom, Grand Naga Monument)\n- ☕ **Best Mekong Riverview Cafes**\n- 🍲 **Delicious Local & Vietnamese Cuisine**\n- 🗓️ **1-Day or Multi-Day Travel Itineraries**`;
-  }
-
-  // Thai Default
-  if (query.includes('1 วัน') || query.includes('หนึ่งวัน') || query.includes('วันเดียว') || query.includes('ทริป') || query.includes('แผนเที่ยว') || query.includes('ตารางเที่ยว')) {
     return `✨ **แนะนำแผนเที่ยวนครพนม 1 วันเต็ม (Day Trip ฉบับสมบูรณ์):**\n\n🌅 **ช่วงเช้า (07:30 - 11:30 น.)**\n- เติมพลังมื้อเช้าด้วย **ก๋วยเตี๋ยวญวนป้าคำ** และไข่กระทะร้อนๆ กลิ่นหอมเนย\n- เดินทางไปกราบสักการะ **วัดพระธาตุพนมวรมหาวิหาร** พระธาตุศักดิ์สิทธิ์คู่บ้านคู่เมือง เพื่อความเป็นสิริมงคล\n\n☀️ **ช่วงบ่าย (12:00 - 16:30 น.)**\n- แวะทานมื้อเที่ยงที่ **แหนมเนือง ริมโขง** หรือร้านตำตุ๊บปุ๊บ\n- จิบกาแฟชิลๆ ดื่มด่ำวิวริมแม่น้ำโขงที่ **Blendy Boo / Riverside Million View**\n- ชมประวัติศาสตร์ที่ **อนุสรณ์สถานประธานโฮจิมินห์** และ **พิพิธภัณฑ์จวนผู้ว่าราชการจังหวัดนครพนม**\n\n🌙 **ช่วงเย็น - ค่ำ (17:00 - 20:30 น.)**\n- ปั่นจักรยานหรือเดินรับลมเย็นบน **ทางเลียบแม่น้ำโขง** ยามพระอาทิตย์อัสดง\n- สักการะ **องค์พญาศรีสัตตนาคราช** แลนด์มาร์กพญานาค 7 เศียรทองเหลืองอร่าม\n- ปิดท้ายวันด้วยการเดินช้อปชิมของอร่อยที่ **ถนนคนเดินนครพนม (ตลาดอินโดจีน)** ครับ!`;
   }
 
