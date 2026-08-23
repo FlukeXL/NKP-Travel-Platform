@@ -1254,7 +1254,9 @@ html.mnx-is-mobile .lifestyle-grid-section {
 }
 
 html.mnx-is-mobile .lifestyle-grid-wrap {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
 html.mnx-is-mobile .lifestyle-ad {

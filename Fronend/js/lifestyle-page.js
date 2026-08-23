@@ -302,8 +302,7 @@ async function loadActivePromo() {
         frame.innerHTML = `
           <a href="${item.linkUrl || '#'}" target="${item.linkUrl ? '_blank' : '_self'}" rel="noopener" style="display:block;">
             <img src="${resolvedUrl}" alt="${item.title}" style="width:100%; height:auto; display:block; border-radius:12px;" loading="lazy" />
-          </a>
-          <div style="font-size:0.62rem; letter-spacing:0.1em; text-transform:uppercase; color:#999; text-align:center; margin-top:6px;" data-i18n="ad.sponsored">พื้นที่ประชาสัมพันธ์</div>`;
+          </a>`;
         if (window.MNX_I18N && window.MNX_I18N.getLang() !== 'TH') window.MNX_I18N.translateDom(window.MNX_I18N.getLang());
         return;
       }
