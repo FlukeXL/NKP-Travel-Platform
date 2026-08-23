@@ -148,7 +148,7 @@ function detectLanguage(text) {
   if (/[\u0400-\u04FF]/.test(str)) return 'ru';
 
   // Vietnamese diacritics
-  if (/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(str)) return 'vi';
+  if (/[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(str)) return 'vi';
 
   // Thai
   if (/[\u0E00-\u0E7F]/.test(str)) return 'th';
@@ -170,41 +170,11 @@ function detectLanguage(text) {
 
 /**
  * Smart Multilingual Nakhon Phanom Concierge Fallback
+ * Analyzes user intent from keywords and answers DIRECTLY — never shows a generic menu.
  */
 function localSmartConcierge(messageHistory) {
   const lastMsg = messageHistory[messageHistory.length - 1];
   const rawQuery = (lastMsg?.content || '').trim();
-  const query = rawQuery.toLowerCase();
-  const lang = detectLanguage(rawQuery);
-
-  if (lang === 'zh') {
-    return `您好！🙏 欢迎来到泰国那空帕侬府（Nakhon Phanom）。我是您的专属 **Planvis AI** 导游。\n\n那空帕侬府坐落于美丽的湄公河畔，拥有悠久的历史与宁静的自然风光。您可以向我咨询：\n- 🛕 **著名寺庙与神迹**：帕侬寺（Wat Phra That Phanom）、巨型七头娜迦地标（Phaya Si Sattanakharat）\n- ☕ **湄公河景咖啡馆**：Blendy Boo、Million View 咖啡厅\n- 🍲 **当地美食**：越式米粉（Khao Piak Sen）、湄公河鲜鱼、印度支那夜市小吃\n- 🗓️ **旅游行程定制**：1日游、2日游或3日游行程规划！`;
-  }
-
-  if (lang === 'ja') {
-    return `こんにちは！🙏 タイのナコーンパノム県へようこそ。私は専属AIガイド **Planvis AI** です。\n\nメコン川沿いの美しい街、ナコーンパノムのおすすめスポットをご紹介します：\n- 🛕 **プラタート・パノム寺院 (Wat Phra That Phanom)**：県内で最も神聖な寺院\n- 🐉 **パヤー・シーサッタナーガラート (ナーガ像)**：メコン川沿いの幸運のパワースポット\n- ☕ **絶景リバービューカフェ**：メコン川とラオスの山々を望むカフェ巡り\n- 🍲 **地元グルメ**：ベトナム風うどん (カオピヤックセン) やメコン川の魚料理\n\n1日・2日間のモデルコースやおすすめホテルなどもお気軽にお尋ねください！`;
-  }
-
-  if (lang === 'ko') {
-    return `안녕하세요! 🙏 태국 나콘파놈(Nakhon Phanom)에 오신 것을 환영합니다. 저는 전담 여행 AI 가이드 **Planvis AI** 입니다.\n\n메콩강의 평화로운 정취와 유서 깊은 문화를 간직한 나콘파놈의 명소를 안내해 드립니다:\n- 🛕 **왓 프라탓 파놈 (Wat Phra That Phanom)**: 나콘파놈의 상징이자 신성한 사원\n- 🐉 **나가(Naga) 랜드마크**: 메콩강변의 거대한 황금 나가 조형물\n- ☕ **메콩강 전망 카페**: 라오스 산맥이 한눈에 보이는 리버뷰 카페\n- 🍲 **로컬 미식**: 베트남식 쌀국수(카오삐약센)와 메콩강 생선 요리\n\n추천 일정(1일/2일 코스)이나 궁금한 점이 있으시면 편하게 물어보세요!`;
-  }
-
-  if (lang === 'lo') {
-    return `ສະບາຍດີ! 🙏 ຍິນດີຕ້ອນຮັບສູ່ນະຄອນພະນົມ. ຂ້ອຍແມ່ນ AI ໄກດ໌ນຳທ່ຽວປະຈຳຕົວຂອງທ່ານ **Planvis AI**.\n\nນະຄອນພະນົມມີສະຖານທີ່ທ່ອງທ່ຽວທີ່ສວຍງາມ ແລະ ວັດທະນະທຳລ້ານຊ້າງທີ່ໜ້າປະທັບໃຈ:\n- 🛕 **ວັດພະທາດພະນົມ**: ປູຊະນີຍະສະຖານຄູ່ບ້ານຄູ່ເມືອງ\n- 🐉 **ລານພະຍາສີສັດຕະນາຄະລາດ**: ແລນດ໌ມາກພະຍານາກ 7 ສຽນ ແຄມຂອງ\n- ☕ **ຄາເຟ່ວິວແມ່ນ້ຳຂອງ**: ຈິບກາເຟຊົມວິວຝັ່ງລາວ\n- 🍲 **ອາຫານທ້ອງຖິ່ນ**: ເຂົ້າປຽກເສັ້ນ, ແໜມເນືອງ, ລາບປາແມ່ນ້ຳຂອງ\n\nສາມາດສອບຖາມແຜນທ່ຽວ ຫຼື ຂໍ້ມູນອື່ນໆ ໄດ້ຕະຫຼອດເວລາເດີ້!`;
-  }
-
-  if (lang === 'vi') {
-    return `Xin chào! 🙏 Chào mừng bạn đến với tỉnh Nakhon Phanom, Thái Lan. Tôi là trợ lý du lịch AI **Planvis AI** của bạn.\n\nNakhon Phanom là vùng đất yên bình bên dòng sông Mê Kông với nhiều nét văn hóa độc đáo:\n- 🛕 **Chùa Phra That Phanom (Wat Phra That Phanom)**: Ngôi chùa linh thiêng bậc nhất\n- 🐉 **Tượng thần rắn Naga (Phaya Si Sattanakharat)**: Biểu tượng may mắn bên bờ sông Mê Kông\n- 🏛️ **Khu tưởng niệm Chủ tịch Hồ Chí Minh**: Di tích lịch sử ý nghĩa tại Nakhon Phanom\n- 🍲 **Ẩm thực địa phương**: Bánh canh Thái-Việt (Khao Piak Sen), Nem Nướng, cá sông Mê Kông\n\nBạn cần gợi ý lịch trình 1 ngày hoặc địa điểm tham quan nào, cứ thoải mái hỏi tôi nhé!`;
-  }
-
-  if (lang === 'fr') {
-    return `Bonjour ! 🙏 Bienvenue à Nakhon Phanom, Thaïlande. Je suis votre guide de voyage exclusif **Planvis AI**.\n\nNakhon Phanom est une charmante province paisible le long du fleuve Mékong. Que souhaitez-vous découvrir ?\n- 🛕 **Wat Phra That Phanom** : Le temple le plus sacré de la région\n- 🐉 **Monument Phaya Si Sattanakharat** : Majestueux monument du Grand Naga au bord du Mékong\n- ☕ **Cafés au bord du Mékong** : Dégustez un café face aux montagnes du Laos\n- 🍲 **Gastronomie locale** : Spécialités de poissons du Mékong et saveurs indochinoises\n- 🗓️ **Itinéraires sur mesure** : Circuits d'une journée ou de plusieurs jours !`;
-  }
-
-  if (lang === 'de') {
-    return `Hallo! 🙏 Willkommen in Nakhon Phanom, Thailand. Ich bin Ihr persönlicher AI-Reiseführer **Planvis AI**.\n\nNakhon Phanom bietet wunderschöne Landschaften entlang des Mekong und reiche Kultur. Wie kann ich Ihnen heute helfen?\n- 🛕 **Wat Phra That Phanom**: Der heiligste Tempel der Provinz\n- 🐉 **Großes Naga-Monument (Phaya Si Sattanakharat)** am Mekong-Ufer\n- ☕ **Ufercafés mit Panoramablick** auf die laotischen Berge\n- 🍲 **Lokale Kulinarik**: Frische Mekong-Fischgerichte und vietnamesisch-isanische Küche\n- 🗓️ **Reisepläne**: Tagesausflüge und 3-Tage-Routen!`;
-  }
-
   if (lang === 'es') {
 
     return `✨ **แนะนำแผนเที่ยวนครพนม 1 วันเต็ม (Day Trip ฉบับสมบูรณ์):**\n\n🌅 **ช่วงเช้า (07:30 - 11:30 น.)**\n- เติมพลังมื้อเช้าด้วย **ก๋วยเตี๋ยวญวนป้าคำ** และไข่กระทะร้อนๆ กลิ่นหอมเนย\n- เดินทางไปกราบสักการะ **วัดพระธาตุพนมวรมหาวิหาร** พระธาตุศักดิ์สิทธิ์คู่บ้านคู่เมือง เพื่อความเป็นสิริมงคล\n\n☀️ **ช่วงบ่าย (12:00 - 16:30 น.)**\n- แวะทานมื้อเที่ยงที่ **แหนมเนือง ริมโขง** หรือร้านตำตุ๊บปุ๊บ\n- จิบกาแฟชิลๆ ดื่มด่ำวิวริมแม่น้ำโขงที่ **Blendy Boo / Riverside Million View**\n- ชมประวัติศาสตร์ที่ **อนุสรณ์สถานประธานโฮจิมินห์** และ **พิพิธภัณฑ์จวนผู้ว่าราชการจังหวัดนครพนม**\n\n🌙 **ช่วงเย็น - ค่ำ (17:00 - 20:30 น.)**\n- ปั่นจักรยานหรือเดินรับลมเย็นบน **ทางเลียบแม่น้ำโขง** ยามพระอาทิตย์อัสดง\n- สักการะ **องค์พญาศรีสัตตนาคราช** แลนด์มาร์กพญานาค 7 เศียรทองเหลืองอร่าม\n- ปิดท้ายวันด้วยการเดินช้อปชิมของอร่อยที่ **ถนนคนเดินนครพนม (ตลาดอินโดจีน)** ครับ!`;
