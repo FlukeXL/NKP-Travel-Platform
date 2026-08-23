@@ -89,14 +89,8 @@ const register = asyncHandler(async (req, res) => {
   return ok(res, { user: toPublicUser(doc), token, tokenType: 'jwt' }, 201);
 });
 
-const login = asyncHandler(async (req, res) => {
-  const { email, password } = req.body || {};
-  if (!isValidEmail(email)) throw new ApiError(400, 'กรุณากรอกอีเมลให้ถูกต้อง');
-  if (!password) throw new ApiError(400, 'กรุณากรอกรหัสผ่าน');
-
+async function findUserByEmail(email) {
   const normalizedEmail = email.trim().toLowerCase();
-
-  // Find user by email
   let record = devStore.findOne(DEV_USERS, (u) => (u.email || '').toLowerCase() === normalizedEmail);
 
   if (!record && isAppwriteReady()) {
@@ -113,6 +107,18 @@ const login = asyncHandler(async (req, res) => {
       console.warn('[auth.controller] Appwrite find user warning:', err.message);
     }
   }
+  return record;
+}
+
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!isValidEmail(email)) throw new ApiError(400, 'กรุณากรอกอีเมลให้ถูกต้อง');
+  if (!password) throw new ApiError(400, 'กรุณากรอกรหัสผ่าน');
+
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // Find user by email
+  let record = await findUserByEmail(normalizedEmail);
 
   if (!record) {
     // If not found, check if it's bootstrap admin or create demo fallback
@@ -161,7 +167,7 @@ const google = asyncHandler(async (req, res) => {
   const userEmail = (email || '').trim().toLowerCase();
   if (!userEmail) throw new ApiError(400, 'Missing email for Google sign-in');
 
-  let record = devStore.findOne(DEV_USERS, (u) => (u.email || '').toLowerCase() === userEmail);
+  let record = await findUserByEmail(userEmail);
   let uid = record?.uid || uuidv4();
 
   if (!record) {
