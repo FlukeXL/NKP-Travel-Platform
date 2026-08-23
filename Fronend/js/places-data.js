@@ -228,13 +228,17 @@ document.addEventListener('includes:loaded', () => {
   mnxSyncPlacesFromApi();
   
   // Real-time updates via Appwrite WebSocket
-  if (typeof mnxInitAppwrite === 'function') {
-    const client = mnxInitAppwrite();
-    if (client) {
-      client.subscribe('databases.mapnexus_db.collections.places.documents', (response) => {
-        console.log('[places-data.js] Real-time place update received:', response);
-        mnxSyncPlacesFromApi();
-      });
+  try {
+    if (typeof mnxInitAppwrite === 'function') {
+      const client = mnxInitAppwrite();
+      if (client && typeof client.subscribe === 'function') {
+        client.subscribe('databases.mapnexus_db.collections.places.documents', (response) => {
+          console.log('[places-data.js] Real-time place update received:', response);
+          mnxSyncPlacesFromApi();
+        });
+      }
     }
+  } catch (err) {
+    console.warn('[places-data.js] Failed to subscribe to realtime updates:', err.message);
   }
 });
