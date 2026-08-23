@@ -224,4 +224,17 @@ window.mnxGetMostPopularByLifestyle = mnxGetMostPopularByLifestyle;
 window.MNX_LIFESTYLE_CATEGORY_SOURCES = MNX_LIFESTYLE_CATEGORY_SOURCES;
 window.mnxSyncPlacesFromApi = mnxSyncPlacesFromApi;
 
-document.addEventListener('includes:loaded', mnxSyncPlacesFromApi);
+document.addEventListener('includes:loaded', () => {
+  mnxSyncPlacesFromApi();
+  
+  // Real-time updates via Appwrite WebSocket
+  if (typeof mnxInitAppwrite === 'function') {
+    const client = mnxInitAppwrite();
+    if (client) {
+      client.subscribe('databases.mapnexus_db.collections.places.documents', (response) => {
+        console.log('[places-data.js] Real-time place update received:', response);
+        mnxSyncPlacesFromApi();
+      });
+    }
+  }
+});
