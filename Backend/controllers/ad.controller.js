@@ -1,6 +1,7 @@
 const AdModel = require('../models/ad.model');
 const fs = require('fs');
 const path = require('path');
+const { uploadToAppwriteStorage, deleteFromAppwriteStorage } = require('../utils/storage');
 
 exports.getActiveAds = async (req, res) => {
   try {
@@ -27,7 +28,8 @@ exports.createAd = async (req, res) => {
       return res.status(400).json({ error: 'กรุณาอัปโหลดรูปภาพโฆษณา' });
     }
 
-    const imageUrl = `/uploads/${req.file.filename}`;
+    const imageUrl = await uploadToAppwriteStorage(req.file.path, req.file.originalname);
+    try { fs.unlinkSync(req.file.path); } catch (e) {}
 
     const newAd = await AdModel.createAd({
       title,
@@ -51,24 +53,30 @@ exports.updateAd = async (req, res) => {
     if (placement !== undefined) updateData.placement = placement;
 
     if (req.file) {
-      updateData.imageUrl = `/uploads/${req.file.filename}`;
+      updateData.imageUrl = await uploadToAppwriteStorage(req.file.path, req.file.originalname);
+      try { fs.unlinkSync(req.file.path); } catch (e) {}
+
       const oldAd = await AdModel.getAdById(req.params.id);
       if (oldAd && oldAd.imageUrl) {
-        try {
-          const filePath = path.join(__dirname, '..', oldAd.imageUrl);
-          if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-        } catch (err) {
-          console.error('Failed to delete old ad image:', err);
+        if (oldAd.imageUrl.includes('appwrite.io')) {
+          await deleteFromAppwriteStorage(oldAd.imageUrl);
+        } else {
+          try {
+            const filePath = path.join(__dirname, '..', oldAd.imageUrl);
+            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+          } catch (err) {
+            console.error('Failed to delete old ad image:', err.message);
+          }
         }
       }
     }
 
-    const ad = await AdModel.updateAd(req.params.id, updateData);
-    if (!ad) {
+    const updatedAd = await AdModel.updateAd(req.params.id, updateData);
+    if (!updatedAd) {
       return res.status(404).json({ error: 'ไม่พบโฆษณานี้' });
     }
 
-    res.json({ success: true, data: ad });
+    res.json({ success: true, data: updatedAd });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

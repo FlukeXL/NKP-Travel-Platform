@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
 const placeModel = require('../models/place.model');
 const { asyncHandler, ok } = require('../utils/helper');
@@ -122,17 +123,25 @@ const createPlace = asyncHandler(async (req, res) => {
   return ok(res, { place: doc }, 201);
 });
 
+const { uploadToAppwriteStorage, deleteFromAppwriteStorage } = require('../utils/storage');
+
 function cleanupPlacePhotos(place) {
   if (!place) return;
-  const urls = [place.img, ...(place.images || [])].filter((u) => typeof u === 'string' && u.startsWith('/uploads/'));
-  [...new Set(urls)].forEach((url) => safeUnlink(path.join(UPLOAD_DIR, path.basename(url))));
+  const urls = [place.img, ...(place.images || [])].filter((u) => typeof u === 'string');
+  [...new Set(urls)].forEach((url) => {
+    if (url.startsWith('/uploads/')) safeUnlink(path.join(UPLOAD_DIR, path.basename(url)));
+    else if (url.includes('appwrite.io')) deleteFromAppwriteStorage(url);
+  });
 }
 
 function cleanupRemovedPlacePhotos(before, after) {
   if (!before || !after) return;
-  const beforeUrls = [before.img, ...(before.images || [])].filter((u) => typeof u === 'string' && u.startsWith('/uploads/'));
+  const beforeUrls = [before.img, ...(before.images || [])].filter((u) => typeof u === 'string');
   const afterUrls = new Set([after.img, ...(after.images || [])]);
-  [...new Set(beforeUrls)].filter((u) => !afterUrls.has(u)).forEach((url) => safeUnlink(path.join(UPLOAD_DIR, path.basename(url))));
+  [...new Set(beforeUrls)].filter((u) => !afterUrls.has(u)).forEach((url) => {
+    if (url.startsWith('/uploads/')) safeUnlink(path.join(UPLOAD_DIR, path.basename(url)));
+    else if (url.includes('appwrite.io')) deleteFromAppwriteStorage(url);
+  });
 }
 
 function placeUpdateAuditEntry(placeId, label, patch) {
@@ -167,7 +176,13 @@ const deletePlace = asyncHandler(async (req, res) => {
 const uploadPlacePhotos = asyncHandler(async (req, res) => {
   const files = req.files || [];
   if (!files.length) throw new ApiError(400, 'กรุณาเลือกไฟล์รูปภาพอย่างน้อย 1 รูป');
-  const urls = files.map((f) => `/uploads/${f.filename}`);
+  
+  const urls = await Promise.all(files.map(async (f) => {
+    const url = await uploadToAppwriteStorage(f.path, f.originalname);
+    try { fs.unlinkSync(f.path); } catch (e) {}
+    return url;
+  }));
+
   return ok(res, { urls }, 201);
 });
 
