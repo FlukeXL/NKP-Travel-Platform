@@ -7,6 +7,9 @@ document.addEventListener('click', (e) => {
   // Toggle chat window from FAB
   const fab = e.target.closest('#ai-guide-fab');
   if (fab) {
+    e.preventDefault();
+    e.stopPropagation();
+
     // Prevent opening chat if it was a drag action
     if (hasFabMoved) return;
 
@@ -25,7 +28,8 @@ document.addEventListener('click', (e) => {
       
       if (isOpening) {
         document.body.classList.add('ai-chat-open');
-        if (inputEl) inputEl.focus();
+        // preventScroll: true prevents the browser from scrolling the page to bring the input into view
+        if (inputEl) inputEl.focus({ preventScroll: true });
       } else {
         document.body.classList.remove('ai-chat-open');
       }
@@ -36,6 +40,8 @@ document.addEventListener('click', (e) => {
   // Close chat window
   const closeBtn = e.target.closest('#ai-guide-chat-close');
   if (closeBtn) {
+    e.preventDefault();
+    e.stopPropagation();
     const chatWindow = document.getElementById('ai-guide-chat');
     if (chatWindow) {
       chatWindow.style.display = 'none';
@@ -47,6 +53,8 @@ document.addEventListener('click', (e) => {
   // Send message button
   const sendBtn = e.target.closest('#ai-guide-chat-send');
   if (sendBtn) {
+    e.preventDefault();
+    e.stopPropagation();
     sendMessage();
     return;
   }
@@ -257,7 +265,7 @@ async function sendMessage() {
   } finally {
     if (sendBtn) sendBtn.disabled = false;
     inputEl.disabled = false;
-    inputEl.focus();
+    inputEl.focus({ preventScroll: true });
   }
 }
 
@@ -272,7 +280,8 @@ window.MapNexusAI = window.PlanvisAI = {
       
       if (isOpening) {
         document.body.classList.add('ai-chat-open');
-        if (inputEl) inputEl.focus();
+        // preventScroll: true prevents the browser from scrolling the page to bring the input into view
+        if (inputEl) inputEl.focus({ preventScroll: true });
       } else {
         document.body.classList.remove('ai-chat-open');
       }
