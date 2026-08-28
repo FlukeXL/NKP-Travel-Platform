@@ -76,6 +76,8 @@ async function createUser(uid, data) {
     envPref: String(profile.envPref || 'both'),
     pacePref: String(profile.pacePref || 'both'),
     aiProfile: data.aiProfile ? (typeof data.aiProfile === 'object' ? JSON.stringify(data.aiProfile) : String(data.aiProfile)) : '',
+    // Store passwordHash in Appwrite so login works from any device/server
+    passwordHash: String(data.passwordHash || ''),
   };
 
   if (isAppwriteReady()) {
@@ -130,11 +132,53 @@ async function getUserById(uid) {
   return user ? formatUser(user) : null;
 }
 
+/**
+ * Like getUserById but also returns the raw passwordHash field (not stripped by formatUser).
+ * Used exclusively by auth.controller login to verify passwords across any device.
+ * Searches by uid field (not document ID) to handle cases where doc.$id ≠ uid.
+ */
+async function getUserWithHashById(uid) {
+  if (isAppwriteReady()) {
+    try {
+      // Try direct document lookup first (fastest)
+      let doc = null;
+      try {
+        doc = await getDatabases().getDocument(databaseId, COLLECTIONS.USERS, sanitizeId(uid));
+      } catch (e) {
+        if (e.code !== 404) throw e;
+      }
+
+      // Fallback: search by uid field (handles UUID mismatch between doc ID and uid)
+      if (!doc) {
+        const res = await getDatabases().listDocuments(databaseId, COLLECTIONS.USERS, [
+          Query.equal('uid', String(uid)),
+          Query.limit(1),
+        ]);
+        if (res.documents.length > 0) doc = res.documents[0];
+      }
+
+      if (doc) {
+        const formatted = formatUser(doc);
+        return formatted ? { ...formatted, passwordHash: doc.passwordHash || '' } : null;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[user.model] Appwrite getUserWithHashById failed:', err.message);
+    }
+  }
+
+  // devStore fallback — has passwordHash stored directly
+  const user = devStore.get(DEV_COL, String(uid));
+  return user || null;
+}
+
 async function updateUser(uid, patch) {
   const cleanPatch = {};
   if (patch.name !== undefined) cleanPatch.name = String(patch.name);
   if (patch.avatar !== undefined) cleanPatch.avatar = sanitizeAvatarUrl(patch.avatar);
   if (patch.role !== undefined) cleanPatch.role = String(patch.role);
+  // Allow updating passwordHash (e.g. on password change)
+  if (patch.passwordHash !== undefined) cleanPatch.passwordHash = String(patch.passwordHash || '');
   if (patch.profile) {
     if (patch.profile.birthdate !== undefined) cleanPatch.birthdate = String(patch.profile.birthdate || '');
     if (patch.profile.interests !== undefined) cleanPatch.interests = Array.isArray(patch.profile.interests) ? patch.profile.interests : [];
@@ -197,4 +241,4 @@ async function getAllUsers() {
   return list.map(formatUser).sort((a, b) => new Date(b.joinedAt || 0) - new Date(a.joinedAt || 0));
 }
 
-module.exports = { createUser, getUserById, updateUser, deleteUser, getAllUsers, isFirebaseReady: isAppwriteReady };
+module.exports = { createUser, getUserById, getUserWithHashById, updateUser, deleteUser, getAllUsers, isFirebaseReady: isAppwriteReady };

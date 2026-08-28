@@ -76,9 +76,11 @@ const register = asyncHandler(async (req, res) => {
     avatar: null,
     profile,
     aiProfile,
+    // Pass passwordHash so it gets stored in Appwrite — enables login from any device
+    passwordHash,
   });
 
-  // Save password hash in local store for fast local auth checking
+  // Also save to devStore (with hash) as local cache
   const devRecord = {
     ...doc,
     passwordHash,
@@ -91,24 +93,61 @@ const register = asyncHandler(async (req, res) => {
 
 async function findUserByEmail(email) {
   const normalizedEmail = email.trim().toLowerCase();
-  let record = devStore.findOne(DEV_USERS, (u) => (u.email || '').toLowerCase() === normalizedEmail);
 
-  if (!record && isAppwriteReady()) {
+  // 1. Check local devStore first (fastest — has passwordHash cached)
+  let record = devStore.findOne(DEV_USERS, (u) => (u.email || '').toLowerCase() === normalizedEmail);
+  if (record) return record;
+
+  // 2. Search Appwrite Database by email field (includes passwordHash)
+  if (isAppwriteReady()) {
     try {
-      const list = await appwriteUsers.list();
-      const matched = list.users.find((u) => (u.email || '').toLowerCase() === normalizedEmail);
-      if (matched) {
-        const doc = await userModel.getUserById(matched.$id);
-        if (doc) {
-          record = { ...doc, uid: matched.$id };
-        }
+      const { getDatabases, databaseId, COLLECTIONS, Query } = require('../config/database');
+      const res = await getDatabases().listDocuments(databaseId, COLLECTIONS.USERS, [
+        Query.equal('email', normalizedEmail),
+        Query.limit(1),
+      ]);
+      if (res.documents.length > 0) {
+        const doc = res.documents[0];
+        const formatted = userModel.formatUserPublic ? userModel.formatUserPublic(doc) : null;
+        // Build record manually with passwordHash included
+        record = {
+          uid: doc.uid || doc.$id,
+          name: doc.name || '',
+          email: doc.email || '',
+          avatar: doc.avatar || null,
+          provider: doc.provider || 'email',
+          role: doc.role || 'user',
+          joinedAt: doc.joinedAt || doc.$createdAt || '',
+          profile: (() => {
+            if (doc.profile && typeof doc.profile === 'object') return doc.profile;
+            if (typeof doc.profile === 'string') { try { return JSON.parse(doc.profile); } catch {} }
+            return { birthdate: doc.birthdate || null, interests: doc.interests || [], envPref: doc.envPref || 'both', pacePref: doc.pacePref || 'both' };
+          })(),
+          passwordHash: doc.passwordHash || '',
+        };
+        // Cache into devStore for next time
+        devStore.set(DEV_USERS, record.uid, record);
       }
     } catch (err) {
-      console.warn('[auth.controller] Appwrite find user warning:', err.message);
+      // Fallback to Appwrite Users service if Database search fails
+      try {
+        const list = await appwriteUsers.list();
+        const matched = list.users.find((u) => (u.email || '').toLowerCase() === normalizedEmail);
+        if (matched) {
+          const doc = await userModel.getUserWithHashById(matched.$id);
+          if (doc) {
+            record = { ...doc, uid: doc.uid || matched.$id };
+            devStore.set(DEV_USERS, record.uid, record);
+          }
+        }
+      } catch (err2) {
+        console.warn('[auth.controller] Appwrite find user warning:', err2.message);
+      }
     }
   }
   return record;
 }
+
 
 const login = asyncHandler(async (req, res) => {
   const { email, password } = req.body || {};
@@ -117,18 +156,24 @@ const login = asyncHandler(async (req, res) => {
 
   const normalizedEmail = email.trim().toLowerCase();
 
-  // Find user by email
+  // Find user by email (checks devStore first, then Appwrite with hash)
   let record = await findUserByEmail(normalizedEmail);
 
   if (!record) {
-    // If not found, check if it's bootstrap admin or create demo fallback
     throw new ApiError(401, 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
   }
 
   if (record.passwordHash) {
+    // Verify password against stored bcrypt hash
     const match = await bcrypt.compare(password, record.passwordHash);
     if (!match) throw new ApiError(401, 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
+  } else if (record.provider === 'email') {
+    // No hash found — this user registered before cross-device login was supported.
+    // We cannot verify without hash, so reject and prompt re-register or contact admin.
+    console.warn(`[auth.controller] Login attempt for ${normalizedEmail} has no passwordHash stored.`);
+    throw new ApiError(401, 'ไม่พบข้อมูลรหัสผ่าน กรุณาติดต่อผู้ดูแลระบบหรือลงทะเบียนใหม่');
   }
+  // provider === 'google' skip password check (OAuth users have no password)
 
   record = await mnxMaybePromoteBootstrapAdmin(record.uid, record);
   const token = signToken(record.uid, normalizedEmail, record.provider || 'email');
