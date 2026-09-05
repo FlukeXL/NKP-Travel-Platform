@@ -64,12 +64,8 @@ window.MNX_ENV = {
 
 async function mnxLoadEnvironmentData() {
   try {
-    const [snapshot, pm25History, weatherHistory, mekongHistory] = await Promise.all([
-      window.MNX_API.get('/environment/snapshot'),
-      window.MNX_API.get('/environment/history?metric=pm25&days=7'),
-      window.MNX_API.get('/environment/history?metric=weather&days=7'),
-      window.MNX_API.get('/environment/history?metric=mekong&days=7'),
-    ]);
+    // Phase 1: โหลด snapshot ก่อน — ข้อมูลปัจจุบัน fire environment:ready ได้ทันที
+    const snapshot = await window.MNX_API.get('/environment/snapshot');
 
     const env = window.MNX_ENV;
     env.loading = false;
@@ -78,7 +74,6 @@ async function mnxLoadEnvironmentData() {
     env.pm25.provinceValue = snapshot.pm25.value;
     env.pm25.percent = snapshot.pm25.percent;
     env.pm25.unit = snapshot.pm25.unit;
-    env.pm25.history = mnxRowsToHistory(pm25History.rows);
     env.pm25.pm10 = snapshot.pm25.pm10;
     env.pm25.co = snapshot.pm25.co;
     env.pm25.no2 = snapshot.pm25.no2;
@@ -92,7 +87,6 @@ async function mnxLoadEnvironmentData() {
     env.weather.humidity = snapshot.weather.humidity;
     env.weather.rainChance = snapshot.weather.rainChance;
     env.weather.percent = mnxTempToPercent(snapshot.weather.temp);
-    env.weather.history = mnxRowsToHistory(weatherHistory.rows);
     env.weather.feelsLike = snapshot.weather.feelsLike;
     env.weather.pressure = snapshot.weather.pressure;
     env.weather.windSpeed = snapshot.weather.windSpeed;
@@ -102,24 +96,46 @@ async function mnxLoadEnvironmentData() {
 
     env.temperature.provinceValue = snapshot.weather.temp;
     env.temperature.percent = mnxTempToPercent(snapshot.weather.temp);
-    env.temperature.history = mnxRowsToHistory(weatherHistory.rows);
     env.temperature.feelsLike = snapshot.weather.feelsLike;
 
     env.mekong.level = snapshot.mekong.level;
     env.mekong.unit = snapshot.mekong.unit;
     env.mekong.percent = snapshot.mekong.percent;
     env.mekong.trend = snapshot.mekong.trend;
-    env.mekong.history = mnxRowsToHistory(mekongHistory.rows);
 
     env.traffic.level = snapshot.traffic.level;
     env.traffic.desc = snapshot.traffic.desc;
 
+    // Fire environment:ready ทันที — infobar, gauge, และ chart ที่ไม่ต้องการ history จะแสดงได้เลย
     document.dispatchEvent(new CustomEvent('environment:ready', { detail: { env } }));
+
+    // Phase 2: โหลด history 7 วัน แบบ allSettled — ถ้า API ตัวใดโดน rate limit (429) จะ warn แทน error
+    const [pm25Res, weatherRes, mekongRes] = await Promise.allSettled([
+      window.MNX_API.get('/environment/history?metric=pm25&days=7'),
+      window.MNX_API.get('/environment/history?metric=weather&days=7'),
+      window.MNX_API.get('/environment/history?metric=mekong&days=7'),
+    ]);
+
+    if (pm25Res.status === 'fulfilled') env.pm25.history = mnxRowsToHistory(pm25Res.value.rows);
+    else console.warn('[environment-data.js] PM2.5 history failed:', pm25Res.reason?.message);
+
+    if (weatherRes.status === 'fulfilled') {
+      env.weather.history = mnxRowsToHistory(weatherRes.value.rows);
+      env.temperature.history = env.weather.history;
+    } else console.warn('[environment-data.js] Weather history failed:', weatherRes.reason?.message);
+
+    if (mekongRes.status === 'fulfilled') env.mekong.history = mnxRowsToHistory(mekongRes.value.rows);
+    else console.warn('[environment-data.js] Mekong history failed:', mekongRes.reason?.message);
+
+    // แจ้ง UI ให้ re-render กราฟย้อนหลัง
+    document.dispatchEvent(new CustomEvent('environment:history-ready', { detail: { env } }));
+
   } catch (err) {
-    console.error('[environment-data.js] Failed to load live environment data:', err.message);
+    console.error('[environment-data.js] Failed to load snapshot:', err.message);
     document.dispatchEvent(new CustomEvent('environment:error', { detail: { message: err.message } }));
   }
 }
+
 
 async function mnxLoadDistrictDetail() {
   try {
