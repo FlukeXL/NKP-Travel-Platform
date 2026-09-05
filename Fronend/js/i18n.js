@@ -17,7 +17,7 @@
       'nav.food': 'สายกิน',
       'nav.culture': 'วัฒนธรรม',
       'nav.nature': 'ธรรมชาติและสิ่งแวดล้อม',
-      'nav.environment': 'อากาศ',
+      'nav.environment': 'สภาพแวดล้อม',
       'nav.checkin': 'เช็คอิน',
       'nav.videos': 'วิดีโอรีวิว',
       'nav.about': 'เกี่ยวกับเรา',
