@@ -191,7 +191,7 @@ function loadI18nScript() {
       return;
     }
     const script = document.createElement('script');
-    script.src = '/Fronend/js/i18n.js?v=38';
+    script.src = '/Fronend/js/i18n.js?v=61';
     script.async = false;
     script.onload = () => resolve(window.MNX_I18N);
     script.onerror = () => resolve(null);
