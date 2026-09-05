@@ -34,7 +34,7 @@
 
       // Infobar & Environment
       'infobar.pm25': 'PM2.5',
-      'infobar.weather': 'อากาศ',
+      'infobar.weather': 'สภาพอากาศ',
       'infobar.mekong': 'แม่น้ำโขง',
       'infobar.traffic': 'การจราจร',
       'infobar.aqi': 'คุณภาพอากาศ',
@@ -111,7 +111,7 @@
       'footer.follow_us': 'ช่องทางการติดตาม',
       'footer.explore': 'สำรวจ',
       'footer.realtime': 'ข้อมูลเรียลไทม์',
-      'footer.weather': 'อากาศ',
+      'footer.weather': 'พยากรณ์อากาศ',
       'footer.pm25': 'สภาพแวดล้อม PM2.5',
       'footer.mekong': 'แม่น้ำโขง',
       'footer.traffic': 'จราจร',
